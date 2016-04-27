@@ -14,10 +14,6 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapDetailActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    //constants
-    private final String KEY_LATITUDE = "latitude_key";
-    private final String KEY_LONGITUDE = "longitude_key";
-
     private double longitude, latitude;
 
     private GoogleMap mMap;
@@ -28,8 +24,8 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
         setContentView(R.layout.activity_map_detail);
 
         Intent intent = getIntent();
-        latitude = intent.getDoubleExtra(KEY_LATITUDE,19.880392);
-        longitude = intent.getDoubleExtra(KEY_LONGITUDE,-159.960938);
+        latitude = intent.getDoubleExtra(Constants.KEY_LATITUDE,19.880392);
+        longitude = intent.getDoubleExtra(Constants.KEY_LONGITUDE,-159.960938);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -55,6 +51,6 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
         LatLng location = new LatLng(latitude, longitude);
         mMap.addMarker(new MarkerOptions().position(location).title("Last Location"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,15f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,14f));
     }
 }
