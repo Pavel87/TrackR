@@ -1,0 +1,12 @@
+<resources>
+    <string name="app_name">TrackR</string>
+    <string name="last_location">Last known Location</string>
+    <string name="coord">Coordinates</string>
+    <string name="local_time">Local Time</string>
+    <string name="address">Address</string>
+    <string name="not_available">Not Available</string>
+    <string name="search">Search</string>
+    <string name="show_map">GO TO MAP</string>
+    <string name="title_activity_map_detail">Map</string>
+
+</resources>
