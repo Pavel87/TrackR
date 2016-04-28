@@ -3,6 +3,7 @@
     package="com.pacmac.trackr">
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
@@ -12,7 +13,9 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity
+            android:name=".MainActivity"
+            android:screenOrientation="portrait">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -20,21 +23,19 @@
             </intent-filter>
         </activity>
 
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
         <activity
             android:name=".MapDetailActivity"
-            android:label="@string/title_activity_map_detail">
-            <meta-data
-                android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pacmac.trackr.MainActivity" />
-        </activity>
+            android:label="@string/title_activity_map_detail" />
 
-        <service android:name=".FetchAdressService"
-            android:exported="false"/>
+        <service
+            android:name=".FetchAdressService"
+            android:exported="false" />
+
+        <activity android:name=".SettingsActivity"></activity>
     </application>
 
 </manifest>

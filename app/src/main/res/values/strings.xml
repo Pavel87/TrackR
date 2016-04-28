@@ -9,4 +9,12 @@
     <string name="show_map">SHOW ON MAP</string>
     <string name="title_activity_map_detail">Map</string>
     <string name="no_connection">No Connectivity</string>
+    <string name="last_seen">Last Seen</string>
+    <string name="action_settings">Settings</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="trackingOn">Tracking Mode</string>
+    <string name="turning_on">Turning Tracking ON</string>
+    <string name="turning_off">Turning Tracking OFF</string>
+
+
 </resources>

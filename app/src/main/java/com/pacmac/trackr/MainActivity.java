@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -12,8 +14,12 @@ import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,10 +27,8 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.google.android.gms.vision.barcode.Barcode;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -32,7 +36,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
 
     private TextView tLastLocation, tTimestamp, tAddress;
-    private Button mapBtn, searchBtn, testBtn;
+    private Button mapBtn, testBtn;
+    private ImageButton searchBtn, settingsBtn;
+    private ImageView imageBG;
 
     private boolean haveLocation = false;
     private boolean isConnected = false;
@@ -56,9 +62,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         tAddress = (TextView) findViewById(R.id.address);
 
         mapBtn = (Button) findViewById(R.id.showMap);
-        searchBtn = (Button) findViewById(R.id.search);
         testBtn = (Button) findViewById(R.id.test);
+        searchBtn = (ImageButton) findViewById(R.id.search);
+        settingsBtn = (ImageButton) findViewById(R.id.settings);
 
+        imageBG = (ImageView) findViewById(R.id.imgBG);
+        imageBG.setImageBitmap(setBitmap());
 
         //restore location on reconfiguration
         if (savedInst != null) {
@@ -68,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             tTimestamp.setText(parseDate(locationRecord.getTimestamp()));
             tAddress.setText(savedInst.getString(Constants.KEY_ADDRESS));
         }
-
 
         handler = new Handler();
         resultReceiver = new AddressResultReceiver(handler);
@@ -100,8 +108,29 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             }
         });
 
+        settingsBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               openSettings();
+            }
+        });
+
         Firebase.setAndroidContext(getApplicationContext());
         firebase = new Firebase("https://trackr1.firebaseio.com");
+    }
+
+    private void openSettings() {
+        Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
+
+    private Bitmap setBitmap(){
+
+        BitmapDrawable drawable = (BitmapDrawable) imageBG.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 8, getApplicationContext());
+        return blurred;
     }
 
 
@@ -117,7 +146,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void getLastKnownLocation() {
-
         if (isConnected) {
             retrieveLocation();
         } else
@@ -126,17 +154,16 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void openMap() {
-        if (!haveLocation) return;
-
-        if (isConnected) {
+        if (isConnected && haveLocation) {
             Intent intent = new Intent(this, MapDetailActivity.class);
             intent.putExtra(Constants.KEY_LATITUDE, locationRecord.getLatitude());
             intent.putExtra(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
+            intent.putExtra(Constants.KEY_TIMESTAMP, parseDate(locationRecord.getTimestamp()));
+            intent.putExtra(Constants.KEY_ADDRESS, tAddress.getText().toString());
             startActivity(intent);
         } else
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_connection), Toast.LENGTH_SHORT)
                     .show();
-
     }
 
 
@@ -151,7 +178,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void retrieveLocation() {
 
         firebase.child("1").addListenerForSingleValueEvent(new ValueEventListener() {
-
             @Override
             public void onDataChange(DataSnapshot snapshot) {
                 System.out.println(snapshot.getValue());
@@ -170,7 +196,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     getAdress();
                 }
             }
-
             @Override
             public void onCancelled(FirebaseError firebaseError) {
                 Log.i(Constants.TAG, "Update Cancelled" + firebaseError.getMessage());
@@ -234,6 +259,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         super.onSaveInstanceState(outState);
     }
+
+
+
 
 
     /// CLASS TO RESOLVE ADDRESS
