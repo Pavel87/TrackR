@@ -21,6 +21,12 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.vision.barcode.Barcode;
+
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class MainActivity extends AppCompatActivity implements NetworkStateListener {
 
@@ -39,20 +45,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     private NetworkStateChangedReceiver connReceiver = null;
 
+    //TODO I might need to save last known in sharedprefs
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
+    protected void onCreate(Bundle savedInst) {
+        super.onCreate(savedInst);
         setContentView(R.layout.activity_main);
-
-        // locationRecord = new LocationRecord(48.42831778375717, -123.35895001888275, "27.4 14:52",1);
-
-        handler = new Handler();
-        resultReceiver = new AddressResultReceiver(handler);
-        connReceiver = new NetworkStateChangedReceiver();
-        connReceiver.setConnectionListener(this);
-
-        checkConnectivity();
-
         tLastLocation = (TextView) findViewById(R.id.coordinates);
         tTimestamp = (TextView) findViewById(R.id.timestamp);
         tAddress = (TextView) findViewById(R.id.address);
@@ -60,6 +58,24 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         mapBtn = (Button) findViewById(R.id.showMap);
         searchBtn = (Button) findViewById(R.id.search);
         testBtn = (Button) findViewById(R.id.test);
+
+
+        //restore location on reconfiguration
+        if (savedInst != null) {
+            locationRecord = new LocationRecord(savedInst.getDouble(Constants.KEY_LATITUDE),
+                    savedInst.getDouble(Constants.KEY_LONGITUDE), savedInst.getLong(Constants.KEY_TIMESTAMP));
+            tLastLocation.setText(locationRecord.toString());
+            tTimestamp.setText(parseDate(locationRecord.getTimestamp()));
+            tAddress.setText(savedInst.getString(Constants.KEY_ADDRESS));
+        }
+
+
+        handler = new Handler();
+        resultReceiver = new AddressResultReceiver(handler);
+        connReceiver = new NetworkStateChangedReceiver();
+        connReceiver.setConnectionListener(this);
+
+        checkConnectivity();
 
         mapBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -79,14 +95,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         testBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // refresh
-                firebase.child("1").setValue(locationRecord);
+                long fakeTime = System.currentTimeMillis();
+                firebase.child("1").setValue(new LocationRecord(48.42831778375717, -123.35895001888275, fakeTime));
             }
         });
 
         Firebase.setAndroidContext(getApplicationContext());
         firebase = new Firebase("https://trackr1.firebaseio.com");
-
     }
 
 
@@ -104,17 +119,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void getLastKnownLocation() {
 
         if (isConnected) {
-            retrieveLocation();  // TODO check for connectivity
-            if (!haveLocation) return;
-
-            tLastLocation.setText(locationRecord.toString());
-            tTimestamp.setText(locationRecord.getTimestamp());
-            getAdress();
+            retrieveLocation();
         } else
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_connection), Toast.LENGTH_SHORT)
-            .show();
-
-
+                    .show();
     }
 
     private void openMap() {
@@ -133,7 +141,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
 
     private void getAdress() {
-        if (Geocoder.isPresent()) //return context.getResources().getString(R.string.not_available);
+        if (Geocoder.isPresent())
             startIntentService();
         else {
             tAddress.setText(getResources().getString(R.string.not_available));
@@ -151,11 +159,15 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
                     double latitude = (double) snapshot.child("latitude").getValue();
                     double longitude = (double) snapshot.child("longitude").getValue();
-                    String timeStamp = (String) snapshot.child("timestamp").getValue();
-                    int timezone = ((Long) snapshot.child("timezone").getValue()).intValue();
+                    long timeStamp = (long) snapshot.child("timestamp").getValue();
 
-                    locationRecord = new LocationRecord(latitude, longitude, timeStamp, timezone);
+                    locationRecord = new LocationRecord(latitude, longitude, timeStamp);
                     haveLocation = true;
+
+                    String date = parseDate(locationRecord.getTimestamp());
+                    tLastLocation.setText(locationRecord.toString());
+                    tTimestamp.setText(date);
+                    getAdress();
                 }
             }
 
@@ -164,6 +176,21 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 Log.i(Constants.TAG, "Update Cancelled" + firebaseError.getMessage());
             }
         });
+    }
+
+    private String parseDate(long timestamp) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+        String timezone = calendar.getTimeZone().getDisplayName(false, TimeZone.SHORT, Locale.getDefault());
+
+        int day = calendar.get(Calendar.DAY_OF_MONTH);
+        String month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+
+        return day + " " + month + "  " + String.format("%02d", hour) + ":" + String.format("%02d", minute) + " " + timezone;
     }
 
     private void startIntentService() {
@@ -176,22 +203,38 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     @Override
     public void connectionChanged(boolean isConnected) {
+        Log.d(Constants.TAG, "Conn changed: " + isConnected);
         this.isConnected = isConnected;
+        if (isConnected && !haveLocation)
+            getLastKnownLocation();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(connReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
-
         getLastKnownLocation();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
+        haveLocation = false;
         unregisterReceiver(connReceiver);
     }
+
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+
+        outState.putDouble(Constants.KEY_LATITUDE, locationRecord.getLatitude());
+        outState.putDouble(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
+        outState.putLong(Constants.KEY_TIMESTAMP, locationRecord.getTimestamp());
+        outState.putString(Constants.KEY_ADDRESS, tAddress.getText().toString());
+
+        super.onSaveInstanceState(outState);
+    }
+
 
     /// CLASS TO RESOLVE ADDRESS
     @SuppressLint("ParcelCreator")
@@ -215,5 +258,3 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
 
 }
-
-//TODO save instance to persist while reconfiguration happens

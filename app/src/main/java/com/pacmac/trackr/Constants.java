@@ -8,6 +8,8 @@ public class Constants {
     public static final String TAG = "TrackR";
     public static final String KEY_LATITUDE = "latitude_key";
     public static final String KEY_LONGITUDE = "longitude_key";
+    public static final String KEY_TIMESTAMP = "timestamp_key";
+    public static final String KEY_ADDRESS = "address_key";
     public static final int SUCCESS = 0;
     public static final int ERROR = 134;
 

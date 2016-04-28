@@ -16,16 +16,13 @@ import com.firebase.client.ValueEventListener;
 public class LocationRecord {
 
 
-    private String timestamp = null;
-    private int timezone;
+    private long timestamp = 0;
     private double longitude, latitude;
 
-    public LocationRecord(double latitude, double longitude, String timestamp, int timezone) {
+    public LocationRecord(double latitude, double longitude, long timestamp) {
 
-        //48.424185, -123.356856  fake location
         this.latitude = latitude;
         this.longitude = longitude;
-        this.timezone = timezone;
         this.timestamp = timestamp;
     }
 
@@ -38,12 +35,8 @@ public class LocationRecord {
         return latitude;
     }
 
-    public String getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
-    }
-
-    public int getTimezone() {
-        return timezone;
     }
 
     @Override

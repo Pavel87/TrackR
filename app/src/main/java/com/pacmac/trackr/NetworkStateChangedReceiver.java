@@ -9,6 +9,8 @@ import android.net.NetworkInfo;
 /**
  * Created by tqm837 on 4/27/2016.
  */
+
+
 public class NetworkStateChangedReceiver extends BroadcastReceiver {
 
     private NetworkStateListener listener = null;

@@ -6,7 +6,7 @@
     <string name="address">Address</string>
     <string name="not_available">Not Available</string>
     <string name="search">Search</string>
-    <string name="show_map">GO TO MAP</string>
+    <string name="show_map">SHOW ON MAP</string>
     <string name="title_activity_map_detail">Map</string>
     <string name="no_connection">No Connectivity</string>
 </resources>
