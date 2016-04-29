@@ -13,16 +13,15 @@
         android:src="@drawable/mapbg" />
 
 
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
         android:background="@drawable/rounded_box"
         android:gravity="center"
         android:orientation="vertical"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="8dp"
         android:paddingRight="8dp"
@@ -31,11 +30,11 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
             android:fontFamily="sans-serif-medium"
             android:text="@string/last_location"
             android:textAllCaps="true"
-            android:textSize="22sp"
-            android:layout_centerHorizontal="true"/>
+            android:textSize="22sp" />
 
 
         <LinearLayout
@@ -51,16 +50,16 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:paddingLeft="16dp"
-                android:textSize="16sp"
-                android:text="@string/coord" />
+                android:text="@string/coord"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/coordinates"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:lines="2"
                 android:layout_weight="1.5"
                 android:fontFamily="sans-serif-medium"
+                android:lines="2"
                 android:textSize="16sp" />
 
         </LinearLayout>
@@ -78,8 +77,8 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:paddingLeft="16dp"
-                android:textSize="16sp"
-                android:text="@string/local_time" />
+                android:text="@string/local_time"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/timestamp"
@@ -94,8 +93,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -106,16 +105,16 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:paddingLeft="16dp"
-                android:textSize="16sp"
-                android:text="@string/address" />
+                android:text="@string/address"
+                android:textSize="16sp" />
 
             <TextView
                 android:id="@+id/address"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.5"
-                android:lines="3"
                 android:fontFamily="sans-serif-medium"
+                android:lines="3"
                 android:textSize="16sp" />
 
         </LinearLayout>
@@ -128,29 +127,28 @@
         android:id="@+id/showMap"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginBottom="@dimen/activity_vertical_margin"
         android:background="@color/halfTransparent"
         android:fontFamily="sans-serif-medium"
-        android:textColor="@android:color/white"
-        android:text="@string/show_map"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_marginBottom="@dimen/activity_vertical_margin"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"/>
+        android:text="@string/show_map"
+        android:textColor="@android:color/white" />
 
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
         android:orientation="vertical"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        >
+        android:paddingTop="@dimen/activity_vertical_margin">
 
         <LinearLayout
             android:layout_width="wrap_content"
@@ -159,15 +157,6 @@
 
 
         </LinearLayout>
-
-        <Button
-            android:id="@+id/test"
-            android:visibility="gone"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
-            android:fontFamily="sans-serif-medium"
-            android:text="TEST SAVE" />
 
     </LinearLayout>
 
@@ -182,7 +171,7 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:src="@mipmap/settingsicon"/>
+        android:src="@mipmap/settingsicon" />
 
 
     <ImageButton
@@ -196,6 +185,6 @@
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:src="@mipmap/search"/>
+        android:src="@mipmap/search" />
 
 </RelativeLayout>

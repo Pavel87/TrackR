@@ -24,8 +24,8 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
         setContentView(R.layout.activity_map_detail);
 
         Intent intent = getIntent();
-        latitude = intent.getDoubleExtra(Constants.KEY_LATITUDE,19.880392);
-        longitude = intent.getDoubleExtra(Constants.KEY_LONGITUDE,-159.960938);
+        latitude = intent.getDoubleExtra(Constants.KEY_LATITUDE,0);
+        longitude = intent.getDoubleExtra(Constants.KEY_LONGITUDE,0);
         lastSeen = intent.getStringExtra(Constants.KEY_TIMESTAMP);
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -47,9 +47,11 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
+        if (latitude == 0) return; // this should not happen
+
         LatLng location = new LatLng(latitude, longitude);
         mMap.addMarker(new MarkerOptions().position(location).
-                title(getResources().getString(R.string.last_seen)+"\n"+lastSeen));
+                title(lastSeen));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,14f));
     }
 }

@@ -4,18 +4,17 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
@@ -31,12 +30,13 @@ import com.firebase.client.ValueEventListener;
 import java.util.Calendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements NetworkStateListener {
 
 
     private TextView tLastLocation, tTimestamp, tAddress;
-    private Button mapBtn, testBtn;
+    private Button mapBtn;
     private ImageButton searchBtn, settingsBtn;
     private ImageView imageBG;
 
@@ -45,13 +45,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     private AddressResultReceiver resultReceiver;
     private Handler handler;
-
+    SharedPreferences preferences = null;
     private Firebase firebase;
     private LocationRecord locationRecord;
 
     private NetworkStateChangedReceiver connReceiver = null;
 
-    //TODO I might need to save last known in sharedprefs
 
     @Override
     protected void onCreate(Bundle savedInst) {
@@ -62,12 +61,17 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         tAddress = (TextView) findViewById(R.id.address);
 
         mapBtn = (Button) findViewById(R.id.showMap);
-        testBtn = (Button) findViewById(R.id.test);
         searchBtn = (ImageButton) findViewById(R.id.search);
         settingsBtn = (ImageButton) findViewById(R.id.settings);
 
         imageBG = (ImageView) findViewById(R.id.imgBG);
         imageBG.setImageBitmap(setBitmap());
+
+        handler = new Handler();
+        resultReceiver = new AddressResultReceiver(handler);
+        connReceiver = new NetworkStateChangedReceiver();
+        connReceiver.setConnectionListener(this);
+
 
         //restore location on reconfiguration
         if (savedInst != null) {
@@ -78,10 +82,16 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             tAddress.setText(savedInst.getString(Constants.KEY_ADDRESS));
         }
 
-        handler = new Handler();
-        resultReceiver = new AddressResultReceiver(handler);
-        connReceiver = new NetworkStateChangedReceiver();
-        connReceiver.setConnectionListener(this);
+        // generate unique IDs on first run
+        preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+        if (preferences.getBoolean(Constants.FIRST_RUN, true)){
+            SharedPreferences.Editor editor = preferences.edit();
+            String uniqueID = generateUniqueID().substring(0,24);
+            editor.putString(Constants.TRACKING_ID, uniqueID);
+            editor.putString(Constants.RECEIVING_ID, uniqueID);
+            editor.putBoolean(Constants.FIRST_RUN, false);
+            editor.commit();
+        }
 
         checkConnectivity();
 
@@ -97,14 +107,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             public void onClick(View v) {
 
                 getLastKnownLocation();
-            }
-        });
-
-        testBtn.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                long fakeTime = System.currentTimeMillis();
-                firebase.child("1").setValue(new LocationRecord(48.42831778375717, -123.35895001888275, fakeTime));
             }
         });
 
@@ -129,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         BitmapDrawable drawable = (BitmapDrawable) imageBG.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
-        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 8, getApplicationContext());
+        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 13, getApplicationContext());
         return blurred;
     }
 
@@ -176,11 +178,11 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void retrieveLocation() {
-
-        firebase.child("1").addListenerForSingleValueEvent(new ValueEventListener() {
+        String child = preferences.getString(Constants.RECEIVING_ID, "Error");
+        firebase.child(child).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-                System.out.println(snapshot.getValue());
+               // System.out.println(snapshot.getValue());
                 if (snapshot.hasChildren()) {
 
                     double latitude = (double) snapshot.child("latitude").getValue();
@@ -211,11 +213,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         int day = calendar.get(Calendar.DAY_OF_MONTH);
         String month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
-
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
 
-        return day + " " + month + "  " + String.format("%02d", hour) + ":" + String.format("%02d", minute) + " " + timezone;
+        return day + " " + month + " " + String.format("%02d", hour) + ":" + String.format("%02d", minute) + " " + timezone;
     }
 
     private void startIntentService() {
@@ -252,15 +253,18 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
-        outState.putDouble(Constants.KEY_LATITUDE, locationRecord.getLatitude());
-        outState.putDouble(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
-        outState.putLong(Constants.KEY_TIMESTAMP, locationRecord.getTimestamp());
-        outState.putString(Constants.KEY_ADDRESS, tAddress.getText().toString());
-
+        if(locationRecord !=null) {
+            outState.putDouble(Constants.KEY_LATITUDE, locationRecord.getLatitude());
+            outState.putDouble(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
+            outState.putLong(Constants.KEY_TIMESTAMP, locationRecord.getTimestamp());
+            outState.putString(Constants.KEY_ADDRESS, tAddress.getText().toString());
+        }
         super.onSaveInstanceState(outState);
     }
 
-
+    private String generateUniqueID(){
+        return UUID.randomUUID().toString();
+    }
 
 
 

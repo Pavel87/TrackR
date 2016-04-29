@@ -13,8 +13,18 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
     <string name="trackingOn">Tracking Mode</string>
+    <string name="trackingID">Tracking ID</string>
+    <string name="receivingID">Receiving ID</string>
     <string name="turning_on">Turning Tracking ON</string>
     <string name="turning_off">Turning Tracking OFF</string>
+    <string name="cancel">Cancel</string>
+    <string name="save">Save</string>
+    <string name="enter_id">Enter Unique ID</string>
+    <string name="id_entry_error">Unique ID must have have 8 or more characters</string>
+    <string name="pass_entry_error">Password does not match</string>
+    <string name="password_dialog">Parental Lock</string>
+    <string name="show_password">Show Password</string>
+    <string name="type_password">Type Password</string>
 
 
 </resources>
