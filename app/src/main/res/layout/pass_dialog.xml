@@ -28,6 +28,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
+        android:minWidth="300dp"
         android:layout_marginTop="16dp"
         android:orientation="vertical"
         android:paddingTop="@dimen/activity_vertical_margin">
@@ -40,7 +41,7 @@
             android:fontFamily="sans-serif-light"
             android:inputType="textPassword"
             android:hint="@string/type_password"
-            android:minWidth="300dp" />
+             />
 
     </LinearLayout>
 

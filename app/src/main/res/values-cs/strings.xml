@@ -1,0 +1,32 @@
+<resources>
+    <string name="app_name">TrackR</string>
+    <string name="last_location">Poslední známa poloha</string>
+    <string name="coord">Souřadnice</string>
+    <string name="local_time">Místní čas</string>
+    <string name="address">Adresa</string>
+    <string name="not_available">Není dostupný</string>
+    <string name="search">Hledej</string>
+    <string name="show_map">Ukaž na mapě</string>
+    <string name="title_activity_map_detail">Mapa</string>
+    <string name="no_connection">Připojení k internetu selhalo</string>
+    <string name="last_seen">Naposled viděn v: </string>
+    <string name="action_settings">Nastavení</string>
+    <string name="title_activity_settings">Nastavení</string>
+    <string name="trackingOn">Tracking Mód</string>
+    <string name="trackingID">Tracking ID</string>
+    <string name="receivingID">Sledovací ID</string>
+    <string name="turning_on">Zapínám Tracking</string>
+    <string name="turning_off">Vypínám Tracking</string>
+    <string name="cancel">Zpět</string>
+    <string name="save">Ulož</string>
+    <string name="enter_id">Vlož Unikátní ID</string>
+    <string name="id_entry_error">ID musí mít 8 nebo více znaků</string>
+    <string name="pass_entry_error">Zadali jste chybné heslo</string>
+    <string name="password_dialog">Rodičovský zámek</string>
+    <string name="show_password">Ukaž heslo</string>
+    <string name="type_password">Vytvoř nové heslo</string>
+    <string name="loading">Hledám...</string>
+    <string name="address_na">Adresa není dosupná</string>
+    <string name="address_loc_error">Chyba v souřadnicích: Restartujte TrackR</string>
+    <string name="address_not_found">Adresa nenalezena</string>
+</resources>

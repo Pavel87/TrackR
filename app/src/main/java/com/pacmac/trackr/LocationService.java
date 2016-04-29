@@ -81,7 +81,7 @@ public class LocationService extends Service implements LocationListener, Google
         mLocationRequest = new LocationRequest();
         mLocationRequest.setInterval(60 * 60 * 1000);
         mLocationRequest.setFastestInterval(10 * 60 * 1000);
-        mLocationRequest.setSmallestDisplacement(100);
+        mLocationRequest.setSmallestDisplacement(50f);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
 
     }
@@ -118,8 +118,8 @@ public class LocationService extends Service implements LocationListener, Google
     @Override
     public void onLocationChanged(Location lastLocation) {
         long time = lastLocation.getTime();
-        //String mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        //System.out.println(mLastUpdateTime + "  " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + accuracy);
+        String mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        System.out.println(mLastUpdateTime + "  " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + lastLocation.getAccuracy());
         firebase.child(child).setValue(new LocationRecord(lastLocation.getLatitude(), lastLocation.getLongitude(), time));
 
     }

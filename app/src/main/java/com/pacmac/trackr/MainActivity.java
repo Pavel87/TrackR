@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         BitmapDrawable drawable = (BitmapDrawable) imageBG.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
-        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 13, getApplicationContext());
+        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 16, getApplicationContext());
         return blurred;
     }
 
@@ -220,7 +220,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void startIntentService() {
-        Intent intent = new Intent(getApplicationContext(), FetchAdressService.class);
+        Intent intent = new Intent(getApplicationContext(), FetchAddressService.class);
         intent.putExtra(Constants.RECEIVER, resultReceiver);
         intent.putExtra(Constants.KEY_LATITUDE, locationRecord.getLatitude());
         intent.putExtra(Constants.KEY_LONGITUDE, locationRecord.getLongitude());

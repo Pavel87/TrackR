@@ -1,5 +1,6 @@
 package com.pacmac.trackr;
 
+import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -65,10 +66,7 @@ public class SettingsActivity extends AppCompatActivity {
         padlock.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 createPassDialog();
-
-
             }
         });
 
@@ -171,9 +169,7 @@ public class SettingsActivity extends AppCompatActivity {
             editor.putBoolean(Constants.PADLOCK_ACTIVE, isLocked);
             editor.putString(Constants.PADLOCK_PASS, text);
             editor.commit();
-
         }
-
         else if(type == Constants.TYPE_PASSWORD_NOT_ACTIVE){
             isLocked = false;
             switchTracking.setEnabled(true);
@@ -210,7 +206,6 @@ public class SettingsActivity extends AppCompatActivity {
                 }
             }
         });
-
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -222,17 +217,15 @@ public class SettingsActivity extends AppCompatActivity {
                 }
                 else{
                     if (password.equals(parentalPass)){
-                        saveIDtoPref(Constants.TYPE_PASSWORD_NOT_ACTIVE, null);
-                        dialog.dismiss(); //unlock
+                        saveIDtoPref(Constants.TYPE_PASSWORD_NOT_ACTIVE, null); //unlock
+                        dialog.dismiss();
                     }
                     else{
                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.pass_entry_error), Toast.LENGTH_SHORT).show();
                     }
                 }
-
             }
         });
-
         Button noButton = (Button) dialog.findViewById(R.id.cancelBtn);
         noButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -241,6 +234,8 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
         dialog.show();
+        Window window = dialog.getWindow(); // make dialog stretched
+        window.setLayout(android.support.v7.app.ActionBar.LayoutParams.MATCH_PARENT, android.support.v7.app.ActionBar.LayoutParams.WRAP_CONTENT);
     }
 
 

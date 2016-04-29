@@ -16,7 +16,7 @@ import java.util.Locale;
  * Created by tqm837 on 4/27/2016.
  */
 
-public class FetchAdressService extends IntentService {
+public class FetchAddressService extends IntentService {
 
 
     protected ResultReceiver receiver;
@@ -25,20 +25,15 @@ public class FetchAdressService extends IntentService {
     private String addressResult;
     private int codeResult;
 
-
-    public FetchAdressService() {
-        super("reverse_location_coder");
-    }
-
-    public FetchAdressService(String name) {
-        super(name);
+    public FetchAddressService() {
+        super(Constants.PACKAGE_NAME + ".FetchedAddress");
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        double latitude = intent.getDoubleExtra(Constants.KEY_LATITUDE, 19.880392);
-        double longitude = intent.getDoubleExtra(Constants.KEY_LONGITUDE, -159.960938);
+        double latitude = intent.getDoubleExtra(Constants.KEY_LATITUDE, 0);
+        double longitude = intent.getDoubleExtra(Constants.KEY_LONGITUDE, 0);
         receiver = intent.getParcelableExtra(Constants.RECEIVER);
 
         addressResult = getAdress(latitude, longitude);
@@ -53,6 +48,7 @@ public class FetchAdressService extends IntentService {
 
     public String getAdress(double latitude, double longitude) {
 
+        if(longitude == 0) return getResources().getString(R.string.address_loc_error);
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         List<Address> addresses = null;
         try {
@@ -65,7 +61,7 @@ public class FetchAdressService extends IntentService {
 
         if (addresses == null || addresses.isEmpty()) {
             codeResult = Constants.ERROR;
-            return "No Adress Found";
+            return getResources().getString(R.string.address_not_found);
         }
 
         StringBuilder result = new StringBuilder();
@@ -88,7 +84,7 @@ public class FetchAdressService extends IntentService {
 
         if (result == null) {
             codeResult = Constants.ERROR;
-            return "Adress Detail Is Not Available";
+            return getResources().getString(R.string.address_na);
         }
         codeResult = Constants.SUCCESS;
         return result.toString();
