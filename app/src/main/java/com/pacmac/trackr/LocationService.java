@@ -3,9 +3,11 @@ package com.pacmac.trackr;
 import android.Manifest;
 import android.app.Service;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.os.BatteryManager;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
@@ -20,9 +22,6 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
-import java.text.DateFormat;
-import java.util.Date;
-
 /**
  * Created by pacmac on 28/04/16.
  */
@@ -34,6 +33,7 @@ public class LocationService extends Service implements LocationListener, Google
     private Firebase firebase;
     private SharedPreferences preferences;
     private String child = null;
+    private boolean lastBatLevel = false;
 
     @Override
     public void onCreate() {
@@ -64,7 +64,6 @@ public class LocationService extends Service implements LocationListener, Google
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         stopLocationUpdates();
         mGoogleApiClient.disconnect();
         Log.d(Constants.TAG, "LocationService is destroying");
@@ -76,14 +75,11 @@ public class LocationService extends Service implements LocationListener, Google
         return null;
     }
 
-
-    private void createLocationRequest() {
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(60 * 60 * 1000);
-        mLocationRequest.setFastestInterval(10 * 60 * 1000);
-        mLocationRequest.setSmallestDisplacement(50f);
+    private void createLocationRequest(long time) {
+        mLocationRequest = new LocationRequest().create();
+        mLocationRequest.setInterval(time);
+        mLocationRequest.setFastestInterval(time);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-
     }
 
     private void startLocationUpdates() {
@@ -106,7 +102,17 @@ public class LocationService extends Service implements LocationListener, Google
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        createLocationRequest();
+
+        float level = getBatteryLevel();
+        if (level >= 30) {
+            createLocationRequest(Constants.TIME_BATTERY_OK);
+            Log.d(Constants.TAG, "Battery OK: " + level);
+            lastBatLevel = true;
+        } else {
+            createLocationRequest(Constants.TIME_BATTERY_LOW);
+            Log.d(Constants.TAG, "Battery LOW: " + level);
+            lastBatLevel = false;
+        }
         startLocationUpdates();
     }
 
@@ -118,15 +124,40 @@ public class LocationService extends Service implements LocationListener, Google
     @Override
     public void onLocationChanged(Location lastLocation) {
         long time = lastLocation.getTime();
-        String mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        System.out.println(mLastUpdateTime + "  " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + lastLocation.getAccuracy());
+        //String mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
+        //Log.d(Constants.TAG, (mLastUpdateTime + "  " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + lastLocation.getAccuracy()));
         firebase.child(child).setValue(new LocationRecord(lastLocation.getLatitude(), lastLocation.getLongitude(), time));
 
+        float level = getBatteryLevel();
+        //Log.d(Constants.TAG, "Battery Level" + level);
+
+        if (level >= 30 && !lastBatLevel) {
+            lastBatLevel= true;
+            stopLocationUpdates();
+            createLocationRequest(Constants.TIME_BATTERY_OK);
+            startLocationUpdates();
+        } else if (level < 30 && lastBatLevel){
+            lastBatLevel= false;
+            stopLocationUpdates();
+            createLocationRequest(Constants.TIME_BATTERY_LOW);
+            startLocationUpdates();
+        }
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    }
 
+    public float getBatteryLevel() {
+        Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        // Error checking that probably isn't needed but I added just in case.
+        if (level == -1 || scale == -1) {
+            return 51.0f;
+        }
+        return ((float) level / (float) scale) * 100.0f;
     }
 
 }

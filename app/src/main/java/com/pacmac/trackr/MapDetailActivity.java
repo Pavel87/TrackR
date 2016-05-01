@@ -1,6 +1,7 @@
 package com.pacmac.trackr;
 
 import android.content.Intent;
+import android.graphics.Color;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 
@@ -8,7 +9,9 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 public class MapDetailActivity extends FragmentActivity implements OnMapReadyCallback {
@@ -49,9 +52,20 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
 
         if (latitude == 0) return; // this should not happen
 
-        LatLng location = new LatLng(latitude, longitude);
+        final LatLng location = new LatLng(latitude, longitude);
         mMap.addMarker(new MarkerOptions().position(location).
                 title(lastSeen));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,14f));
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,16f));
+
+        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+            @Override
+            public boolean onMarkerClick(Marker marker) {
+                CircleOptions cOptions = new CircleOptions();
+                cOptions.center(location).fillColor(getResources().getColor(R.color.map_radius))
+                        .strokeColor(Color.BLUE).radius(25).strokeWidth(0.6f).visible(true);
+                mMap.addCircle(cOptions);
+                return false;
+            }
+        });
     }
 }

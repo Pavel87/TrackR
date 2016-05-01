@@ -5,6 +5,6 @@ package com.pacmac.trackr;
  */
 public interface NetworkStateListener {
 
-    public void connectionChanged(boolean isConnected);
+    void connectionChanged(boolean isConnected);
 
 }

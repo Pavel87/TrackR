@@ -26,6 +26,9 @@ public class Constants {
     public static final int TYPE_RECEIVING_ID = 1;
     public static final int TYPE_PASSWORD_ACTIVE = 2;
     public static final int TYPE_PASSWORD_NOT_ACTIVE = 3;
+    public final static int TIME_BATTERY_OK = 30 * 60 * 1000;
+    public final static int TIME_BATTERY_LOW = 60 * 60 * 1000;
+
 
 
 }

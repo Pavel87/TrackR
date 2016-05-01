@@ -7,7 +7,6 @@
 
     Note that this file specifies the API key for the release build target.
     If you have previously set up a key for the debug target with the debug signing certificate,
-    you will also need to set up a key for your release certificate.
 
     Follow the directions here:
 
@@ -17,6 +16,6 @@
     string in this file.
     -->
     <string name="google_maps_key" templateMergeStrategy="preserve" translatable="false">
-        YOUR_KEY_HERE
+        AIzaSyDVt6x6wBALKaViL8j9PfaHY7nwiEN0P0Y
     </string>
 </resources>

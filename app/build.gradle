@@ -1,15 +1,21 @@
 apply plugin: 'com.android.application'
 
 android {
+    signingConfigs {
+        config {
+            keyAlias 'pacmac'
+            keyPassword 'eBaVuFe8'
+            storeFile file('/Users/pavel/projects/AndroidStudioProjects/keystore_pacmac/pacmac.jks')
+            storePassword 'eBaVuFe8'
+        }
+    }
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
-
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE-FIREBASE.txt'
         exclude 'META-INF/NOTICE'
     }
-
     defaultConfig {
         applicationId "com.pacmac.trackr"
         minSdkVersion 16
@@ -22,6 +28,8 @@ android {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
+    }
+    productFlavors {
     }
 }
 

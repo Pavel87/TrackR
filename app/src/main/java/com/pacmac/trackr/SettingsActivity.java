@@ -1,6 +1,5 @@
 package com.pacmac.trackr;
 
-import android.app.ActionBar;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -28,7 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
     private ImageButton padlock;
 
     private boolean isLocked;
-    private String trackID,receiveID, parentalPass;
+    private String trackID, receiveID, parentalPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,19 +42,19 @@ public class SettingsActivity extends AppCompatActivity {
         txLayout = (LinearLayout) findViewById(R.id.txID);
         rxLayout = (LinearLayout) findViewById(R.id.rxID);
 
-        padlock= (ImageButton) findViewById(R.id.padlock);
+        padlock = (ImageButton) findViewById(R.id.padlock);
         isLocked = preferences.getBoolean(Constants.PADLOCK_ACTIVE, false);
 
         tTrackingID = (TextView) findViewById(R.id.trackingID);
-        trackID = preferences.getString(Constants.TRACKING_ID,"Error");
+        trackID = preferences.getString(Constants.TRACKING_ID, "Error");
         tTrackingID.setText(trackID);
         tReceivingID = (TextView) findViewById(R.id.receivingID);
-        receiveID = preferences.getString(Constants.RECEIVING_ID,"Error");
+        receiveID = preferences.getString(Constants.RECEIVING_ID, "Error");
         tReceivingID.setText(receiveID);
 
-        parentalPass = preferences.getString(Constants.PADLOCK_PASS,"");
+        parentalPass = preferences.getString(Constants.PADLOCK_PASS, "");
 
-        if(isLocked){
+        if (isLocked) {
             switchTracking.setEnabled(false);
             txLayout.setEnabled(false);
             rxLayout.setEnabled(false);
@@ -71,7 +70,6 @@ public class SettingsActivity extends AppCompatActivity {
         });
 
 
-
         switchTracking.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
@@ -83,8 +81,7 @@ public class SettingsActivity extends AppCompatActivity {
                 if (isChecked) {
                     Intent intentService = new Intent(getApplicationContext(), LocationService.class);
                     startService(intentService);
-                }
-                else{
+                } else {
                     Intent intentService = new Intent(getApplicationContext(), LocationService.class);
                     stopService(intentService);
                 }
@@ -105,7 +102,7 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
-    private void createDialog(final int type){
+    private void createDialog(final int type) {
 
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -115,7 +112,7 @@ public class SettingsActivity extends AppCompatActivity {
         Button save = (Button) dialog.findViewById(R.id.saveBtn);
         final EditText newID = (EditText) dialog.findViewById(R.id.idText);
         if (type == Constants.TYPE_TRACKING_ID) newID.setText(trackID);
-        else if(type == Constants.TYPE_RECEIVING_ID) newID.setText(receiveID);
+        else if (type == Constants.TYPE_RECEIVING_ID) newID.setText(receiveID);
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -142,49 +139,47 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    private void saveIDtoPref(int type, String text){
-        if(type == Constants.TYPE_TRACKING_ID){
-            SharedPreferences.Editor  editor = preferences.edit();
+    private void saveIDtoPref(int type, String text) {
+        if (type == Constants.TYPE_TRACKING_ID) {
+            SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.TRACKING_ID, text);
             editor.commit();
             tTrackingID.setText(text);
-            if(switchTracking.isChecked()){
+            trackID = text;
+            if (switchTracking.isChecked()) {
                 switchTracking.setChecked(false);
             }
-        }
-        else if(type == Constants.TYPE_RECEIVING_ID){
-            SharedPreferences.Editor  editor = preferences.edit();
+        } else if (type == Constants.TYPE_RECEIVING_ID) {
+            SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.RECEIVING_ID, text);
             editor.commit();
             tReceivingID.setText(text);
-        }
-        else if(type == Constants.TYPE_PASSWORD_ACTIVE){
+            receiveID = text;
+        } else if (type == Constants.TYPE_PASSWORD_ACTIVE) {
             isLocked = true;
             switchTracking.setEnabled(false);
             txLayout.setEnabled(false);
             rxLayout.setEnabled(false);
             padlock.setImageDrawable(getResources().getDrawable(R.drawable.locked));
 
-            SharedPreferences.Editor  editor = preferences.edit();
+            SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean(Constants.PADLOCK_ACTIVE, isLocked);
             editor.putString(Constants.PADLOCK_PASS, text);
             editor.commit();
-        }
-        else if(type == Constants.TYPE_PASSWORD_NOT_ACTIVE){
+        } else if (type == Constants.TYPE_PASSWORD_NOT_ACTIVE) {
             isLocked = false;
             switchTracking.setEnabled(true);
             txLayout.setEnabled(true);
             rxLayout.setEnabled(true);
             padlock.setImageDrawable(getResources().getDrawable(R.drawable.unlock));
-            SharedPreferences.Editor  editor = preferences.edit();
+            SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean(Constants.PADLOCK_ACTIVE, isLocked);
             editor.commit();
         }
     }
 
 
-
-    private void createPassDialog(){
+    private void createPassDialog() {
 
         final Dialog dialog = new Dialog(this);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -193,13 +188,18 @@ public class SettingsActivity extends AppCompatActivity {
 
         Button save = (Button) dialog.findViewById(R.id.saveBtn);
         final EditText newPassword = (EditText) dialog.findViewById(R.id.passwordText);
-        if(!isLocked) newPassword.setText(parentalPass);
+        if (!isLocked) {
+            save.setText(getResources().getString(R.string.save));
+            newPassword.setText(parentalPass);
+        } else {
+            save.setText(getResources().getString(R.string.unlock));
+        }
 
         CheckBox checkbox = (CheckBox) dialog.findViewById(R.id.checkbox);
         checkbox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if(isChecked) {
+                if (isChecked) {
                     newPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
                 } else {
                     newPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
@@ -210,17 +210,15 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String password = newPassword.getText().toString();
-                if(!isLocked) {
+                if (!isLocked) {
                     parentalPass = password;
                     saveIDtoPref(Constants.TYPE_PASSWORD_ACTIVE, password);
                     dialog.dismiss();
-                }
-                else{
-                    if (password.equals(parentalPass)){
+                } else {
+                    if (password.equals(parentalPass)) {
                         saveIDtoPref(Constants.TYPE_PASSWORD_NOT_ACTIVE, null); //unlock
                         dialog.dismiss();
-                    }
-                    else{
+                    } else {
                         Toast.makeText(getApplicationContext(), getResources().getString(R.string.pass_entry_error), Toast.LENGTH_SHORT).show();
                     }
                 }

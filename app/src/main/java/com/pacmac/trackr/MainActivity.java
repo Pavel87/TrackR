@@ -10,6 +10,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
@@ -65,7 +66,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         settingsBtn = (ImageButton) findViewById(R.id.settings);
 
         imageBG = (ImageView) findViewById(R.id.imgBG);
-        imageBG.setImageBitmap(setBitmap());
+        // renderScript Class works only from API 17 so have to check if it can blur the bg or not
+        if (Build.VERSION.SDK_INT > 16) {
+            imageBG.setImageBitmap(setBitmap());
+        }
 
         handler = new Handler();
         resultReceiver = new AddressResultReceiver(handler);
@@ -84,9 +88,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         // generate unique IDs on first run
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
-        if (preferences.getBoolean(Constants.FIRST_RUN, true)){
+        if (preferences.getBoolean(Constants.FIRST_RUN, true)) {
             SharedPreferences.Editor editor = preferences.edit();
-            String uniqueID = generateUniqueID().substring(0,24);
+            String uniqueID = generateUniqueID().substring(0, 24);
             editor.putString(Constants.TRACKING_ID, uniqueID);
             editor.putString(Constants.RECEIVING_ID, uniqueID);
             editor.putBoolean(Constants.FIRST_RUN, false);
@@ -113,7 +117,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         settingsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-               openSettings();
+                openSettings();
             }
         });
 
@@ -127,7 +131,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
 
-    private Bitmap setBitmap(){
+    private Bitmap setBitmap() {
 
         BitmapDrawable drawable = (BitmapDrawable) imageBG.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
@@ -182,7 +186,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         firebase.child(child).addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot snapshot) {
-               // System.out.println(snapshot.getValue());
+                // System.out.println(snapshot.getValue());
                 if (snapshot.hasChildren()) {
 
                     double latitude = (double) snapshot.child("latitude").getValue();
@@ -198,6 +202,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     getAdress();
                 }
             }
+
             @Override
             public void onCancelled(FirebaseError firebaseError) {
                 Log.i(Constants.TAG, "Update Cancelled" + firebaseError.getMessage());
@@ -253,7 +258,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     @Override
     protected void onSaveInstanceState(Bundle outState) {
 
-        if(locationRecord !=null) {
+        if (locationRecord != null) {
             outState.putDouble(Constants.KEY_LATITUDE, locationRecord.getLatitude());
             outState.putDouble(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
             outState.putLong(Constants.KEY_TIMESTAMP, locationRecord.getTimestamp());
@@ -262,10 +267,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         super.onSaveInstanceState(outState);
     }
 
-    private String generateUniqueID(){
+    private String generateUniqueID() {
         return UUID.randomUUID().toString();
     }
-
 
 
     /// CLASS TO RESOLVE ADDRESS
