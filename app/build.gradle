@@ -2,14 +2,8 @@ apply plugin: 'com.android.application'
 
 android {
     signingConfigs {
-        config {
-            keyAlias 'pacmac'
-            keyPassword 'eBaVuFe8'
-            storeFile file('/Users/pavel/projects/AndroidStudioProjects/keystore_pacmac/pacmac.jks')
-            storePassword 'eBaVuFe8'
-        }
     }
-    compileSdkVersion 23
+    compileSdkVersion 24
     buildToolsVersion "23.0.3"
     packagingOptions {
         exclude 'META-INF/LICENSE'
@@ -19,9 +13,9 @@ android {
     defaultConfig {
         applicationId "com.pacmac.trackr"
         minSdkVersion 16
-        targetSdkVersion 23
-        versionCode 1
-        versionName "1.0"
+        targetSdkVersion 24
+        versionCode 2
+        versionName "1.2"
     }
     buildTypes {
         release {
@@ -34,10 +28,10 @@ android {
 }
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
-    compile 'com.android.support:appcompat-v7:23.3.0'
+    compile fileTree(include: ['*.jar'], dir: 'libs')
+    compile 'com.android.support:appcompat-v7:24.+'
     compile 'com.google.android.gms:play-services-maps:8.4.0'
     compile 'com.google.android.gms:play-services-location:8.4.0'
     compile 'com.firebase:firebase-client-android:2.5.2'
-    compile 'com.android.support:support-v4:23.3.0'
+    compile 'com.android.support:support-v4:24.+'
 }

@@ -30,4 +30,7 @@
     <string name="address_na">Adress Detail Is Not Available</string>
     <string name="address_loc_error">Wrong Location: Please Restart TrackR</string>
     <string name="address_not_found">Address Not Found</string>
+    <string name="location_message">Location Permission is required for correct application functionality.</string>
+    <string name="request_perm">Request</string>
+    <string name="no_location">Tracked device has not reported location yet</string>
 </resources>

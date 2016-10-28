@@ -30,4 +30,7 @@
     <string name="address_na">Adresa není dosupná</string>
     <string name="address_loc_error">Chyba v souřadnicích: Restartujte TrackR</string>
     <string name="address_not_found">Adresa nenalezena</string>
+    <string name="location_message">Location Permission je nutné pro správnou funkci aplikace.</string>
+    <string name="request_perm">Žádej</string>
+    <string name="no_location">Poloha sledovaného zařízení je neznámá.</string>
 </resources>

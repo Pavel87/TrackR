@@ -1,5 +1,6 @@
 package com.pacmac.trackr;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -52,11 +53,22 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     private NetworkStateChangedReceiver connReceiver = null;
 
+    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
+    private boolean isPermissionEnabled = true;
 
     @Override
     protected void onCreate(Bundle savedInst) {
         super.onCreate(savedInst);
         setContentView(R.layout.activity_main);
+
+        // Check if user disabled LOCATION permission at some point
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
+            isPermissionEnabled = Utility.checkPermission(getApplicationContext(), LOCATION_PERMISSION);
+        }
+        if (!isPermissionEnabled) {
+            Utility.displayExplanationForPermission(this, LOCATION_PERMISSION);
+        }
+
         tLastLocation = (TextView) findViewById(R.id.coordinates);
         tTimestamp = (TextView) findViewById(R.id.timestamp);
         tAddress = (TextView) findViewById(R.id.address);
@@ -160,16 +172,22 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void openMap() {
-        if (isConnected && haveLocation) {
+        if (!isConnected){
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_connection), Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
+        if (!haveLocation){
+            Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_location), Toast.LENGTH_SHORT)
+                    .show();
+            return;
+        }
             Intent intent = new Intent(this, MapDetailActivity.class);
             intent.putExtra(Constants.KEY_LATITUDE, locationRecord.getLatitude());
             intent.putExtra(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
             intent.putExtra(Constants.KEY_TIMESTAMP, parseDate(locationRecord.getTimestamp()));
             intent.putExtra(Constants.KEY_ADDRESS, tAddress.getText().toString());
             startActivity(intent);
-        } else
-            Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_connection), Toast.LENGTH_SHORT)
-                    .show();
     }
 
 
@@ -292,5 +310,16 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         }
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        if (requestCode == Utility.MY_PERMISSIONS_REQUEST) {
+            isPermissionEnabled = Utility.checkPermission(getApplicationContext(), LOCATION_PERMISSION);
+        }
+        if (isPermissionEnabled){
+            getLastKnownLocation();
+        }
+
+    }
 
 }
