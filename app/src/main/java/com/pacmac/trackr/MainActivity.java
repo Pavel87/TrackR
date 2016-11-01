@@ -104,6 +104,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             SharedPreferences.Editor editor = preferences.edit();
             String uniqueID = generateUniqueID().substring(0, 24);
             editor.putString(Constants.TRACKING_ID, uniqueID);
+            editor.putString(Constants.TRACKING_ID_RAW, uniqueID);
+            editor.putString(Constants.RECEIVING_ID_RAW, uniqueID);
             editor.putString(Constants.RECEIVING_ID, uniqueID);
             editor.putBoolean(Constants.FIRST_RUN, false);
             editor.commit();

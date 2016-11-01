@@ -56,4 +56,11 @@ public class Utility {
         alertDialog.show();
     }
 
+    public static String checkAndReplaceForbiddenChars(String id) {
+        // Firebase paths must not contain '.', '#', '$', '[', or ']'
+        // We have to make sure these chars will be replaced
+        // '.' = ','  '#' = '@' '$' = '%'  '[' = '('   ']' = ')'
+        return id.replace(".", ",").replace("#", "@").replace("$", "%").replace("[", "(").replace("[", "(");
+    }
+
 }

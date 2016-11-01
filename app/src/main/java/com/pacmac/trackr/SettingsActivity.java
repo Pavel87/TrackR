@@ -27,7 +27,7 @@ public class SettingsActivity extends AppCompatActivity {
     private ImageButton padlock;
 
     private boolean isLocked;
-    private String trackID, receiveID, parentalPass;
+    private String trackID, receiveID, trackIdRaw, receiveIdRaw, parentalPass;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,10 +47,13 @@ public class SettingsActivity extends AppCompatActivity {
 
         tTrackingID = (TextView) findViewById(R.id.trackingID);
         trackID = preferences.getString(Constants.TRACKING_ID, "Error");
-        tTrackingID.setText(trackID);
+        trackIdRaw = preferences.getString(Constants.TRACKING_ID_RAW, "Error");
+        tTrackingID.setText(trackIdRaw);
+
         tReceivingID = (TextView) findViewById(R.id.receivingID);
         receiveID = preferences.getString(Constants.RECEIVING_ID, "Error");
-        tReceivingID.setText(receiveID);
+        receiveIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, "Error");
+        tReceivingID.setText(receiveIdRaw);
 
         parentalPass = preferences.getString(Constants.PADLOCK_PASS, "");
 
@@ -111,8 +114,8 @@ public class SettingsActivity extends AppCompatActivity {
 
         Button save = (Button) dialog.findViewById(R.id.saveBtn);
         final EditText newID = (EditText) dialog.findViewById(R.id.idText);
-        if (type == Constants.TYPE_TRACKING_ID) newID.setText(trackID);
-        else if (type == Constants.TYPE_RECEIVING_ID) newID.setText(receiveID);
+        if (type == Constants.TYPE_TRACKING_ID) newID.setText(trackIdRaw);
+        else if (type == Constants.TYPE_RECEIVING_ID) newID.setText(receiveIdRaw);
 
         save.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -139,22 +142,27 @@ public class SettingsActivity extends AppCompatActivity {
     }
 
 
-    private void saveIDtoPref(int type, String text) {
+    private void saveIDtoPref(int type, String id) {
+
+        String editedID = Utility.checkAndReplaceForbiddenChars(id);
+
         if (type == Constants.TYPE_TRACKING_ID) {
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(Constants.TRACKING_ID, text);
+            editor.putString(Constants.TRACKING_ID, editedID);  // firebase child path
+            editor.putString(Constants.TRACKING_ID_RAW, id);  // id to show in UI
             editor.commit();
-            tTrackingID.setText(text);
-            trackID = text;
+            tTrackingID.setText(id);
+            trackID = id;
             if (switchTracking.isChecked()) {
                 switchTracking.setChecked(false);
             }
         } else if (type == Constants.TYPE_RECEIVING_ID) {
             SharedPreferences.Editor editor = preferences.edit();
-            editor.putString(Constants.RECEIVING_ID, text);
+            editor.putString(Constants.RECEIVING_ID, editedID); // firebase child path
+            editor.putString(Constants.RECEIVING_ID_RAW, id);  //  id to show in UI
             editor.commit();
-            tReceivingID.setText(text);
-            receiveID = text;
+            tReceivingID.setText(id);
+            receiveID = id;
         } else if (type == Constants.TYPE_PASSWORD_ACTIVE) {
             isLocked = true;
             switchTracking.setEnabled(false);
@@ -164,7 +172,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean(Constants.PADLOCK_ACTIVE, isLocked);
-            editor.putString(Constants.PADLOCK_PASS, text);
+            editor.putString(Constants.PADLOCK_PASS, editedID);
             editor.commit();
         } else if (type == Constants.TYPE_PASSWORD_NOT_ACTIVE) {
             isLocked = false;
@@ -235,6 +243,5 @@ public class SettingsActivity extends AppCompatActivity {
         Window window = dialog.getWindow(); // make dialog stretched
         window.setLayout(android.support.v7.app.ActionBar.LayoutParams.MATCH_PARENT, android.support.v7.app.ActionBar.LayoutParams.WRAP_CONTENT);
     }
-
 
 }

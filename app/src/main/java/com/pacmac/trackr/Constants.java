@@ -13,6 +13,8 @@ public class Constants {
     public static final String PREF_TRACKR = "-tracker_PREF";
     public static final String TRACKING_STATE = "trackr_gps_state";
     public static final String TRACKING_ID = "trackr_gps_ID";
+    public static final String TRACKING_ID_RAW = "trackr_gps_ID_raw";
+    public static final String RECEIVING_ID_RAW = "receiver_gps_ID_raw";
     public static final String RECEIVING_ID = "receiver_gps_ID";
     public static final String PACKAGE_NAME = "com.pacmac.trackr";
     public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
