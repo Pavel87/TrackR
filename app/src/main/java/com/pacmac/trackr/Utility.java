@@ -60,6 +60,8 @@ public class Utility {
         // Firebase paths must not contain '.', '#', '$', '[', or ']'
         // We have to make sure these chars will be replaced
         // '.' = ','  '#' = '@' '$' = '%'  '[' = '('   ']' = ')'
+        if (id == null)
+            return "ID_ERROR_TRY_AGAIN";
         return id.replace(".", ",").replace("#", "@").replace("$", "%").replace("[", "(").replace("[", "(");
     }
 

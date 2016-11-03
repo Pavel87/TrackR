@@ -47,12 +47,12 @@ public class SettingsActivity extends AppCompatActivity {
 
         tTrackingID = (TextView) findViewById(R.id.trackingID);
         trackID = preferences.getString(Constants.TRACKING_ID, "Error");
-        trackIdRaw = preferences.getString(Constants.TRACKING_ID_RAW, "Error");
+        trackIdRaw = preferences.getString(Constants.TRACKING_ID_RAW, trackID);
         tTrackingID.setText(trackIdRaw);
 
         tReceivingID = (TextView) findViewById(R.id.receivingID);
         receiveID = preferences.getString(Constants.RECEIVING_ID, "Error");
-        receiveIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, "Error");
+        receiveIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, receiveID);
         tReceivingID.setText(receiveIdRaw);
 
         parentalPass = preferences.getString(Constants.PADLOCK_PASS, "");
@@ -122,7 +122,7 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String id = newID.getText().toString();
 
-                if (id.length() > 7) {
+                if (id != null && id.length() > 7) {
                     saveIDtoPref(type, id);
                     dialog.dismiss();
                 } else {
