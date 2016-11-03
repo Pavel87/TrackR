@@ -46,11 +46,13 @@ public class SettingsActivity extends AppCompatActivity {
         isLocked = preferences.getBoolean(Constants.PADLOCK_ACTIVE, false);
 
         tTrackingID = (TextView) findViewById(R.id.trackingID);
+        // TODO in version 6 I want to shrink these 2 together as all users should be already upgraded
         trackID = preferences.getString(Constants.TRACKING_ID, "Error");
         trackIdRaw = preferences.getString(Constants.TRACKING_ID_RAW, trackID);
         tTrackingID.setText(trackIdRaw);
 
         tReceivingID = (TextView) findViewById(R.id.receivingID);
+        // TODO in version 6 I want to shrink these 2 together as all users should be already upgraded
         receiveID = preferences.getString(Constants.RECEIVING_ID, "Error");
         receiveIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, receiveID);
         tReceivingID.setText(receiveIdRaw);
@@ -122,6 +124,7 @@ public class SettingsActivity extends AppCompatActivity {
             public void onClick(View view) {
                 String id = newID.getText().toString();
 
+                // TODO NEED TO CREATE RULE FOR IDs
                 if (id != null && id.length() > 7) {
                     saveIDtoPref(type, id);
                     dialog.dismiss();
@@ -143,16 +146,17 @@ public class SettingsActivity extends AppCompatActivity {
 
 
     private void saveIDtoPref(int type, String id) {
-
-        String editedID = Utility.checkAndReplaceForbiddenChars(id);
-
+        String editedID = null;
+        if(type == Constants.TYPE_TRACKING_ID || type == Constants.TYPE_RECEIVING_ID) {
+            editedID = Utility.checkAndReplaceForbiddenChars(id);
+        }
         if (type == Constants.TYPE_TRACKING_ID) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.TRACKING_ID, editedID);  // firebase child path
             editor.putString(Constants.TRACKING_ID_RAW, id);  // id to show in UI
             editor.commit();
             tTrackingID.setText(id);
-            trackID = id;
+            trackIdRaw = id;
             if (switchTracking.isChecked()) {
                 switchTracking.setChecked(false);
             }
@@ -162,7 +166,7 @@ public class SettingsActivity extends AppCompatActivity {
             editor.putString(Constants.RECEIVING_ID_RAW, id);  //  id to show in UI
             editor.commit();
             tReceivingID.setText(id);
-            receiveID = id;
+            receiveIdRaw = id;
         } else if (type == Constants.TYPE_PASSWORD_ACTIVE) {
             isLocked = true;
             switchTracking.setEnabled(false);
@@ -185,7 +189,6 @@ public class SettingsActivity extends AppCompatActivity {
             editor.commit();
         }
     }
-
 
     private void createPassDialog() {
 
