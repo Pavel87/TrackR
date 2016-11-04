@@ -9,4 +9,5 @@
     <color name="transparent1">#32121212</color>
     <color name="textLight">#C3C3C3</color>
     <color name="map_radius">#654895FF</color>
+    <color name="text_nightMode">@color/textLight</color>
 </resources>
