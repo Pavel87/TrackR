@@ -196,7 +196,6 @@ public class SettingsActivity extends AppCompatActivity {
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
         dialog.setContentView(R.layout.pass_dialog);
         dialog.setCancelable(false);
-
         Button save = (Button) dialog.findViewById(R.id.saveBtn);
         final EditText newPassword = (EditText) dialog.findViewById(R.id.passwordText);
         if (!isLocked) {
@@ -243,8 +242,8 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
         dialog.show();
-        Window window = dialog.getWindow(); // make dialog stretched
-        window.setLayout(android.support.v7.app.ActionBar.LayoutParams.MATCH_PARENT, android.support.v7.app.ActionBar.LayoutParams.WRAP_CONTENT);
+        //Window window = dialog.getWindow(); // make dialog stretched
+        //window.setLayout(android.support.v7.app.ActionBar.LayoutParams.MATCH_PARENT, android.support.v7.app.ActionBar.LayoutParams.WRAP_CONTENT);
     }
 
 }
