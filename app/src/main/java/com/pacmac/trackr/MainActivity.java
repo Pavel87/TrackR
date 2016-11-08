@@ -37,7 +37,7 @@ import java.util.UUID;
 public class MainActivity extends AppCompatActivity implements NetworkStateListener {
 
 
-    private TextView tLastLocation, tTimestamp, tAddress;
+    private TextView tLastLocation, tTimestamp, tAddress, tBatteryLevel;
     private Button mapBtn;
     private ImageButton searchBtn, settingsBtn;
     private ImageView imageBG;
@@ -72,6 +72,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         tLastLocation = (TextView) findViewById(R.id.coordinates);
         tTimestamp = (TextView) findViewById(R.id.timestamp);
         tAddress = (TextView) findViewById(R.id.address);
+        tBatteryLevel = (TextView) findViewById(R.id.batteryLevel);
 
         mapBtn = (Button) findViewById(R.id.showMap);
         searchBtn = (ImageButton) findViewById(R.id.search);
@@ -232,6 +233,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     tLastLocation.setText(locationRecord.toString());
                     tTimestamp.setText(date);
                     getAdress();
+                    tBatteryLevel.setText(String.valueOf(batteryLevel) + " %");
                 }
             }
 

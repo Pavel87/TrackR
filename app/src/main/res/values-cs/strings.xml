@@ -4,6 +4,7 @@
     <string name="coord">Souřadnice</string>
     <string name="local_time">Místní čas</string>
     <string name="address">Adresa</string>
+    <string name="batlevel">Stav Baterie</string>
     <string name="not_available">Není dostupný</string>
     <string name="search">Hledej</string>
     <string name="show_map">Ukaž na mapě</string>
