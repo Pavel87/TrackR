@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/mapbg" />
+        android:src="@drawable/city" />
 
 
     <LinearLayout
@@ -19,7 +19,7 @@
         android:layout_centerInParent="true"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:background="@drawable/rounded_box"
+        android:background="@drawable/rounded_box_night"
         android:gravity="center"
         android:orientation="vertical"
         android:paddingBottom="@dimen/activity_vertical_margin"
@@ -33,6 +33,7 @@
             android:layout_centerHorizontal="true"
             android:fontFamily="sans-serif-medium"
             android:text="@string/last_location"
+            android:textColor="@color/text_nightMode"
             android:textAllCaps="true"
             android:textSize="22sp" />
 
@@ -48,6 +49,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
+                android:textColor="@color/text_nightMode"
                 android:fontFamily="sans-serif-light"
                 android:paddingLeft="16dp"
                 android:text="@string/coord"
@@ -60,6 +62,7 @@
                 android:layout_weight="1.5"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/loading"
+                android:textColor="@color/text_nightMode"
                 android:lines="2"
                 android:textSize="16sp" />
 
@@ -78,6 +81,7 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:paddingLeft="16dp"
+                android:textColor="@color/text_nightMode"
                 android:text="@string/local_time"
                 android:textSize="16sp" />
 
@@ -86,6 +90,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.5"
+                android:textColor="@color/text_nightMode"
                 android:fontFamily="sans-serif-medium"
                 android:textSize="16sp" />
 
@@ -106,6 +111,7 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:paddingLeft="16dp"
+                android:textColor="@color/text_nightMode"
                 android:text="@string/address"
                 android:textSize="16sp" />
 
@@ -115,6 +121,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1.5"
                 android:fontFamily="sans-serif-medium"
+                android:textColor="@color/text_nightMode"
                 android:lines="3"
                 android:textSize="16sp" />
 

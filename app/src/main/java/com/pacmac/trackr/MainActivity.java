@@ -91,11 +91,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         //restore location on reconfiguration
         if (savedInst != null) {
-            locationRecord = new LocationRecord(savedInst.getDouble(Constants.KEY_LATITUDE),
-                    savedInst.getDouble(Constants.KEY_LONGITUDE), savedInst.getLong(Constants.KEY_TIMESTAMP));
+            locationRecord = new LocationRecord(savedInst.getInt(Constants.KEY_ID), savedInst.getDouble(Constants.KEY_LATITUDE),
+                    savedInst.getDouble(Constants.KEY_LONGITUDE), savedInst.getLong(Constants.KEY_TIMESTAMP), savedInst.getFloat(Constants.KEY_BATTERY_LEVEL));
             tLastLocation.setText(locationRecord.toString());
             tTimestamp.setText(parseDate(locationRecord.getTimestamp()));
             tAddress.setText(savedInst.getString(Constants.KEY_ADDRESS));
+            Log.d(Constants.TAG, "recovered batt level: " + (savedInst.getFloat(Constants.KEY_BATTERY_LEVEL)));
         }
 
         // generate unique IDs on first run
@@ -149,7 +150,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         BitmapDrawable drawable = (BitmapDrawable) imageBG.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
-        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 16, getApplicationContext());
+        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 3, getApplicationContext());
         return blurred;
     }
 
@@ -174,22 +175,22 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void openMap() {
-        if (!isConnected){
+        if (!isConnected) {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_connection), Toast.LENGTH_SHORT)
                     .show();
             return;
         }
-        if (!haveLocation){
+        if (!haveLocation) {
             Toast.makeText(getApplicationContext(), getResources().getString(R.string.no_location), Toast.LENGTH_SHORT)
                     .show();
             return;
         }
-            Intent intent = new Intent(this, MapDetailActivity.class);
-            intent.putExtra(Constants.KEY_LATITUDE, locationRecord.getLatitude());
-            intent.putExtra(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
-            intent.putExtra(Constants.KEY_TIMESTAMP, parseDate(locationRecord.getTimestamp()));
-            intent.putExtra(Constants.KEY_ADDRESS, tAddress.getText().toString());
-            startActivity(intent);
+        Intent intent = new Intent(this, MapDetailActivity.class);
+        intent.putExtra(Constants.KEY_LATITUDE, locationRecord.getLatitude());
+        intent.putExtra(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
+        intent.putExtra(Constants.KEY_TIMESTAMP, parseDate(locationRecord.getTimestamp()));
+        intent.putExtra(Constants.KEY_ADDRESS, tAddress.getText().toString());
+        startActivity(intent);
     }
 
 
@@ -209,11 +210,22 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 // System.out.println(snapshot.getValue());
                 if (snapshot.hasChildren()) {
 
+                    Long idLong = ((Long) snapshot.child("id").getValue());
+                    int id = -1;
+                    double batteryLevel = -1;
+                    if (idLong != null){
+                        id = idLong.intValue();
+                        batteryLevel = (double) snapshot.child("batteryLevel").getValue();
+                    }
+
+
                     double latitude = (double) snapshot.child("latitude").getValue();
                     double longitude = (double) snapshot.child("longitude").getValue();
                     long timeStamp = (long) snapshot.child("timestamp").getValue();
+                    Log.d(Constants.TAG, "recovered batt level from FB: " + batteryLevel);
 
-                    locationRecord = new LocationRecord(latitude, longitude, timeStamp);
+
+                    locationRecord = new LocationRecord(id, latitude, longitude, timeStamp, (float) batteryLevel );
                     haveLocation = true;
 
                     String date = parseDate(locationRecord.getTimestamp());
@@ -279,10 +291,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     protected void onSaveInstanceState(Bundle outState) {
 
         if (locationRecord != null) {
+            outState.putInt(Constants.KEY_ID, locationRecord.getId());
             outState.putDouble(Constants.KEY_LATITUDE, locationRecord.getLatitude());
             outState.putDouble(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
             outState.putLong(Constants.KEY_TIMESTAMP, locationRecord.getTimestamp());
             outState.putString(Constants.KEY_ADDRESS, tAddress.getText().toString());
+            outState.putFloat(Constants.KEY_BATTERY_LEVEL, locationRecord.getBatteryLevel());
         }
         super.onSaveInstanceState(outState);
     }
@@ -318,7 +332,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         if (requestCode == Utility.MY_PERMISSIONS_REQUEST) {
             isPermissionEnabled = Utility.checkPermission(getApplicationContext(), LOCATION_PERMISSION);
         }
-        if (isPermissionEnabled){
+        if (isPermissionEnabled) {
             getLastKnownLocation();
         }
 

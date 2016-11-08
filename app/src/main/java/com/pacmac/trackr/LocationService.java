@@ -124,19 +124,20 @@ public class LocationService extends Service implements LocationListener, Google
     @Override
     public void onLocationChanged(Location lastLocation) {
         long time = lastLocation.getTime();
+        float batteryLevel = getBatteryLevel();
         //String mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
         //Log.d(Constants.TAG, (mLastUpdateTime + "  " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + lastLocation.getAccuracy()));
-        firebase.child(child).setValue(new LocationRecord(lastLocation.getLatitude(), lastLocation.getLongitude(), time));
+        // TODO update ID
+        firebase.child(child).setValue(new LocationRecord(0, lastLocation.getLatitude(), lastLocation.getLongitude(), time, batteryLevel));
 
-        float level = getBatteryLevel();
-        //Log.d(Constants.TAG, "Battery Level" + level);
+        //Log.d(Constants.TAG, "Battery Level" + batteryLevel);
 
-        if (level >= 30 && !lastBatLevel) {
+        if (batteryLevel >= 30 && !lastBatLevel) {
             lastBatLevel= true;
             stopLocationUpdates();
             createLocationRequest(Constants.TIME_BATTERY_OK);
             startLocationUpdates();
-        } else if (level < 30 && lastBatLevel){
+        } else if (batteryLevel < 30 && lastBatLevel){
             lastBatLevel= false;
             stopLocationUpdates();
             createLocationRequest(Constants.TIME_BATTERY_LOW);

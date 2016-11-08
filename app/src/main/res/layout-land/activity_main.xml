@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/mapbg" />
+        android:src="@drawable/city" />
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -25,12 +25,13 @@
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
             android:layout_weight="3"
-            android:background="@drawable/rounded_box"
+            android:background="@drawable/rounded_box_night"
             android:gravity="center"
             android:orientation="vertical"
+            android:layout_marginTop="16dp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
-            android:paddingTop="@dimen/activity_vertical_margin">
+            android:paddingTop="16dp">
 
 
             <TextView
@@ -41,6 +42,7 @@
                 android:layout_marginLeft="100dp"
                 android:layout_marginRight="100dp"
                 android:fontFamily="sans-serif-medium"
+                android:textColor="@color/text_nightMode"
                 android:text="@string/last_location"
                 android:textAllCaps="true"
                 android:textSize="22sp" />
@@ -63,6 +65,7 @@
                     android:gravity="right"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
+                    android:textColor="@color/text_nightMode"
                     android:text="@string/coord"
                     android:textSize="16sp" />
 
@@ -71,6 +74,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1.5"
+                    android:textColor="@color/text_nightMode"
                     android:fontFamily="sans-serif-medium"
                     android:lines="2"
                     android:text="@string/loading"
@@ -93,6 +97,7 @@
                     android:layout_weight="1"
                     android:fontFamily="sans-serif-light"
                     android:gravity="right"
+                    android:textColor="@color/text_nightMode"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:text="@string/local_time"
@@ -103,6 +108,7 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1.5"
+                    android:textColor="@color/text_nightMode"
                     android:fontFamily="sans-serif-medium"
                     android:textSize="16sp" />
 
@@ -126,6 +132,7 @@
                     android:fontFamily="sans-serif-light"
                     android:gravity="right"
                     android:paddingLeft="16dp"
+                    android:textColor="@color/text_nightMode"
                     android:paddingRight="16dp"
                     android:text="@string/address"
                     android:textSize="16sp" />
@@ -135,8 +142,10 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1.5"
+                    android:ellipsize="marquee"
+                    android:textColor="@color/text_nightMode"
                     android:fontFamily="sans-serif-medium"
-                    android:lines="3"
+                    android:lines="2"
                     android:textSize="16sp" />
 
             </LinearLayout>
@@ -165,15 +174,15 @@
         android:id="@+id/settings"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentRight="true"
+        android:layout_weight="3"
+        android:background="@drawable/image_button_bg"
         android:paddingBottom="@dimen/activity_vertical_margin"
         android:paddingLeft="@dimen/activity_horizontal_margin"
         android:paddingRight="@dimen/activity_horizontal_margin"
         android:paddingTop="@dimen/activity_vertical_margin"
-        android:background="@drawable/image_button_bg"
-        android:src="@mipmap/settingsicon"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_weight="3" />
+        android:src="@mipmap/settingsicon" />
 
     <ImageButton
         android:id="@+id/search"
