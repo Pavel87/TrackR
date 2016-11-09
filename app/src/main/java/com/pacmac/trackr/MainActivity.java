@@ -151,7 +151,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         BitmapDrawable drawable = (BitmapDrawable) imageBG.getDrawable();
         Bitmap bitmap = drawable.getBitmap();
-        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 3, getApplicationContext());
+        Bitmap blurred = Blurring.getBitmapBlurry(bitmap, 15, getApplicationContext());
         return blurred;
     }
 
