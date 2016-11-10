@@ -2,6 +2,7 @@ package com.pacmac.trackr;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -44,13 +45,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     private boolean haveLocation = false;
     private boolean isConnected = false;
+    private boolean isTrackingOn = false;
 
     private AddressResultReceiver resultReceiver;
     private Handler handler;
     SharedPreferences preferences = null;
     private Firebase firebase;
     private LocationRecord locationRecord;
-
     private NetworkStateChangedReceiver connReceiver = null;
 
     private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
@@ -121,15 +122,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 openMap();
             }
         });
-
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
                 getLastKnownLocation();
             }
         });
-
         settingsBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -139,6 +137,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         Firebase.setAndroidContext(getApplicationContext());
         firebase = new Firebase("https://trackr1.firebaseio.com");
+
+        // at last we want to start tracking service if not started and if device is in tracking mode
+        startTrackingService();
     }
 
     private void openSettings() {
@@ -286,6 +287,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         super.onPause();
         haveLocation = false;
         unregisterReceiver(connReceiver);
+        startTrackingService();
+
     }
 
 
@@ -337,7 +340,32 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         if (isPermissionEnabled) {
             getLastKnownLocation();
         }
+    }
 
+
+    private void startTrackingService() {
+        isTrackingOn = preferences.getBoolean(Constants.TRACKING_STATE, false);
+        if(isTrackingOn && !isMyServiceRunning(LocationService.class)) {
+            Intent intentService = new Intent(getApplicationContext(), LocationService.class);
+            startService(intentService);
+        }
+    }
+
+
+
+    /**
+     *  check the given service is running
+     * @param serviceClass class eg MyService.class
+     * @return boolean
+     */
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }

@@ -38,6 +38,13 @@ public class LocationService extends Service implements LocationListener, Google
     @Override
     public void onCreate() {
         super.onCreate();
+
+    }
+
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -51,11 +58,7 @@ public class LocationService extends Service implements LocationListener, Google
 
         Firebase.setAndroidContext(getApplicationContext());
         firebase = new Firebase("https://trackr1.firebaseio.com");
-    }
 
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
         mGoogleApiClient.connect();
         Log.d(Constants.TAG, "LocationService Started");
         return START_STICKY;
@@ -126,7 +129,7 @@ public class LocationService extends Service implements LocationListener, Google
         long time = lastLocation.getTime();
         float batteryLevel = getBatteryLevel();
         //String mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
-        //Log.d(Constants.TAG, (mLastUpdateTime + "  " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + lastLocation.getAccuracy()));
+        Log.d(Constants.TAG, ("Updating FIREBASE: " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + lastLocation.getAccuracy()));
         // TODO update ID
         firebase.child(child).setValue(new LocationRecord(0, lastLocation.getLatitude(), lastLocation.getLongitude(), time, batteryLevel));
 
