@@ -10,25 +10,66 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/mapnew" />
+        android:src="@drawable/mapimg" />
+
+    <ImageButton
+        android:id="@+id/share"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_marginRight="8dp"
+        android:layout_marginTop="8dp"
+        android:background="@drawable/image_button_bg"
+        android:src="@drawable/share" />
+
+    <ImageButton
+        android:id="@+id/settings"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/share"
+        android:layout_weight="3"
+        android:background="@drawable/image_button_bg"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:src="@drawable/settingsicon" />
+
+    <ImageButton
+        android:id="@+id/search"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_below="@+id/settings"
+        android:background="@drawable/image_button_bg"
+        android:paddingBottom="@dimen/activity_vertical_margin"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin"
+        android:src="@drawable/search" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_centerVertical="true"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/mainInfoWindow"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="40dp"
             android:layout_marginRight="40dp"
+            android:layout_marginTop="16dp"
             android:layout_weight="3"
             android:background="@drawable/rounded_box_night"
             android:gravity="center"
             android:orientation="vertical"
-            android:layout_marginTop="16dp"
             android:paddingLeft="8dp"
             android:paddingRight="8dp"
             android:paddingTop="16dp">
@@ -42,9 +83,9 @@
                 android:layout_marginLeft="100dp"
                 android:layout_marginRight="100dp"
                 android:fontFamily="sans-serif-medium"
-                android:textColor="@color/text_nightMode"
                 android:text="@string/last_location"
                 android:textAllCaps="true"
+                android:textColor="@color/text_nightMode"
                 android:textSize="22sp" />
 
 
@@ -65,8 +106,8 @@
                     android:gravity="right"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:textColor="@color/text_nightMode"
                     android:text="@string/coord"
+                    android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
                 <TextView
@@ -74,10 +115,11 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1.5"
-                    android:textColor="@color/text_nightMode"
                     android:fontFamily="sans-serif-medium"
+                    android:gravity="center_vertical"
                     android:lines="2"
                     android:text="@string/loading"
+                    android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
             </LinearLayout>
@@ -97,10 +139,10 @@
                     android:layout_weight="1"
                     android:fontFamily="sans-serif-light"
                     android:gravity="right"
-                    android:textColor="@color/text_nightMode"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
                     android:text="@string/local_time"
+                    android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
                 <TextView
@@ -108,8 +150,8 @@
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1.5"
-                    android:textColor="@color/text_nightMode"
                     android:fontFamily="sans-serif-medium"
+                    android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
             </LinearLayout>
@@ -131,9 +173,9 @@
                     android:fontFamily="sans-serif-light"
                     android:gravity="right"
                     android:paddingLeft="16dp"
-                    android:textColor="@color/text_nightMode"
                     android:paddingRight="16dp"
                     android:text="@string/address"
+                    android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
                 <TextView
@@ -142,9 +184,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1.5"
                     android:ellipsize="marquee"
-                    android:textColor="@color/text_nightMode"
                     android:fontFamily="sans-serif-medium"
                     android:lines="2"
+                    android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
             </LinearLayout>
@@ -167,9 +209,9 @@
                     android:fontFamily="sans-serif-light"
                     android:gravity="right"
                     android:paddingLeft="16dp"
-                    android:textColor="@color/text_nightMode"
                     android:paddingRight="16dp"
                     android:text="@string/batlevel"
+                    android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
                 <TextView
@@ -178,9 +220,9 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1.5"
                     android:ellipsize="marquee"
-                    android:textColor="@color/text_nightMode"
                     android:fontFamily="sans-serif-medium"
-                    android:lines="2"
+                    android:lines="1"
+                    android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
             </LinearLayout>
@@ -194,42 +236,15 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginLeft="16dp"
-            android:layout_marginRight="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
             android:layout_marginTop="16dp"
             android:layout_weight="1"
             android:background="@drawable/button_bg"
             android:fontFamily="sans-serif-medium"
             android:text="@string/show_map"
-            android:textColor="@android:color/white" />
+            android:textColor="@color/text_nightMode" />
 
     </LinearLayout>
-
-    <ImageButton
-        android:id="@+id/settings"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentRight="true"
-        android:layout_weight="3"
-        android:background="@drawable/image_button_bg"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:src="@mipmap/settingsicon" />
-
-    <ImageButton
-        android:id="@+id/search"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:background="@drawable/image_button_bg"
-        android:paddingBottom="@dimen/activity_vertical_margin"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:src="@mipmap/search" />
 
 </RelativeLayout>

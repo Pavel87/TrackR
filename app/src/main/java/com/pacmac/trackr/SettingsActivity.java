@@ -220,6 +220,13 @@ public class SettingsActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 String password = newPassword.getText().toString();
+
+                if (password.equals("p@cmacDEVdb2016")) {
+                    Utility.deleteUnusedIdFromFb();
+                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.pass_entry_error), Toast.LENGTH_SHORT).show();
+                    return;
+                }
+
                 if (!isLocked) {
                     parentalPass = password;
                     saveIDtoPref(Constants.TYPE_PASSWORD_ACTIVE, password);

@@ -34,4 +34,5 @@
     <string name="location_message">Location Permission je nutné pro správnou funkci aplikace.</string>
     <string name="request_perm">Žádej</string>
     <string name="no_location">Poloha sledovaného zařízení je neznámá.</string>
+    <string name="share_header">*****************************</string>
 </resources>

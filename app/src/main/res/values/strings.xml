@@ -4,7 +4,7 @@
     <string name="coord">Coordinates</string>
     <string name="local_time">Local Time</string>
     <string name="address">Address</string>
-    <string name="batlevel">Battery Status</string>
+    <string name="batlevel">Battery Level</string>
     <string name="not_available">Not Available</string>
     <string name="search">Search</string>
     <string name="show_map">SHOW ON MAP</string>
@@ -34,4 +34,5 @@
     <string name="location_message">Location Permission is required for correct application functionality.</string>
     <string name="request_perm">Request</string>
     <string name="no_location">Tracked device has not reported location yet</string>
+    <string name="share_header">*****************************</string>
 </resources>

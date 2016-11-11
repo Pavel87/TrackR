@@ -9,14 +9,24 @@ public class LocationRecord {
     private long timestamp = 0;
     private double longitude, latitude;
     private int id = -1;
-    private float batteryLevel = -1;
+    private double batteryLevel = -1;
+    private String address = "";
 
-    public LocationRecord(int id, double latitude, double longitude, long timestamp, float batteryLevel) {
+    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
         this.batteryLevel = batteryLevel;
+    }
+
+    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, String address) {
+        this.id = id;
+        this.latitude = latitude;
+        this.longitude = longitude;
+        this.timestamp = timestamp;
+        this.batteryLevel = batteryLevel;
+        this.address = address;
     }
 
 
@@ -32,12 +42,24 @@ public class LocationRecord {
         return timestamp;
     }
 
+    public String getFormatedTimestamp() {
+        return Utility.parseDate(timestamp);
+    }
+
     public int getId() {
         return id;
     }
 
-    public float getBatteryLevel() {
+    public double getBatteryLevel() {
         return batteryLevel;
+    }
+
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address;
     }
 
     @Override

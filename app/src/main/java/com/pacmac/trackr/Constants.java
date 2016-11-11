@@ -32,6 +32,7 @@ public class Constants {
     public static final int TYPE_PASSWORD_NOT_ACTIVE = 3;
     public final static int TIME_BATTERY_OK = 15 * 60 * 1000;
     public final static int TIME_BATTERY_LOW = 40 * 60 * 1000;
+    public final static int OLD_ID_THRESHOLD = 7*24 * 60 * 60 * 1000; // 7 days
 
 
 

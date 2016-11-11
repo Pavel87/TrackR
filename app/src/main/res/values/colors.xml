@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#19121212</color>
+    <color name="colorPrimaryDark">#121212</color>
     <color name="halfTransparent">#95121212</color>
     <color name="colorAccent">#25B7B1</color>
     <color name="textbox_background">#19121212</color>
@@ -10,4 +10,5 @@
     <color name="textLight">#C3C3C3</color>
     <color name="map_radius">#654895FF</color>
     <color name="text_nightMode">@color/textLight</color>
+    <color name="text_critical">#FF2F2F</color>
 </resources>
