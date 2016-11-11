@@ -1,13 +1,22 @@
 package com.pacmac.trackr;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
+import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AlertDialog;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.util.Log;
+import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.CompoundButton;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -45,7 +54,7 @@ public class Utility {
         ActivityCompat.requestPermissions(activity, new String[]{permission}, MY_PERMISSIONS_REQUEST);
     }
 
-    public static void displayExplanationForPermission(Activity act, final String permission){
+    public static void displayExplanationForPermission(Activity act, final String permission) {
 
         final Activity mActivity = act;
         AlertDialog.Builder builder = new AlertDialog.Builder(act, 0)
@@ -98,17 +107,18 @@ public class Utility {
         firebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                for(DataSnapshot snapshot : dataSnapshot.getChildren()){
+                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 
                     long timestamp = (long) snapshot.child("timestamp").getValue();
                     String id = snapshot.getKey();
-                    if(timestamp < timeThreshold) {
+                    if (timestamp < timeThreshold) {
                         Log.d(Constants.TAG, id + " ID was not updated in last 7 days - likely not in use anymore");
                         firebase.child(id).removeValue();
                     }
                 }
                 firebase.removeEventListener(this);
             }
+
             @Override
             public void onCancelled(FirebaseError firebaseError) {
             }
@@ -156,5 +166,99 @@ public class Utility {
         return sb;
     }
 
+
+    public static void createAlertDialog(Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+
+        builder.setTitle(context.getResources().getString(R.string.new_update_title) + Utility.getCurrentAppVersion(context));
+
+        StringBuilder sb = new StringBuilder();
+
+        sb.append(context.getString(R.string.updateMsg1));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg2));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg3));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg4));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg5));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg6));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg7));
+        builder.setMessage(sb.toString());
+        sb = null;
+        builder.setCancelable(true);
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.dismiss();
+            }
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+    }
+
+    public static String getCurrentAppVersion(Context context) {
+        String appVersion = "N/A";
+        try {
+            appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
+
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+        return appVersion;
+    }
+
+
+    public static void showRateMyAppDialog(final Context context, final SharedPreferences preferences) {
+
+        if (preferences.getBoolean(Constants.RATING_POPUP_ENABLED, true)) {
+
+            final Dialog dialog = new Dialog(context);
+            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+            dialog.setContentView(R.layout.rate_dialog);
+            dialog.setCancelable(false);
+
+            Button yesButton = (Button) dialog.findViewById(R.id.yesExit);
+            yesButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    // if user clicks on Rate Now then don't show again this dialog
+                    preferences.edit().putBoolean(Constants.RATING_POPUP_ENABLED, false).commit();
+
+                    String appPackage = context.getPackageName();
+                    Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + appPackage));
+                    if (intent.resolveActivity(context.getPackageManager()) != null) {
+                        context.startActivity(intent);
+                    } else {
+                        intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + appPackage));
+                        context.startActivity(intent);
+                    }
+                    dialog.dismiss();
+                }
+            });
+
+            Button noButton = (Button) dialog.findViewById(R.id.noExit);
+            noButton.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    dialog.dismiss();
+                }
+            });
+
+            AppCompatCheckBox checkBox = (AppCompatCheckBox) dialog.findViewById(R.id.neverAgain);
+            checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    preferences.edit().putBoolean(Constants.RATING_POPUP_ENABLED, !isChecked).commit();
+                }
+            });
+
+            dialog.show();
+        }
+    }
 
 }

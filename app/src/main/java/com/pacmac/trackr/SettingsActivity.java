@@ -23,7 +23,7 @@ public class SettingsActivity extends AppCompatActivity {
     private SwitchCompat switchTracking = null;
     private SharedPreferences preferences = null;
     private LinearLayout txLayout, rxLayout;
-    private TextView tTrackingID, tReceivingID;
+    private TextView tTrackingID, tReceivingID, appVersion;
     private ImageButton padlock;
 
     private boolean isLocked;
@@ -56,6 +56,9 @@ public class SettingsActivity extends AppCompatActivity {
         receiveID = preferences.getString(Constants.RECEIVING_ID, "Error");
         receiveIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, receiveID);
         tReceivingID.setText(receiveIdRaw);
+
+        appVersion = (TextView) findViewById(R.id.appVersion);
+        appVersion.setText("v" + Utility.getCurrentAppVersion(getApplicationContext()));
 
         parentalPass = preferences.getString(Constants.PADLOCK_PASS, "");
 
@@ -176,7 +179,7 @@ public class SettingsActivity extends AppCompatActivity {
 
             SharedPreferences.Editor editor = preferences.edit();
             editor.putBoolean(Constants.PADLOCK_ACTIVE, isLocked);
-            editor.putString(Constants.PADLOCK_PASS, editedID);
+            editor.putString(Constants.PADLOCK_PASS, id);
             editor.commit();
         } else if (type == Constants.TYPE_PASSWORD_NOT_ACTIVE) {
             isLocked = false;
@@ -249,8 +252,6 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
         dialog.show();
-        //Window window = dialog.getWindow(); // make dialog stretched
-        //window.setLayout(android.support.v7.app.ActionBar.LayoutParams.MATCH_PARENT, android.support.v7.app.ActionBar.LayoutParams.WRAP_CONTENT);
     }
 
 }

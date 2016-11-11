@@ -6,6 +6,8 @@ package com.pacmac.trackr;
 public class Constants {
 
     public static final String TAG = "TrackR";
+    public static final String RATING_POPUP_COUNTER = "rating_popup_counter";
+    public static final String RATING_POPUP_ENABLED = "rating_popup_enabled";
     public static final String KEY_ID = "id_record_key";
     public static final String KEY_LATITUDE = "latitude_key";
     public static final String KEY_LONGITUDE = "longitude_key";
@@ -13,6 +15,7 @@ public class Constants {
     public static final String KEY_ADDRESS = "address_key";
     public static final String KEY_BATTERY_LEVEL = "battery_LEVEL_key";
     public static final String PREF_TRACKR = "-tracker_PREF";
+    public static final String NEW_UPDATE = "TrackR_Update";
     public static final String TRACKING_STATE = "trackr_gps_state";
     public static final String TRACKING_ID = "trackr_gps_ID";
     public static final String TRACKING_ID_RAW = "trackr_gps_ID_raw";
@@ -33,6 +36,7 @@ public class Constants {
     public final static int TIME_BATTERY_OK = 15 * 60 * 1000;
     public final static int TIME_BATTERY_LOW = 40 * 60 * 1000;
     public final static int OLD_ID_THRESHOLD = 7*24 * 60 * 60 * 1000; // 7 days
+    public final static int RATING_POPUP_ATTEMPTS = 8; // popup will show after user open the app 8 times
 
 
 

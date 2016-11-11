@@ -57,6 +57,10 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
                 title(lastSeen));
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,16f));
 
+        mMap.getUiSettings().setMapToolbarEnabled(false);
+        mMap.getUiSettings().setMyLocationButtonEnabled(false);
+        mMap.getUiSettings().setZoomGesturesEnabled(true);
+
         mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
             @Override
             public boolean onMarkerClick(Marker marker) {

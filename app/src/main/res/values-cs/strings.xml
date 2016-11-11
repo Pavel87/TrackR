@@ -27,7 +27,7 @@
     <string name="password_dialog">Rodičovský zámek</string>
     <string name="show_password">Ukaž heslo</string>
     <string name="type_password">Vytvoř nové heslo</string>
-    <string name="loading">Hledám...</string>
+    <string name="loading">Poloha není známa</string>
     <string name="address_na">Adresa není dosupná</string>
     <string name="address_loc_error">Chyba v souřadnicích: Restartujte TrackR</string>
     <string name="address_not_found">Adresa nenalezena</string>
@@ -35,4 +35,19 @@
     <string name="request_perm">Žádej</string>
     <string name="no_location">Poloha sledovaného zařízení je neznámá.</string>
     <string name="share_header">*****************************</string>
+    <string name="new_update_title">New TrackR Update v</string>
+    <string name="updateMsg1">- Nové uspořádání a lepší podpora landscape modu.</string>
+    <string name="updateMsg2">- Přidáno tlačítko pro export dat.</string>
+    <string name="updateMsg3">- Sledované zařízení bude reportovat stav baterie.</string>
+    <string name="updateMsg4">- Omezení spojení se serverem.</string>
+    <string name="updateMsg5">- Vylepšení UX.</string>
+    <string name="updateMsg6">- Verze aplikace je viditelná v Nastavení.</string>
+    <string name="updateMsg7">- Další Opravy.</string>
+    <string name="rateApp">Jak se vám líbí TrackR?.</string>
+    <string name="rta_dialog_message"> TrackR team je poctěn každým, kdo aplikaci používá a
+        neustále se jej snažíme vylepšovat k vaší spokojenosti. Pokud jste spokojeni zanechte
+        nám prosím hodnocení,či poznámku, jaká funkce vám v TrackR chybí na Google Play.</string>
+    <string name="no_thanks">Někdy Jindy</string>
+    <string name="rateit">Hodnotit</string>
+    <string name="neveragain">Toto již nechci vidět</string>
 </resources>

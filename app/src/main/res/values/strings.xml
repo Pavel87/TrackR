@@ -35,4 +35,17 @@
     <string name="request_perm">Request</string>
     <string name="no_location">Tracked device has not reported location yet</string>
     <string name="share_header">*****************************</string>
+    <string name="new_update_title">New TrackR Update v</string>
+    <string name="updateMsg1">- New UI elements and improvement to landscape mode.</string>
+    <string name="updateMsg2">- Added Share button for exporting current location.</string>
+    <string name="updateMsg3">- Added Battery Level tracking.</string>
+    <string name="updateMsg4">- Reduced network data traffic.</string>
+    <string name="updateMsg5">- Improved user experience.</string>
+    <string name="updateMsg6">- App version now visible in Settings screen.</string>
+    <string name="updateMsg7">- Bug fixes.</string>
+    <string name="rateApp">How do you like TrackR?</string>
+    <string name="rta_dialog_message">TrackR development team is honoured by You using this app. Please take a few seconds and rate this app in Google Store. Also any kind of feedback or feature request is much appreciated.</string>
+    <string name="no_thanks">Later</string>
+    <string name="rateit">Rate NOW</string>
+    <string name="neveragain">Do not show this again</string>
 </resources>

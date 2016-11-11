@@ -1,12 +1,5 @@
 package com.pacmac.trackr;
 
-import java.util.UUID;
-
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
-
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
@@ -30,6 +23,13 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.firebase.client.DataSnapshot;
+import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
+import com.firebase.client.ValueEventListener;
+
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity implements NetworkStateListener {
 
@@ -91,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         connReceiver.setConnectionListener(this);
 
         // restore location on reconfiguration
-        if (savedInst != null) {
+        if (savedInst != null && savedInst.getInt(Constants.KEY_ID, -1) != -1) {
             locationRecord = new LocationRecord(savedInst.getInt(Constants.KEY_ID, -1),
                     savedInst.getDouble(Constants.KEY_LATITUDE),
                     savedInst.getDouble(Constants.KEY_LONGITUDE),
@@ -137,7 +137,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         searchBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                 getLastKnownLocation();
+                getLastKnownLocation();
             }
         });
         settingsBtn.setOnClickListener(new View.OnClickListener() {
@@ -149,7 +149,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(locationRecord != null) {
+                if (locationRecord != null) {
                     Intent sharingIntent = Utility.createShareIntent(Utility.updateShareIntent(getApplicationContext(), locationRecord.getLatitude(),
                             locationRecord.getLongitude(), locationRecord.getTimestamp(),
                             locationRecord.getAddress(), locationRecord.getBatteryLevel()));
@@ -164,11 +164,35 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         // at last we want to start tracking service if not started and if
         // device is in tracking mode
         startTrackingService();
+
+        showUpdateDialog();
+        showRateMyAppDialog();
     }
 
     private void openSettings() {
         Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
+    }
+
+    private void showUpdateDialog() {
+        String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
+
+        if (!preferences.getString(Constants.NEW_UPDATE, "").equals(appVersion)) {
+            Utility.createAlertDialog(MainActivity.this);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(Constants.NEW_UPDATE, appVersion);
+            editor.commit();
+        }
+    }
+
+    private void showRateMyAppDialog() {
+        int counter = preferences.getInt(Constants.RATING_POPUP_COUNTER, 0);
+        counter++;
+        if (counter > Constants.RATING_POPUP_ATTEMPTS) {
+            counter = 0;
+            Utility.showRateMyAppDialog(MainActivity.this, preferences);
+        }
+        preferences.edit().putInt(Constants.RATING_POPUP_COUNTER, counter).commit();
     }
 
     private Bitmap setBitmap() {
@@ -303,13 +327,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         startTrackingService();
     }
 
-    private void checkIfshouldTryRetrieveDevicePosition(){
+    private void checkIfshouldTryRetrieveDevicePosition() {
         String recIdFromPref = preferences.getString(Constants.RECEIVING_ID, null);
         if (recIdFromPref == null) {
             return;
         }
-        if(locationRecord != null && locationRecord.getTimestamp() > (System.currentTimeMillis() - Constants.TIME_BATTERY_OK) && recIdFromPref.equals(receivingId)){
-            return ;
+        if (locationRecord != null && locationRecord.getTimestamp() > (System.currentTimeMillis() - Constants.TIME_BATTERY_OK) && recIdFromPref.equals(receivingId)) {
+            return;
         }
         receivingId = recIdFromPref;
         getLastKnownLocation();
@@ -357,7 +381,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     @Override
     public void onRequestPermissionsResult(int requestCode, String permissions[],
-            int[] grantResults) {
+                                           int[] grantResults) {
         if (requestCode == Utility.MY_PERMISSIONS_REQUEST) {
             isPermissionEnabled = Utility.checkPermission(getApplicationContext(),
                     LOCATION_PERMISSION);
@@ -377,9 +401,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     /**
      * check the given service is running
-     * 
-     * @param serviceClass
-     *            class eg MyService.class
+     *
+     * @param serviceClass class eg MyService.class
      * @return boolean
      */
     private boolean isMyServiceRunning(Class<?> serviceClass) {
