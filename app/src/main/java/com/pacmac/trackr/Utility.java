@@ -13,10 +13,14 @@ import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.TextView;
+import android.widget.Toast;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -81,12 +85,12 @@ public class Utility {
         calendar.setTimeInMillis(timestamp);
 
         int day = calendar.get(Calendar.DAY_OF_MONTH);
-        String month = calendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+        String month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
 
-        return String.format("%02d", hour) + ":"
-                + String.format("%02d", minute) + " - " + day + " " + month;
+        return month + " " + day + ", " + String.format("%02d", hour) + ":"
+                + String.format("%02d", minute);
     }
 
     public static String checkAndReplaceForbiddenChars(String id) {
@@ -103,6 +107,8 @@ public class Utility {
     protected static void deleteUnusedIdFromFb() {
         final long timeThreshold = System.currentTimeMillis() - Constants.OLD_ID_THRESHOLD; // 7 days
         final Firebase firebase = new Firebase("https://trackr1.firebaseio.com");
+        firebase.goOnline();
+        Log.d(Constants.TAG, "Firebase goes online");
         firebase.keepSynced(true);
         firebase.addValueEventListener(new ValueEventListener() {
             @Override
@@ -117,10 +123,13 @@ public class Utility {
                     }
                 }
                 firebase.removeEventListener(this);
+                Log.d(Constants.TAG, "Firebase goes offline");
+                firebase.goOffline();
             }
 
             @Override
             public void onCancelled(FirebaseError firebaseError) {
+                Log.d(Constants.TAG, "DELETING UNUSED IDs WAS CANCELED");
             }
         });
     }
@@ -183,8 +192,8 @@ public class Utility {
         sb.append(context.getString(R.string.updateMsg4));
         sb.append("\n");
         sb.append(context.getString(R.string.updateMsg5));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg6));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg6));
         sb.append("\n");
         sb.append(context.getString(R.string.updateMsg7));
         builder.setMessage(sb.toString());
@@ -260,5 +269,19 @@ public class Utility {
             dialog.show();
         }
     }
+
+    public static void showToast(Context context, CharSequence text){
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        View view = inflater.inflate(R.layout.trackr_notification_top, null);
+        TextView toastText = (TextView) view.findViewById(R.id.toastText);
+        toastText.setText(text);
+
+        Toast toast = new Toast(context);
+        toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.TOP, 0, 0);
+        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setView(view);
+        toast.show();
+    }
+
 
 }

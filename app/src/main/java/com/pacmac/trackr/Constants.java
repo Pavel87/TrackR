@@ -27,14 +27,23 @@ public class Constants {
     public static final String FIRST_RUN = "firstRUN";
     public static final String PADLOCK_ACTIVE = "padlock_active";
     public static final String PADLOCK_PASS = "padlock_pass";
+
+    public static final String REMOTE_USER_ID = "user_id";
+    public static final String REMOTE_LATITUDE = "user_latitude";
+    public static final String REMOTE_LONGITUDE = "user_longitude";
+    public static final String REMOTE_BATTERY_LEVEL = "user_battery_level";
+    public static final String REMOTE_TIMESTAMP = "user_last_seen_timestamp";
+    public static final String REMOTE_ADDRESS = "user_address";
+
     public static final int SUCCESS = 0;
     public static final int ERROR = 134;
     public static final int TYPE_TRACKING_ID = 0;
     public static final int TYPE_RECEIVING_ID = 1;
     public static final int TYPE_PASSWORD_ACTIVE = 2;
     public static final int TYPE_PASSWORD_NOT_ACTIVE = 3;
-    public final static int TIME_BATTERY_OK = 15 * 60 * 1000;
-    public final static int TIME_BATTERY_LOW = 40 * 60 * 1000;
+    public final static int UPDATE_TIMEOUT = 10 * 60 * 1000;
+    public final static int TIME_BATTERY_OK = 20 * 60 * 1000;
+    public final static int TIME_BATTERY_LOW = 45 * 60 * 1000;
     public final static int OLD_ID_THRESHOLD = 7*24 * 60 * 60 * 1000; // 7 days
     public final static int RATING_POPUP_ATTEMPTS = 8; // popup will show after user open the app 8 times
 

@@ -16,6 +16,7 @@ import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
 import com.firebase.client.Firebase;
+import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
@@ -26,7 +27,8 @@ import com.google.android.gms.location.LocationServices;
  * Created by pacmac on 28/04/16.
  */
 
-public class LocationService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
+public class LocationService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener, Firebase.CompletionListener {
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -58,6 +60,7 @@ public class LocationService extends Service implements LocationListener, Google
 
         Firebase.setAndroidContext(getApplicationContext());
         firebase = new Firebase("https://trackr1.firebaseio.com");
+        firebase.goOffline();
 
         mGoogleApiClient.connect();
         Log.d(Constants.TAG, "LocationService Started");
@@ -67,8 +70,10 @@ public class LocationService extends Service implements LocationListener, Google
 
     @Override
     public void onDestroy() {
-        stopLocationUpdates();
-        mGoogleApiClient.disconnect();
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
+            stopLocationUpdates();
+            mGoogleApiClient.disconnect();
+        }
         Log.d(Constants.TAG, "LocationService is destroying");
     }
 
@@ -105,7 +110,6 @@ public class LocationService extends Service implements LocationListener, Google
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-
         float level = getBatteryLevel();
         if (level >= 30) {
             createLocationRequest(Constants.TIME_BATTERY_OK);
@@ -130,14 +134,17 @@ public class LocationService extends Service implements LocationListener, Google
         double batteryLevel = Math.round(getBatteryLevel() * 100.0) / 100.0;
         //Log.d(Constants.TAG, ("Updating FIREBASE: " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + lastLocation.getAccuracy()));
         // TODO update ID
-        firebase.child(child).setValue(new LocationRecord(0, lastLocation.getLatitude(), lastLocation.getLongitude(), time, batteryLevel));
+        firebase.goOnline();
+        Log.d(Constants.TAG, "Firebase goes online");
+        firebase.child(child).setValue(new LocationRecord(0, lastLocation.getLatitude(),
+                lastLocation.getLongitude(), time, batteryLevel), this);
         if (batteryLevel >= 30 && !lastBatLevel) {
-            lastBatLevel= true;
+            lastBatLevel = true;
             stopLocationUpdates();
             createLocationRequest(Constants.TIME_BATTERY_OK);
             startLocationUpdates();
-        } else if (batteryLevel < 30 && lastBatLevel){
-            lastBatLevel= false;
+        } else if (batteryLevel < 30 && lastBatLevel) {
+            lastBatLevel = false;
             stopLocationUpdates();
             createLocationRequest(Constants.TIME_BATTERY_LOW);
             startLocationUpdates();
@@ -160,4 +167,17 @@ public class LocationService extends Service implements LocationListener, Google
         return ((float) level / (float) scale) * 100.0f;
     }
 
+    @Override
+    public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+        Log.d(Constants.TAG, "TrackR finished server upload");
+
+        if(firebaseError != null) {
+            Log.d(Constants.TAG, firebaseError.getDetails() + " Message: " + firebaseError.getMessage());
+        }
+
+        if (firebase != null){
+            firebase.goOffline();
+            Log.d(Constants.TAG, "Firebase goes offline");
+        }
+    }
 }

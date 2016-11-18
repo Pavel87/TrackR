@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/parentMainActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.pacmac.trackr.MainActivity">
@@ -117,7 +118,7 @@
                 android:layout_gravity="center_vertical"
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
-                android:gravity="right"
+                android:gravity="right|center_vertical"
                 android:paddingRight="32dp"
                 android:paddingLeft="16dp"
                 android:textColor="@color/text_nightMode"

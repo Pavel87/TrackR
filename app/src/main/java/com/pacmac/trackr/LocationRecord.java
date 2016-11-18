@@ -29,6 +29,8 @@ public class LocationRecord {
         this.address = address;
     }
 
+    public LocationRecord(){
+    }
 
     public double getLongitude() {
         return longitude;
@@ -40,10 +42,6 @@ public class LocationRecord {
 
     public long getTimestamp() {
         return timestamp;
-    }
-
-    public String getFormatedTimestamp() {
-        return Utility.parseDate(timestamp);
     }
 
     public int getId() {
@@ -60,6 +58,26 @@ public class LocationRecord {
 
     public void setAddress(String address) {
         this.address = address;
+    }
+
+    public void setTimestamp(long timestamp) {
+        this.timestamp = timestamp;
+    }
+
+    public void setLongitude(double longitude) {
+        this.longitude = longitude;
+    }
+
+    public void setLatitude(double latitude) {
+        this.latitude = latitude;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public void setBatteryLevel(double batteryLevel) {
+        this.batteryLevel = batteryLevel;
     }
 
     @Override

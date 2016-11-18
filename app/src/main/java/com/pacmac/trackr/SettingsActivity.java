@@ -16,7 +16,8 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
+
+import java.util.UUID;
 
 public class SettingsActivity extends AppCompatActivity {
 
@@ -35,6 +36,7 @@ public class SettingsActivity extends AppCompatActivity {
         setContentView(R.layout.activity_settings);
 
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+        firstRunIDSetup();
 
         switchTracking = (SwitchCompat) findViewById(R.id.switchTracking);
         switchTracking.setChecked(preferences.getBoolean(Constants.TRACKING_STATE, false));
@@ -110,6 +112,25 @@ public class SettingsActivity extends AppCompatActivity {
         });
     }
 
+    private void firstRunIDSetup() {
+        // generate unique IDs on first run
+        if (preferences.getBoolean(Constants.FIRST_RUN, true)) {
+            SharedPreferences.Editor editor = preferences.edit();
+            String uniqueID = generateUniqueID().substring(0, 24);
+            editor.putString(Constants.TRACKING_ID, uniqueID);
+            editor.putString(Constants.TRACKING_ID_RAW, uniqueID);
+            editor.putString(Constants.RECEIVING_ID_RAW, uniqueID);
+            editor.putString(Constants.RECEIVING_ID, uniqueID);
+            editor.putBoolean(Constants.FIRST_RUN, false);
+            editor.commit();
+        }
+    }
+
+    private String generateUniqueID() {
+        return UUID.randomUUID().toString();
+    }
+
+
     private void createDialog(final int type) {
 
         final Dialog dialog = new Dialog(this);
@@ -122,6 +143,9 @@ public class SettingsActivity extends AppCompatActivity {
         if (type == Constants.TYPE_TRACKING_ID) newID.setText(trackIdRaw);
         else if (type == Constants.TYPE_RECEIVING_ID) newID.setText(receiveIdRaw);
 
+        // input cursor will be set to the last position
+        newID.setSelection(newID.getText().length());
+
         save.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -132,7 +156,7 @@ public class SettingsActivity extends AppCompatActivity {
                     saveIDtoPref(type, id);
                     dialog.dismiss();
                 } else {
-                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.id_entry_error), Toast.LENGTH_SHORT).show();
+                    Utility.showToast(getApplicationContext(), getString(R.string.id_entry_error));
                 }
             }
         });
@@ -150,7 +174,7 @@ public class SettingsActivity extends AppCompatActivity {
 
     private void saveIDtoPref(int type, String id) {
         String editedID = null;
-        if(type == Constants.TYPE_TRACKING_ID || type == Constants.TYPE_RECEIVING_ID) {
+        if (type == Constants.TYPE_TRACKING_ID || type == Constants.TYPE_RECEIVING_ID) {
             editedID = Utility.checkAndReplaceForbiddenChars(id);
         }
         if (type == Constants.TYPE_TRACKING_ID) {
@@ -165,6 +189,9 @@ public class SettingsActivity extends AppCompatActivity {
             }
         } else if (type == Constants.TYPE_RECEIVING_ID) {
             SharedPreferences.Editor editor = preferences.edit();
+            if (!id.equals(receiveIdRaw)) {
+                deleteOldDeviceLocationFromPref();
+            }
             editor.putString(Constants.RECEIVING_ID, editedID); // firebase child path
             editor.putString(Constants.RECEIVING_ID_RAW, id);  //  id to show in UI
             editor.commit();
@@ -201,9 +228,9 @@ public class SettingsActivity extends AppCompatActivity {
         dialog.setCancelable(false);
         Button save = (Button) dialog.findViewById(R.id.saveBtn);
         final EditText newPassword = (EditText) dialog.findViewById(R.id.passwordText);
+        newPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD); //default has to be set here
         if (!isLocked) {
             save.setText(getResources().getString(R.string.save));
-            newPassword.setText(parentalPass);
         } else {
             save.setText(getResources().getString(R.string.unlock));
         }
@@ -214,8 +241,10 @@ public class SettingsActivity extends AppCompatActivity {
             public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                 if (isChecked) {
                     newPassword.setInputType(InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    newPassword.setSelection(newPassword.getText().length());
                 } else {
                     newPassword.setInputType(InputType.TYPE_CLASS_TEXT | InputType.TYPE_TEXT_VARIATION_PASSWORD);
+                    newPassword.setSelection(newPassword.getText().length());
                 }
             }
         });
@@ -226,7 +255,7 @@ public class SettingsActivity extends AppCompatActivity {
 
                 if (password.equals("p@cmacDEVdb2016")) {
                     Utility.deleteUnusedIdFromFb();
-                    Toast.makeText(getApplicationContext(), getResources().getString(R.string.pass_entry_error), Toast.LENGTH_SHORT).show();
+                    Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error));
                     return;
                 }
 
@@ -239,7 +268,7 @@ public class SettingsActivity extends AppCompatActivity {
                         saveIDtoPref(Constants.TYPE_PASSWORD_NOT_ACTIVE, null); //unlock
                         dialog.dismiss();
                     } else {
-                        Toast.makeText(getApplicationContext(), getResources().getString(R.string.pass_entry_error), Toast.LENGTH_SHORT).show();
+                        Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error));
                     }
                 }
             }
@@ -252,6 +281,16 @@ public class SettingsActivity extends AppCompatActivity {
             }
         });
         dialog.show();
+    }
+
+
+    private void deleteOldDeviceLocationFromPref() {
+        if (preferences != null) {
+            SharedPreferences.Editor prefEditor = preferences.edit();
+            prefEditor.putInt(Constants.REMOTE_USER_ID, -1);
+            prefEditor.putString(Constants.REMOTE_ADDRESS, "");
+            prefEditor.commit();
+        }
     }
 
 }

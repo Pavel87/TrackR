@@ -27,7 +27,7 @@
     <string name="password_dialog">Rodičovský zámek</string>
     <string name="show_password">Ukaž heslo</string>
     <string name="type_password">Vytvoř nové heslo</string>
-    <string name="loading">Poloha není známa</string>
+    <string name="loading">Hledám ...</string>
     <string name="address_na">Adresa není dosupná</string>
     <string name="address_loc_error">Chyba v souřadnicích: Restartujte TrackR</string>
     <string name="address_not_found">Adresa nenalezena</string>
@@ -36,13 +36,13 @@
     <string name="no_location">Poloha sledovaného zařízení je neznámá.</string>
     <string name="share_header">*****************************</string>
     <string name="new_update_title">New TrackR Update v</string>
-    <string name="updateMsg1">- Nové uspořádání a lepší podpora landscape modu.</string>
-    <string name="updateMsg2">- Přidáno tlačítko pro export dat.</string>
-    <string name="updateMsg3">- Sledované zařízení bude reportovat stav baterie.</string>
-    <string name="updateMsg4">- Omezení spojení se serverem.</string>
-    <string name="updateMsg5">- Vylepšení UX.</string>
-    <string name="updateMsg6">- Verze aplikace je viditelná v Nastavení.</string>
-    <string name="updateMsg7">- Další Opravy.</string>
+    <string name="updateMsg1">- Snížení přenesených dat na minimum.</string>
+    <string name="updateMsg2">- Snížení nároků na baterii.</string>
+    <string name="updateMsg3">- Nové notifikace o stavu aplikace.</string>
+    <string name="updateMsg4">- Přidán dialog při načítání poslední polohy.</string>
+    <string name="updateMsg5">- Menší změny v UI.</string>
+    <string name="updateMsg6">- Nic.</string>
+    <string name="updateMsg7">- Opravy pádů.</string>
     <string name="rateApp">Jak se vám líbí TrackR?.</string>
     <string name="rta_dialog_message"> TrackR team je poctěn každým, kdo aplikaci používá a
         neustále se jej snažíme vylepšovat k vaší spokojenosti. Pokud jste spokojeni zanechte
@@ -50,4 +50,10 @@
     <string name="no_thanks">Někdy Jindy</string>
     <string name="rateit">Hodnotit</string>
     <string name="neveragain">Toto již nechci vidět</string>
+    <string name="last_location_fresh">Poslední známá poloha je již zobrazena.</string>
+    <string name="rec_id_wrong">Přijímací ID zřejmě neexistuje. Zkontrolujte zadané ID v obou zařízeních.</string>
+    <string name="progress_searching">Hledám polohu zařízení</string>
+    <string name="extract_data">Sdílej GPS polohu s:</string>
+    <string name="conn_error">Chyba spojení. Zkontrolujte zda vám funguje připojení do internetu</string>
+    <string name="device_didnot_report_location">Poslední známá GPS poloha je již zobrazena.</string>
 </resources>
