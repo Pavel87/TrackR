@@ -26,7 +26,7 @@
     <string name="pass_entry_error">Password does not match</string>
     <string name="password_dialog">Parental Lock</string>
     <string name="show_password">Show Password</string>
-    <string name="type_password">Type Password</string>
+    <string name="type_password">Password</string>
     <string name="loading">Loading...</string>
     <string name="address_na">Adress Detail Is Not Available</string>
     <string name="address_loc_error">Wrong Location: Please Restart TrackR</string>
@@ -54,4 +54,12 @@
     <string name="extract_data">Extract Location Data To:</string>
     <string name="conn_error">Connection Error Occurred.</string>
     <string name="device_didnot_report_location">The last known location is already displayed.</string>
+    <string name="friendly_name">Alias</string>
+    <string name="rec_id">ID</string>
+    <string name="rec_id_list_title">List of Tracked Devices</string>
+    <string name="friendlyName">Friendly Name</string>
+    <string name="deviceId">Device ID</string>
+    <string name="enter_rec_id">Add New Device ID</string>
+    <string name="alias_required">Friendly name is now mandatory field.</string>
+    <string name="password_length_wrong">Password length is wrong.</string>
 </resources>

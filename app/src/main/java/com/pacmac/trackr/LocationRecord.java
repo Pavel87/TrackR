@@ -84,4 +84,14 @@ public class LocationRecord {
     public String toString() {
         return getLatitude() +"\n"+ getLongitude();
     }
+
+
+    public String getJSONString(){
+        return "{  \"id\": " + "\"" + id + "\","
+                + "\"latitude\": " + "\"" + latitude + "\","
+                + "\"longitude\": " + "\"" + longitude + "\","
+                + "\"timestamp\": " + "\"" + timestamp + "\","
+                + "\"batteryLevel\": " + "\"" + batteryLevel + "\","
+                + "\"address\": " + "\"" + address + "\"}";
+    }
 }

@@ -18,7 +18,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@string/enter_rec_id"
+            android:text="@string/enter_id"
             android:textColor="@color/material_blue_grey_950"
             android:textSize="18sp" />
 
@@ -38,30 +38,13 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="12">
-
-            <EditText
-                android:id="@+id/friendlyNameInput"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="@string/friendlyName"
-                android:minWidth="280dp"/>
-
-        </android.support.design.widget.TextInputLayout>
-
-
-        <android.support.design.widget.TextInputLayout
-            xmlns:app="http://schemas.android.com/apk/res-auto"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            app:counterEnabled="true"
             app:counterMaxLength="20">
 
             <EditText
-                android:id="@+id/recIdInput"
+                android:id="@+id/trackIdInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:hint="@string/deviceId"
+                android:hint="@string/trackingID"
                 android:minWidth="280dp"/>
 
         </android.support.design.widget.TextInputLayout>

@@ -136,7 +136,7 @@ public class LocationService extends Service implements LocationListener, Google
         // TODO update ID
         firebase.goOnline();
         Log.d(Constants.TAG, "Firebase goes online");
-        firebase.child(child).setValue(new LocationRecord(0, lastLocation.getLatitude(),
+        firebase.child(child).setValue(new LocationTxObject(0, lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel), this);
         if (batteryLevel >= 30 && !lastBatLevel) {
             lastBatLevel = true;

@@ -24,12 +24,22 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements NetworkStateListener {
 
@@ -47,13 +57,18 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private Handler handler;
     SharedPreferences preferences = null;
     private Firebase firebase;
-    private LocationRecord locationRecord;
+    //    private LocationRecord locationRecord;
+//    private ArrayList<LocationRecord> locationRecList = new ArrayList<>();
+    private HashMap<Integer, LocationRecord> locationRecList = new HashMap<>();
     private NetworkStateChangedReceiver connReceiver = null;
 
     private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
     private boolean isPermissionEnabled = true;
 
-    private String receivingId = "";
+
+    private int recIdCount = 0;
+    private ArrayList<SettingsObject> recIdDataSet = new ArrayList<SettingsObject>();
+    private int itemNumber = 0;
 
     @Override
     protected void onCreate(Bundle savedInst) {
@@ -63,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
                 MODE_PRIVATE);
 
+        populateRecIdsList();
         // Check if user disabled LOCATION permission at some point
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
             isPermissionEnabled = Utility.checkPermission(getApplicationContext(),
@@ -76,18 +92,19 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         tTimestamp = (TextView) findViewById(R.id.timestamp);
         tAddress = (TextView) findViewById(R.id.address);
         tBatteryLevel = (TextView) findViewById(R.id.batteryLevel);
-
         mapBtn = findViewById(R.id.showMap);
         searchBtn = (ImageButton) findViewById(R.id.search);
         settingsBtn = (ImageButton) findViewById(R.id.settings);
         shareBtn = (ImageButton) findViewById(R.id.share);
-
         imageBG = (ImageView) findViewById(R.id.imgBG);
+
         // renderScript Class works only from API 17 so have to check if it can
         // blur the bg or not
         if (Build.VERSION.SDK_INT > 16) {
             imageBG.setImageBitmap(setBitmap());
         }
+
+        spawnReceiverIdViews();
 
         handler = new Handler();
         resultReceiver = new AddressResultReceiver(handler);
@@ -96,19 +113,27 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         // restore location on reconfiguration
         if (savedInst != null && savedInst.getInt(Constants.KEY_ID, -1) != -1) {
-            locationRecord = new LocationRecord(savedInst.getInt(Constants.KEY_ID, -1),
-                    savedInst.getDouble(Constants.KEY_LATITUDE),
-                    savedInst.getDouble(Constants.KEY_LONGITUDE),
-                    savedInst.getLong(Constants.KEY_TIMESTAMP),
-                    savedInst.getDouble(Constants.KEY_BATTERY_LEVEL, 100),
-                    savedInst.getString(Constants.KEY_ADDRESS));
-            receivingId = savedInst.getString(Constants.RECEIVING_ID, "");
-            displayDeviceLocation(false);
+//            locationRecord = new LocationRecord(savedInst.getInt(Constants.KEY_ID, -1),
+//                    savedInst.getDouble(Constants.KEY_LATITUDE),
+//                    savedInst.getDouble(Constants.KEY_LONGITUDE),
+//                    savedInst.getLong(Constants.KEY_TIMESTAMP),
+//                    savedInst.getDouble(Constants.KEY_BATTERY_LEVEL, 100),
+//                    savedInst.getString(Constants.KEY_ADDRESS));
+//            receivingId = recIdDataSet.get(0).getSafeId();
+//            displayDeviceLocation(false);
         } else {
-            locationRecord = restoreLocationRecordFromPref();
-            if (locationRecord != null) {
-                displayDeviceLocation(false);
+             convertJsonStringToLocList();
+//            if (locationRecord != null) {
+//                displayDeviceLocation(false);
+//            }
+
+            if (locationRecList.size() == 0) {
+                displayDeviceLocation(null, true);
+            } else {
+                displayDeviceLocation(locationRecList.get(itemNumber), false);
             }
+
+
         }
 
         checkConnectivity();
@@ -130,7 +155,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     return;
                 }
 
-                if (preferences.getString(Constants.RECEIVING_ID, "").length() < 8) {
+                if (recIdDataSet.size() == 0) {
                     Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
                     enableSearchButton();
                     return;
@@ -157,8 +182,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     isDataReceived = false;
                     Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
                     enableSearchButton();
-                    if (locationRecord != null && locationRecord.getAddress().equals("") && isConnected) {
-                        getAdress();
+                    if (locationRecList.containsKey(itemNumber) && locationRecList.get(itemNumber).getAddress().equals("") && isConnected) {
+                        getAdress(itemNumber);
                     }
                 }
             }
@@ -172,10 +197,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         shareBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (locationRecord != null) {
-                    Intent sharingIntent = Utility.createShareIntent(Utility.updateShareIntent(getApplicationContext(), locationRecord.getLatitude(),
-                            locationRecord.getLongitude(), locationRecord.getTimestamp(),
-                            locationRecord.getAddress(), locationRecord.getBatteryLevel()));
+                if (locationRecList.containsKey(itemNumber)) {
+                    Intent sharingIntent = Utility.createShareIntent(Utility.updateShareIntent(getApplicationContext(), locationRecList.get(itemNumber).getLatitude(),
+                            locationRecList.get(itemNumber).getLongitude(), locationRecList.get(itemNumber).getTimestamp(),
+                            locationRecList.get(itemNumber).getAddress(), locationRecList.get(itemNumber).getBatteryLevel()));
 
                     startActivity(Intent.createChooser(sharingIntent, getString(R.string.extract_data)));
                 } else {
@@ -244,7 +269,17 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     private void getLastKnownLocation() {
         if (isConnected) {
-            retrieveLocation();
+
+            // retrieve Location from FB for currently selected ID
+            retrieveLocation(itemNumber);
+            // retrieve Location from FB for rest of ids
+//            for(int position = 0; position < recIdCount; position ++){
+//                if(position == itemNumber)
+//                    continue;
+//                retrieveLocation(position);
+//            }
+
+
         } else {
             Utility.showToast(getApplicationContext(), getString(R.string.no_connection));
             enableSearchButton();
@@ -256,85 +291,105 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             Utility.showToast(getApplicationContext(), getString(R.string.no_connection));
             return;
         }
-        if (locationRecord == null) {
+        if (locationRecList.size() == 0) {
             Utility.showToast(getApplicationContext(), getString(R.string.no_location));
             return;
         }
         Intent intent = new Intent(this, MapDetailActivity.class);
-        intent.putExtra(Constants.KEY_LATITUDE, locationRecord.getLatitude());
-        intent.putExtra(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
-        intent.putExtra(Constants.KEY_TIMESTAMP, Utility.parseDate(locationRecord.getTimestamp()));
-        intent.putExtra(Constants.KEY_ADDRESS, locationRecord.getAddress());
-        intent.putExtra(Constants.KEY_BATTERY_LEVEL, locationRecord.getBatteryLevel());
+        intent.putExtra(Constants.KEY_LATITUDE, locationRecList.get(itemNumber).getLatitude());
+        intent.putExtra(Constants.KEY_LONGITUDE, locationRecList.get(itemNumber).getLongitude());
+        intent.putExtra(Constants.KEY_TIMESTAMP, Utility.parseDate(locationRecList.get(itemNumber).getTimestamp()));
+        intent.putExtra(Constants.KEY_ADDRESS, locationRecList.get(itemNumber).getAddress());
+        intent.putExtra(Constants.KEY_BATTERY_LEVEL, locationRecList.get(itemNumber).getBatteryLevel());
         startActivity(intent);
     }
 
-    private void getAdress() {
+    private void getAdress(int item) {
         if (Geocoder.isPresent())
-            startIntentService();
+            startIntentService(locationRecList.get(item), item);
         else {
             tAddress.setText(getResources().getString(R.string.not_available));
         }
     }
 
-    private void retrieveLocation() {
-        String child = preferences.getString(Constants.RECEIVING_ID, "child_none");
-        Log.d(Constants.TAG, "Firebase goes online");
+
+    private void retrieveLocation(final int item) {
+
+        final Firebase firebase = new Firebase("https://trackr1.firebaseio.com");
         firebase.goOnline();
-        firebase.keepSynced(false);
-        firebase.child(child).addListenerForSingleValueEvent(new ValueEventListener() {
+        Log.d(Constants.TAG, "Firebase goes online");
+        firebase.keepSynced(true);
+        firebase.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot snapshot) {
-                Log.d(Constants.TAG, "Firebase goes offline");
-                firebase.goOffline();
-                long oldTimestamp = 0l;
-                if (locationRecord != null) {
-                    oldTimestamp = locationRecord.getTimestamp();
-                }
-                if (snapshot.hasChildren()) {
-                    isDataReceived = true;
-                    Long idLong = ((Long) snapshot.child("id").getValue());
-                    int id = -1;
-                    double batteryLevel = -1;
-                    if (idLong != null) {
-                        id = idLong.intValue();
-                        batteryLevel = (double) snapshot.child("batteryLevel").getValue();
-                    }
-                    double latitude = (double) snapshot.child("latitude").getValue();
-                    double longitude = (double) snapshot.child("longitude").getValue();
-                    long timeStamp = (long) snapshot.child("timestamp").getValue();
-                    Log.i(Constants.TAG, "recovered batt level from FB: " + batteryLevel);
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                {
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 
-                    locationRecord = new LocationRecord(id, latitude, longitude, timeStamp,
-                            (float) batteryLevel);
-                    getAdress();
-                    firebase.removeEventListener(this);
+                        //Log.d(Constants.TAG, "Firebase snapshot KEY: " + snapshot.getKey());
 
-                    displayDeviceLocation(false);
+                        for (int i = 0; i < recIdCount; i++) {
+                            if (snapshot.getKey().equals(recIdDataSet.get(i).getSafeId())) {
 
-                    // SAVE last known location in SharedPreferences
-                    if (preferences != null) {
-                        SharedPreferences.Editor prefEditor = preferences.edit();
-                        prefEditor.putInt(Constants.REMOTE_USER_ID, locationRecord.getId());
-                        prefEditor.putFloat(Constants.REMOTE_LATITUDE, (float) locationRecord.getLatitude());
-                        prefEditor.putFloat(Constants.REMOTE_LONGITUDE, (float) locationRecord.getLongitude());
-                        prefEditor.putFloat(Constants.REMOTE_BATTERY_LEVEL, (float) locationRecord.getBatteryLevel());
-                        prefEditor.putLong(Constants.REMOTE_TIMESTAMP, locationRecord.getTimestamp());
-                        prefEditor.putString(Constants.REMOTE_ADDRESS, locationRecord.getAddress());
-                        prefEditor.commit();
+
+                                Log.d(Constants.TAG, "Firebase goes offline");
+                                firebase.removeEventListener(this);
+                                firebase.goOffline();
+
+                                // Processing received data
+                                if (snapshot.hasChildren()) {
+                                    isDataReceived = true;
+                                    Long idLong = ((Long) snapshot.child("id").getValue());
+                                    int id = i;
+                                    double batteryLevel = -1;
+                                    if (idLong != null) {
+                                        batteryLevel = (double) snapshot.child("batteryLevel").getValue();
+                                    }
+                                    double latitude = (double) snapshot.child("latitude").getValue();
+                                    double longitude = (double) snapshot.child("longitude").getValue();
+                                    long timeStamp = (long) snapshot.child("timestamp").getValue();
+                                    Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + recIdDataSet.get(i).getAlias());
+
+                                    // Store location and request addres translation
+                                    locationRecList.put(i, new LocationRecord(id, latitude, longitude, timeStamp,
+                                            (float) batteryLevel));
+
+
+                                    // as we do multiple id request we want to display only currently selected ID
+                                    if (i == itemNumber) {
+                                        getAdress(i);
+                                        displayDeviceLocation(locationRecList.get(i), false);
+                                    }
+
+                                    Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayString());
+                                    Log.d(Constants.TAG, createJsonArrayString());
+                                } else if (progressDialog != null && progressDialog.isShowing()) {
+                                    Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
+                                }
+                                if (progressDialog != null && progressDialog.isShowing()) {
+                                    progressDialog.dismiss();
+                                    // if there was network request but location is same as before then notify user
+//                    if (isDataReceived && oldTimestamp == locationRecord.getTimestamp()) {
+//                        // TODO may want to show how many hours/minutes ago was the location updated
+//                        Utility.showToast(getApplicationContext(), getString(R.string.device_didnot_report_location));
+//                    }
+                                }
+                                searchBtn.setEnabled(true);
+                            }
+                        }
                     }
-                } else if (progressDialog != null && progressDialog.isShowing()) {
-                    Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
+
+
+//                    long timestamp = (long) snapshot.child("timestamp").getValue();
+//                    String id = snapshot.getKey();
+//                    if (timestamp < timeThreshold) {
+//                        Log.d(Constants.TAG, id + " ID was not updated in last 7 days - likely not in use anymore");
+//                        firebase.child(id).removeValue();
+//                    }
                 }
-                if (progressDialog != null && progressDialog.isShowing()) {
-                    progressDialog.dismiss();
-                    // if there was network request but location is same as before then notify user
-                    if (isDataReceived && oldTimestamp == locationRecord.getTimestamp()){
-                        // TODO may want to show how many hours/minutes ago was the location updated
-                        Utility.showToast(getApplicationContext(), getString(R.string.device_didnot_report_location));
-                    }
-                }
-                searchBtn.setEnabled(true);
+//
+//            firebase.removeEventListener(this);
+//            Log.d(Constants.TAG,"Firebase goes offline");
+//            firebase.goOffline();
             }
 
             @Override
@@ -354,11 +409,92 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         });
     }
 
-    private void startIntentService() {
+
+//        String child = recIdDataSet.get(item).getSafeId();
+//        Log.d(Constants.TAG, "Firebase goes online");
+//        firebase.goOnline();
+//        firebase.keepSynced(false);
+//        firebase.child(child).addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot snapshot) {
+//                Log.d(Constants.TAG, "Firebase goes offline");
+//                firebase.removeEventListener(this);
+//                firebase.goOffline();
+//
+//                // Processing received data
+//                if (snapshot.hasChildren()) {
+//                    isDataReceived = true;
+//                    Long idLong = ((Long) snapshot.child("id").getValue());
+//                    int id = -1;
+//                    double batteryLevel = -1;
+//                    if (idLong != null) {
+//                        id = idLong.intValue();
+//                        batteryLevel = (double) snapshot.child("batteryLevel").getValue();
+//                    }
+//                    double latitude = (double) snapshot.child("latitude").getValue();
+//                    double longitude = (double) snapshot.child("longitude").getValue();
+//                    long timeStamp = (long) snapshot.child("timestamp").getValue();
+//                    Log.i(Constants.TAG, "Recovered data from FB for id: " + item + " alias: " + recIdDataSet.get(item).getAlias());
+//
+//                    // Store location and request addres translation
+//                    locationRecList.put(item ,new LocationRecord(id, latitude, longitude, timeStamp,
+//                            (float) batteryLevel));
+//                    getAdress(item);
+//
+//
+//                    // as we do multiple id request we want to display only currently selected ID
+//                    if(item == itemNumber) {
+//                        displayDeviceLocation(locationRecList.get(item), false);
+//                    }
+//                    // SAVE last known location in SharedPreferences
+//                    if (preferences != null) {
+//                        SharedPreferences.Editor prefEditor = preferences.edit();
+//                        //TODO instead will save as JSON in file
+////                        prefEditor.putInt(Constants.REMOTE_USER_ID, locationRecord.getId());
+////                        prefEditor.putFloat(Constants.REMOTE_LATITUDE, (float) locationRecord.getLatitude());
+////                        prefEditor.putFloat(Constants.REMOTE_LONGITUDE, (float) locationRecord.getLongitude());
+////                        prefEditor.putFloat(Constants.REMOTE_BATTERY_LEVEL, (float) locationRecord.getBatteryLevel());
+////                        prefEditor.putLong(Constants.REMOTE_TIMESTAMP, locationRecord.getTimestamp());
+////                        prefEditor.putString(Constants.REMOTE_ADDRESS, locationRecord.getAddress());
+//                        prefEditor.commit();
+//                    }
+//                } else if (progressDialog != null && progressDialog.isShowing()) {
+//                    Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
+//                }
+//                if (progressDialog != null && progressDialog.isShowing()) {
+//                    progressDialog.dismiss();
+//                    // if there was network request but location is same as before then notify user
+////                    if (isDataReceived && oldTimestamp == locationRecord.getTimestamp()) {
+////                        // TODO may want to show how many hours/minutes ago was the location updated
+////                        Utility.showToast(getApplicationContext(), getString(R.string.device_didnot_report_location));
+////                    }
+//                }
+//                searchBtn.setEnabled(true);
+//            }
+//
+//            @Override
+//            public void onCancelled(FirebaseError firebaseError) {
+//                isDataReceived = false;
+//                Log.i(Constants.TAG, "Update Cancelled" + firebaseError.getMessage());
+//                firebase.goOffline();
+//                Log.d(Constants.TAG, "Firebase goes offline");
+//
+//                // Dismiss progress dialog if it is showing right now
+//                if (progressDialog != null && progressDialog.isShowing()) {
+//                    progressDialog.dismiss();
+//                    Utility.showToast(getApplicationContext(), getString(R.string.conn_error));
+//                }
+//                searchBtn.setEnabled(true);
+//            }
+//        });
+//        }
+
+    private void startIntentService(LocationRecord locationRecord, int item) {
         Intent intent = new Intent(getApplicationContext(), FetchAddressService.class);
         intent.putExtra(Constants.RECEIVER, resultReceiver);
         intent.putExtra(Constants.KEY_LATITUDE, locationRecord.getLatitude());
         intent.putExtra(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
+        intent.putExtra(Constants.KEY_ITEM_ORDER, item);
         startService(intent);
     }
 
@@ -385,24 +521,32 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private boolean checkIfshouldTryRetrieveDevicePosition() {
-        String recIdFromPref = preferences.getString(Constants.RECEIVING_ID, null);
-        boolean shouldConnectToFB = true;
-
-        if (recIdFromPref == null || recIdFromPref.equals("")) {
+        if (recIdDataSet.size() == 0) {
             return false;
         }
+        boolean shouldConnectToFB = true;
 
-        // If I have location record and timestamp of last device upload is smalled than 15 minutes then I don't want to do update
-        if (locationRecord != null && locationRecord.getTimestamp() > (System.currentTimeMillis() - Constants.UPDATE_TIMEOUT)) {
-            shouldConnectToFB = false;
+
+//
+//        // If I have location record and timestamp of last device upload is smalled than 15 minutes then I don't want to do update
+
+        for (int i = 0; i < recIdCount; i++) {
+
+            if (locationRecList.containsKey(i)) {
+                shouldConnectToFB = !(locationRecList.get(i).getTimestamp() > (System.currentTimeMillis() - Constants.UPDATE_TIMEOUT));
+            }
+            if (!shouldConnectToFB) {
+                break;
+            }
         }
 
-        // but if Ids changes since last time then we want to try to fetch new data
-        if (!recIdFromPref.equals(receivingId)) {
-            shouldConnectToFB = true;
-            receivingId = recIdFromPref;
-            resetLocationAndRefreshScreen();
-        }
+        // TODO ids have been refreshed then we want to update
+//        // but if Ids changes since last time then we want to try to fetch new data
+//        if (!recIdFromPref.equals(receivingId)) {
+//            shouldConnectToFB = true;
+//            receivingId = recIdFromPref;
+//            resetLocationAndRefreshScreen();
+//        }
 
         if (shouldConnectToFB) {
             getLastKnownLocation();
@@ -414,23 +558,18 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         if (preferences != null) {
             int id = preferences.getInt(Constants.REMOTE_USER_ID, -1);
             if (id == -1) {
-                locationRecord = null;
+//                locationRecord = null;
             }
         }
         // Will clear the old device location
-        displayDeviceLocation(true);
+        displayDeviceLocation(null, true);
     }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
-        if (locationRecord != null) {
-            outState.putString(Constants.RECEIVING_ID, receivingId);
-            outState.putInt(Constants.KEY_ID, locationRecord.getId());
-            outState.putDouble(Constants.KEY_LATITUDE, locationRecord.getLatitude());
-            outState.putDouble(Constants.KEY_LONGITUDE, locationRecord.getLongitude());
-            outState.putLong(Constants.KEY_TIMESTAMP, locationRecord.getTimestamp());
-            outState.putString(Constants.KEY_ADDRESS, locationRecord.getAddress());
-            outState.putDouble(Constants.KEY_BATTERY_LEVEL, locationRecord.getBatteryLevel());
+        if (locationRecList.size() != 0) {
+            outState.putInt(Constants.KEY_ITEM_ORDER, itemNumber);
+
         }
         super.onSaveInstanceState(outState);
     }
@@ -446,22 +585,23 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
 
-            String address = resultData.getString(Constants.RESULT_DATA_KEY);
+            String address = "";
+            int itemOrder = resultData.getInt(Constants.KEY_ITEM_ORDER, 0);
+
             if (resultCode == Constants.SUCCESS) {
-                locationRecord.setAddress(address);
-                tAddress.setText(address);
+                address = resultData.getString(Constants.RESULT_DATA_KEY);
             } else { // GEOCODER returned error
-                locationRecord.setAddress(getResources().getString(R.string.not_available));
-                tAddress.setText(getResources().getString(R.string.not_available));
+                address = getResources().getString(R.string.not_available);
                 Log.e(Constants.TAG, address);
             }
-            // save address to shared preferences
-            if (preferences != null) {
-                SharedPreferences.Editor prefEditor = preferences.edit();
-                prefEditor.putString(Constants.REMOTE_ADDRESS, locationRecord.getAddress());
-                prefEditor.commit();
+            if (itemOrder == itemNumber) {
+                tAddress.setText(address);
             }
+
+            // Store address in proper location object
+            locationRecList.get(itemOrder).setAddress(address);
         }
+
     }
 
     @Override
@@ -504,27 +644,28 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     // this will restore last known location from shared preferences on start if available
     private LocationRecord restoreLocationRecordFromPref() {
-        if (preferences != null) {
-           receivingId = preferences.getString(Constants.RECEIVING_ID, "");
-
-            LocationRecord locRecord = new LocationRecord();
-
-            int id = preferences.getInt(Constants.REMOTE_USER_ID, -1);
-            if (id == -1) {
-                return null;
-            }
-            locRecord.setId(id);
-            locRecord.setLatitude((double) preferences.getFloat(Constants.REMOTE_LATITUDE, 0));
-            locRecord.setLongitude((double) preferences.getFloat(Constants.REMOTE_LONGITUDE, 0));
-            locRecord.setBatteryLevel((double) preferences.getFloat(Constants.REMOTE_BATTERY_LEVEL, -1));
-            locRecord.setTimestamp(preferences.getLong(Constants.REMOTE_TIMESTAMP, 0));
-            locRecord.setAddress(preferences.getString(Constants.REMOTE_ADDRESS, getString(R.string.not_available)));
-            return locRecord;
-        }
+//        if (preferences != null) {
+////            receivingId = recIdDataSet.get(0).getSafeId();
+//
+////            LocationRecord locRecord = new LocationRecord();
+//
+//            int id = preferences.getInt(Constants.REMOTE_USER_ID, -1);
+//            if (id == -1) {
+//                return null;
+//            }
+//            locRecord.setId(id);
+//            locRecord.setLatitude((double) preferences.getFloat(Constants.REMOTE_LATITUDE, 0));
+//            locRecord.setLongitude((double) preferences.getFloat(Constants.REMOTE_LONGITUDE, 0));
+//            locRecord.setBatteryLevel((double) preferences.getFloat(Constants.REMOTE_BATTERY_LEVEL, -1));
+//            locRecord.setTimestamp(preferences.getLong(Constants.REMOTE_TIMESTAMP, 0));
+//            locRecord.setAddress(preferences.getString(Constants.REMOTE_ADDRESS, getString(R.string.not_available)));
+//            return locRecord;
+//        }
         return null;
     }
 
-    private void displayDeviceLocation(boolean isLoading) {
+    private void displayDeviceLocation(LocationRecord locationRecord, boolean isLoading) {
+
         if (!isLoading) {
             tLastLocation.setText(locationRecord.toString());
             tTimestamp.setText(Utility.parseDate(locationRecord.getTimestamp()));
@@ -534,12 +675,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 tBatteryLevel.setTextColor(getResources().getColor(R.color.text_nightMode));
             }
             tBatteryLevel.setText(String.format("%.0f", locationRecord.getBatteryLevel()) + " %");
-            if (!locationRecord.getAddress().equals(""))
+            if (!locationRecord.getAddress().equals("")) {
                 tAddress.setText(locationRecord.getAddress());
+            } else {
+                getAdress(itemNumber);
+                tAddress.setText("");
+            }
 
-//            if (progressDialog != null && progressDialog.isShowing()) {
-//                progressDialog.dismiss();
-//            }
         } else {
             tLastLocation.setText(getString(R.string.loading));
             tTimestamp.setText("");
@@ -548,7 +690,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         }
 
     }
-
 
     private Runnable dismissDialogRunnable = new Runnable() {
         @Override
@@ -569,4 +710,96 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             }
         }, 4000);
     }
+
+
+    private void populateRecIdsList() {
+        String jsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
+
+        if (jsonString.equals("")) {
+            // file doesn't exist
+            return;
+        }
+
+        try {
+            JSONObject jsnobject = new JSONObject(jsonString);
+            JSONArray jsonArray = jsnobject.getJSONArray("receiverids");
+            recIdDataSet.clear();
+            for (int i = 0; i < jsonArray.length(); i++) {
+                SettingsObject settingsObject = Utility.createSettingsObjectFromJson((JSONObject) jsonArray.get(i));
+                if (settingsObject != null) {
+                    recIdDataSet.add(settingsObject);
+                }
+            }
+        } catch (JSONException e) {
+            Log.d(Constants.TAG, "#4# Error getting JSON obj or array. " + e.getMessage());
+        }
+        recIdCount = recIdDataSet.size();
+    }
+
+    private void spawnReceiverIdViews() {
+        LinearLayout linearLayout = (LinearLayout) findViewById(R.id.receivingIDPanel);
+        LayoutInflater inflater = getLayoutInflater();
+
+        for (int i = 0; i < recIdCount; i++) {
+            View view = inflater.inflate(R.layout.tracking_id_button_layout, null);
+            TextView item = (TextView) view.findViewById(R.id.recIdLabel);
+            item.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    Log.d(Constants.TAG, "textview clicked: " + ((TextView) view).getHint().toString());
+                    itemNumber = Integer.parseInt(((TextView) view).getHint().toString());
+                    // check if we already hav any location for this id first
+                    if (locationRecList.containsKey(itemNumber)) {
+                        displayDeviceLocation(locationRecList.get(itemNumber), false);
+                    } else {
+                        getLastKnownLocation();
+                        displayDeviceLocation(null, true);
+                    }
+                }
+            });
+            item.setText(recIdDataSet.get(i).getAlias().substring(0, 1));
+            item.setHint(String.valueOf(i));
+            linearLayout.addView(view);
+        }
+    }
+
+    private String createJsonArrayString() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("{\"locrecords\":[");
+
+        int counter = 0;
+        for (Map.Entry<Integer, LocationRecord> entry : locationRecList.entrySet()) {
+            if (counter == (locationRecList.size() - 1)) {
+                sb.append(entry.getValue().getJSONString());
+                break;
+            }
+            sb.append(entry.getValue().getJSONString() + ",");
+            counter++;
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+    private void convertJsonStringToLocList() {
+        String jsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+        if (jsonString.equals("")) {
+            return;
+        }
+        try {
+            JSONObject jsnobject = new JSONObject(jsonString);
+            JSONArray jsonArray = jsnobject.getJSONArray("locrecords");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                LocationRecord locationRecord = Utility.createLocationRecordFromJson((JSONObject) jsonArray.get(i));
+                if (locationRecord != null) {
+                    locationRecList.put(locationRecord.getId(), locationRecord);
+                }
+            }
+        } catch (JSONException e) {
+            Log.d(Constants.TAG, "#7# Error getting LocRecord JSON obj or array. " + e.getMessage());
+        }
+        // add footer
+    }
 }
+

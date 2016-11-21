@@ -12,6 +12,7 @@ public class Constants {
     public static final String KEY_LATITUDE = "latitude_key";
     public static final String KEY_LONGITUDE = "longitude_key";
     public static final String KEY_TIMESTAMP = "timestamp_key";
+    public static final String KEY_ITEM_ORDER = "rec_id_order";
     public static final String KEY_ADDRESS = "address_key";
     public static final String KEY_BATTERY_LEVEL = "battery_LEVEL_key";
     public static final String PREF_TRACKR = "-tracker_PREF";
@@ -35,6 +36,9 @@ public class Constants {
     public static final String REMOTE_TIMESTAMP = "user_last_seen_timestamp";
     public static final String REMOTE_ADDRESS = "user_address";
 
+    public static final String JSON_REC_IDS_FILE_NAME = "/recIdsJson";
+    public static final String JSON_LOC_FILE_NAME = "/locRecsJson";
+
     public static final int SUCCESS = 0;
     public static final int ERROR = 134;
     public static final int TYPE_TRACKING_ID = 0;
@@ -46,6 +50,12 @@ public class Constants {
     public final static int TIME_BATTERY_LOW = 45 * 60 * 1000;
     public final static int OLD_ID_THRESHOLD = 7*24 * 60 * 60 * 1000; // 7 days
     public final static int RATING_POPUP_ATTEMPTS = 8; // popup will show after user open the app 8 times
+
+    public static final int TYPE_HEADER = -1;
+    public static final int TYPE_NORMAL = 0;
+    public static final int TYPE_TRACKID = 1;
+    public static final int TYPE_TRACK_SWITCH = 2;
+    public static final int TYPE_FOOTER = 3;
 
 
 

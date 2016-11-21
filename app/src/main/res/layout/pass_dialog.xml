@@ -34,24 +34,29 @@
         android:orientation="vertical"
         android:paddingTop="@dimen/activity_vertical_margin">
 
-        <EditText
-            android:id="@+id/passwordText"
+
+
+        <android.support.design.widget.TextInputLayout
+            xmlns:app="http://schemas.android.com/apk/res-auto"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:imeOptions="actionDone"
-            android:fontFamily="sans-serif-light"
-            android:inputType="textPassword"
-            android:hint="@string/type_password"
-             />
+            app:counterEnabled="true"
+            app:counterMaxLength="32">
+
+            <EditText
+                android:id="@+id/passwordText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textPassword"
+                android:imeOptions="actionDone"
+                android:hint="@string/type_password"
+                android:minWidth="280dp"/>
+
+        </android.support.design.widget.TextInputLayout>
+
 
     </LinearLayout>
 
-    <CheckBox
-        android:id="@+id/checkbox"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="left"
-        android:text="@string/show_password"/>
 
     <LinearLayout
         android:layout_width="match_parent"

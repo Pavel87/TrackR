@@ -27,9 +27,19 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
+import java.util.UUID;
 
 /**
  * Created by pacmac on 2016-10-27.
@@ -283,5 +293,94 @@ public class Utility {
         toast.show();
     }
 
+
+    public static boolean saveJsonStringToFile(String path, String data) {
+
+        File file = new File(path);
+        if(file.exists()){
+            file.delete();
+//            try {
+//                file.createNewFile();
+//            } catch (IOException e) {
+//                e.printStackTrace();
+//            }
+        }
+        BufferedWriter writer = null;
+        boolean isSuccesful = false;
+
+        try {
+            writer = new BufferedWriter(new FileWriter(file));
+            writer.write(data);
+            isSuccesful = true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(Constants.TAG, "Failed to write rec ids in file: " + e.getMessage());
+        } finally {
+            if (writer != null){
+                try {
+                    writer.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return isSuccesful;
+    }
+
+    public static String loadJsonStringFromFile(String path) {
+
+        File file = new File(path);
+        if (!file.exists()){
+            return "";
+        }
+
+        BufferedReader reader = null;
+        StringBuilder readOutput = new StringBuilder();
+
+        try {
+            reader = new BufferedReader(new FileReader(file));
+            String line;
+            readOutput.append("");
+            while((line = reader.readLine()) != null) {
+                readOutput.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(Constants.TAG, "Failed to read rec ids from file: " + e.getMessage());
+        } finally {
+            if (reader != null){
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return readOutput.toString();
+    }
+
+
+    public static String generateUniqueID() {
+        return UUID.randomUUID().toString();
+    }
+
+    public static SettingsObject createSettingsObjectFromJson(JSONObject object) {
+        try {
+            return new SettingsObject((String) object.getString("alias"),
+                    (String) object.getString("id"), (String) object.getString("safeId"));
+        } catch (JSONException e) {
+            Log.d(Constants.TAG, "#3# Error parsing json from file. " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static LocationRecord createLocationRecordFromJson(JSONObject object) {
+        try {
+            return new LocationRecord(object.getInt("id"), object.getDouble("latitude"), object.getDouble("longitude"), object.getLong("timestamp"), object.getDouble("batteryLevel"), object.getString("address"));
+        } catch (JSONException e) {
+            Log.d(Constants.TAG, "#6# Error parsing locationRecord json from file. " + e.getMessage());
+        }
+        return null;
+    }
 
 }

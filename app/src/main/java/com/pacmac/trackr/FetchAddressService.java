@@ -24,6 +24,7 @@ public class FetchAddressService extends IntentService {
 
     private String addressResult;
     private int codeResult;
+    private int itemOrder = 0;
 
     public FetchAddressService() {
         super(Constants.PACKAGE_NAME + ".FetchedAddress");
@@ -35,6 +36,8 @@ public class FetchAddressService extends IntentService {
         double latitude = intent.getDoubleExtra(Constants.KEY_LATITUDE, 0);
         double longitude = intent.getDoubleExtra(Constants.KEY_LONGITUDE, 0);
         receiver = intent.getParcelableExtra(Constants.RECEIVER);
+        itemOrder = intent.getIntExtra(Constants.KEY_ITEM_ORDER, 0);
+
 
         addressResult = getAdress(latitude, longitude);
         deliverResultToReceiver(codeResult, addressResult);
@@ -43,6 +46,7 @@ public class FetchAddressService extends IntentService {
     private void deliverResultToReceiver(int resultCode, String message) {
         Bundle bundle = new Bundle();
         bundle.putString(Constants.RESULT_DATA_KEY, message);
+        bundle.putInt(Constants.KEY_ITEM_ORDER, itemOrder);
         receiver.send(resultCode, bundle);
     }
 

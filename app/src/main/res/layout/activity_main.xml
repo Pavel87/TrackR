@@ -13,6 +13,18 @@
         android:scaleType="centerCrop"
         android:src="@drawable/mapimg" />
 
+    <LinearLayout
+        android:id="@+id/receivingIDPanel"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/mainInfoWindow"
+        android:layout_marginLeft="8dp"
+        android:layout_marginRight="8dp"
+        android:layout_marginBottom="8dp"
+        android:orientation="horizontal">
+
+
+    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/mainInfoWindow"
@@ -35,8 +47,8 @@
             android:layout_centerHorizontal="true"
             android:fontFamily="sans-serif-medium"
             android:text="@string/last_location"
-            android:textColor="@color/text_nightMode"
             android:textAllCaps="true"
+            android:textColor="@color/text_nightMode"
             android:textSize="22sp" />
 
 
@@ -51,12 +63,12 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:gravity="right"
-                android:paddingRight="32dp"
-                android:textColor="@color/text_nightMode"
                 android:fontFamily="sans-serif-light"
+                android:gravity="right"
                 android:paddingLeft="16dp"
+                android:paddingRight="32dp"
                 android:text="@string/coord"
+                android:textColor="@color/text_nightMode"
                 android:textSize="16sp" />
 
             <TextView
@@ -64,11 +76,11 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.1"
-                android:gravity="center_vertical"
                 android:fontFamily="sans-serif-medium"
+                android:gravity="center_vertical"
+                android:lines="2"
                 android:text="@string/loading"
                 android:textColor="@color/text_nightMode"
-                android:lines="2"
                 android:textSize="16sp" />
 
         </LinearLayout>
@@ -86,10 +98,10 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:gravity="right"
-                android:paddingRight="32dp"
                 android:paddingLeft="16dp"
-                android:textColor="@color/text_nightMode"
+                android:paddingRight="32dp"
                 android:text="@string/local_time"
+                android:textColor="@color/text_nightMode"
                 android:textSize="16sp" />
 
             <TextView
@@ -97,10 +109,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.1"
+                android:ellipsize="end"
+                android:fontFamily="sans-serif-medium"
                 android:gravity="center_vertical"
                 android:textColor="@color/text_nightMode"
-                android:fontFamily="sans-serif-medium"
-                android:ellipsize="end"
                 android:textSize="16sp" />
 
         </LinearLayout>
@@ -119,10 +131,10 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:gravity="right|center_vertical"
-                android:paddingRight="32dp"
                 android:paddingLeft="16dp"
-                android:textColor="@color/text_nightMode"
+                android:paddingRight="32dp"
                 android:text="@string/address"
+                android:textColor="@color/text_nightMode"
                 android:textSize="16sp" />
 
             <TextView
@@ -130,10 +142,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.1"
-                android:gravity="center_vertical"
                 android:fontFamily="sans-serif-medium"
-                android:textColor="@color/text_nightMode"
+                android:gravity="center_vertical"
                 android:lines="3"
+                android:textColor="@color/text_nightMode"
                 android:textSize="16sp" />
 
         </LinearLayout>
@@ -141,8 +153,8 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="16dp"
             android:layout_marginBottom="16dp"
+            android:layout_marginTop="16dp"
             android:gravity="center"
             android:orientation="horizontal">
 
@@ -153,10 +165,10 @@
                 android:layout_weight="1"
                 android:fontFamily="sans-serif-light"
                 android:gravity="right"
-                android:paddingRight="32dp"
                 android:paddingLeft="8dp"
-                android:textColor="@color/text_nightMode"
+                android:paddingRight="32dp"
                 android:text="@string/batlevel"
+                android:textColor="@color/text_nightMode"
                 android:textSize="16sp" />
 
             <TextView
@@ -164,10 +176,10 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1.1"
-                android:gravity="center_vertical"
                 android:fontFamily="sans-serif-medium"
-                android:textColor="@color/text_nightMode"
+                android:gravity="center_vertical"
                 android:lines="1"
+                android:textColor="@color/text_nightMode"
                 android:textSize="16sp" />
 
         </LinearLayout>
@@ -181,8 +193,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@+id/mainInfoWindow"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:layout_marginBottom="@dimen/activity_vertical_margin"
+        android:layout_marginTop="@dimen/activity_vertical_margin"
         android:background="@drawable/button_bg"
         android:fontFamily="sans-serif-medium"
         android:paddingBottom="16dp"
@@ -217,10 +229,10 @@
         android:id="@+id/settings"
         android:layout_width="54dp"
         android:layout_height="54dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginRight="8dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentRight="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginRight="8dp"
         android:background="@drawable/image_button_bg"
         android:src="@drawable/settingsicon" />
 
@@ -229,10 +241,10 @@
         android:id="@+id/search"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
         android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
+        android:layout_marginBottom="8dp"
+        android:layout_marginLeft="8dp"
         android:background="@drawable/image_button_bg"
         android:src="@drawable/search" />
 
@@ -240,11 +252,11 @@
         android:id="@+id/share"
         android:layout_width="56dp"
         android:layout_height="56dp"
-        android:layout_marginTop="9dp"
-        android:background="@drawable/image_button_bg"
-        android:src="@drawable/share"
+        android:layout_alignEnd="@+id/mainInfoWindow"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/mainInfoWindow"
-        android:layout_alignEnd="@+id/mainInfoWindow" />
+        android:layout_marginTop="9dp"
+        android:background="@drawable/image_button_bg"
+        android:src="@drawable/share" />
 
 </RelativeLayout>
