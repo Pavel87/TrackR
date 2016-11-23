@@ -6,17 +6,6 @@
     android:layout_height="match_parent"
     tools:context="com.pacmac.trackr.MainActivity">
 
-    <LinearLayout
-        android:id="@+id/receivingIDPanel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
-        android:orientation="horizontal">
-
-
-    </LinearLayout>
 
     <ImageView
         android:id="@+id/imgBG"
@@ -53,28 +42,38 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:layout_centerVertical="true"
+        android:layout_marginTop="8dp"
         android:layout_toLeftOf="@+id/share"
         android:gravity="center_horizontal"
         android:orientation="vertical">
 
         <LinearLayout
+            android:id="@+id/receivingIDPanel"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:orientation="horizontal">
+        </LinearLayout>
+
+        <LinearLayout
             android:id="@+id/mainInfoWindow"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_marginBottom="16dp"
+            android:layout_marginBottom="8dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="8dp"
-            android:layout_marginTop="16dp"
+            android:layout_marginTop="8dp"
             android:background="@drawable/rounded_box_night"
             android:gravity="center"
             android:orientation="vertical">
-
 
             <TextView
                 android:id="@+id/textView"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true"
+                android:layout_marginTop="8dp"
                 android:fontFamily="sans-serif-medium"
                 android:text="@string/last_location"
                 android:textAllCaps="true"
@@ -108,7 +107,7 @@
                     android:layout_weight="1"
                     android:fontFamily="sans-serif-medium"
                     android:gravity="center_vertical"
-                    android:lines="2"
+                    android:lines="1"
                     android:text="@string/loading"
                     android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />

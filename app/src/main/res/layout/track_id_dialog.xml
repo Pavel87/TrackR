@@ -44,6 +44,8 @@
                 android:id="@+id/trackIdInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
+                android:imeOptions="actionDone"
                 android:hint="@string/trackingID"
                 android:minWidth="280dp"/>
 

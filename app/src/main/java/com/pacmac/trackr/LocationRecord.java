@@ -82,7 +82,7 @@ public class LocationRecord {
 
     @Override
     public String toString() {
-        return getLatitude() +"\n"+ getLongitude();
+        return getLatitude() +", "+ getLongitude();
     }
 
 

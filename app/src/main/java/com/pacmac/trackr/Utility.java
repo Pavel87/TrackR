@@ -17,6 +17,8 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -26,6 +28,8 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -381,6 +385,27 @@ public class Utility {
             Log.d(Constants.TAG, "#6# Error parsing locationRecord json from file. " + e.getMessage());
         }
         return null;
+    }
+
+
+    public static Animation getAnimation(){
+        RotateAnimation rotate = new RotateAnimation(30, 360, Animation.RELATIVE_TO_SELF, 0.5f,  Animation.RELATIVE_TO_SELF, 0.5f);
+        rotate.setDuration(300);
+        return rotate;
+    }
+
+
+    public static boolean checkPlayServices(Context context) {
+        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
+        if (status != ConnectionResult.SUCCESS) {
+            if (GooglePlayServicesUtil.isUserRecoverableError(status)) {
+                showToast(context, "This app requires Google Play services are up to date for correct functionality");
+            } else {
+                showToast(context, "This device is not supported.");
+            }
+            return false;
+        }
+        return true;
     }
 
 }

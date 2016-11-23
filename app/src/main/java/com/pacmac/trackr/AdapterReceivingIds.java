@@ -26,10 +26,10 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
         notifyItemInserted(position);
     }
 
-    public void update(ArrayList<SettingsObject> mDataset) {
-        this.mDataset = mDataset;
-        notifyDataSetChanged();
-    }
+//    public void update(ArrayList<SettingsObject> mDataset) {
+//        this.mDataset = mDataset;
+//        notifyDataSetChanged();
+//    }
 //    public void remove(String item) {
 //        int position = mDataset.indexOf(item);
 //        mDataset.remove(position);

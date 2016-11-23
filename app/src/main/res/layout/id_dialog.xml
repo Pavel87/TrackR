@@ -55,12 +55,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:counterEnabled="true"
-            app:counterMaxLength="20">
+            app:counterMaxLength="32">
 
             <EditText
                 android:id="@+id/recIdInput"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:inputType="textNoSuggestions"
+                android:imeOptions="actionDone"
                 android:hint="@string/deviceId"
                 android:minWidth="280dp"/>
 

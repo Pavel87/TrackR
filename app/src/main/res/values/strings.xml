@@ -54,7 +54,7 @@
     <string name="extract_data">Extract Location Data To:</string>
     <string name="conn_error">Connection Error Occurred.</string>
     <string name="device_didnot_report_location">The last known location is already displayed.</string>
-    <string name="friendly_name">Alias</string>
+    <string name="friendly_name">Device</string>
     <string name="rec_id">ID</string>
     <string name="rec_id_list_title">List of Tracked Devices</string>
     <string name="friendlyName">Friendly Name</string>

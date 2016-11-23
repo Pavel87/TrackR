@@ -20,8 +20,7 @@ public class Constants {
     public static final String TRACKING_STATE = "trackr_gps_state";
     public static final String TRACKING_ID = "trackr_gps_ID";
     public static final String TRACKING_ID_RAW = "trackr_gps_ID_raw";
-    public static final String RECEIVING_ID_RAW = "receiver_gps_ID_raw";
-    public static final String RECEIVING_ID = "receiver_gps_ID";
+    public static final String RECEIVING_ID_CHANGE = "receiver_gps_ID_changed";
     public static final String PACKAGE_NAME = "com.pacmac.trackr";
     public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
     public static final String RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY";
@@ -30,10 +29,6 @@ public class Constants {
     public static final String PADLOCK_PASS = "padlock_pass";
 
     public static final String REMOTE_USER_ID = "user_id";
-    public static final String REMOTE_LATITUDE = "user_latitude";
-    public static final String REMOTE_LONGITUDE = "user_longitude";
-    public static final String REMOTE_BATTERY_LEVEL = "user_battery_level";
-    public static final String REMOTE_TIMESTAMP = "user_last_seen_timestamp";
     public static final String REMOTE_ADDRESS = "user_address";
 
     public static final String JSON_REC_IDS_FILE_NAME = "/recIdsJson";

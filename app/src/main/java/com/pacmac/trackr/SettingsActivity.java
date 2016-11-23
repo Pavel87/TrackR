@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.helper.ItemTouchHelper;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
@@ -33,7 +34,55 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
 
     private ArrayList<SettingsObject> recIdDataSet = new ArrayList<SettingsObject>();
     private boolean isLocked;
-    private String trackID, trackIdRaw, parentalPass;
+    private String parentalPass;
+
+
+    private ItemTouchHelper.SimpleCallback simpleItemTouchCallback = new ItemTouchHelper.SimpleCallback(0, ItemTouchHelper.RIGHT) {
+
+        @Override
+        public int getSwipeDirs(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+            if(viewHolder.getItemViewType() != Constants.TYPE_NORMAL || isLocked){
+                return 0;
+            }
+            return super.getSwipeDirs(recyclerView, viewHolder);
+        }
+
+
+        @Override
+        public void onSwiped(RecyclerView.ViewHolder viewHolder, int swipeDir) {
+
+            int position  = viewHolder.getAdapterPosition();
+
+            if(recIdDataSet.size() == 6){
+                //this condition will ensure that we will keep at least 1 ID
+                ((AdapterReceivingIds) adapterForRecIdList).notifyDataSetChanged();
+                return;
+            }
+            //Remove swiped item from list and notify the RecyclerView
+            recIdDataSet.remove(position);
+            Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, createFinalJsonString());
+            ((AdapterReceivingIds) adapterForRecIdList).notifyDataSetChanged();   //update(recIdDataSet);
+
+            Log.d(Constants.TAG, " view # swiped: " +position);
+
+            if(preferences == null) {
+                preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+            }
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(Constants.RECEIVING_ID_CHANGE, true);
+            editor.commit();
+        }
+
+        @Override
+        public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+            return false;
+        }
+
+        @Override
+        public boolean isItemViewSwipeEnabled() {
+            return true;
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -55,8 +104,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
 
         // TODO in version 6 I want to shrink these 2 together as all users should be already upgraded
         // Load preferences
-        trackID = preferences.getString(Constants.TRACKING_ID, "Error");
-        trackIdRaw = preferences.getString(Constants.TRACKING_ID_RAW, trackID);
         parentalPass = preferences.getString(Constants.PADLOCK_PASS, "");
         isLocked = preferences.getBoolean(Constants.PADLOCK_ACTIVE, false);
 
@@ -76,6 +123,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
         // adding  adapter to Rec ID list
         adapterForRecIdList = new AdapterReceivingIds(recIdDataSet, this);
         listOfRecIds.setAdapter(adapterForRecIdList);
+        ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
+        itemTouchHelper.attachToRecyclerView(listOfRecIds);
     }
 
 
@@ -98,7 +147,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
                 // If alias edit text is null then we are inserting tracking ID
 
                 // TODO NEED TO CREATE RULE FOR IDs (characters which we can use)
-                if (id != null && id.length() > 7 && id.length() < 21) {
+                if (id != null && id.length() > 7 && id.length() < 32) {
                     saveIDandUpdateView(type, null, id, position);
                     dialog.dismiss();
                 } else {
@@ -144,9 +193,9 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
                 String id = newID.getText().toString();
                 String aliasText = alias.getText().toString();
 
-                if (aliasText.length() > 0 && aliasText.length() <= 12) {
+                if (aliasText.length() > 0 && aliasText.length() <= 14) {
                     // TODO NEED TO CREATE RULE FOR IDs (characters which we can use)
-                    if (id != null && id.length() > 7 && id.length() < 21) {
+                    if (id != null && id.length() > 7 && id.length() < 32) {
                         saveIDandUpdateView(type, aliasText, id, position);
                         dialog.dismiss();
                     } else {
@@ -172,26 +221,18 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
         String editedID = null;
         editedID = Utility.checkAndReplaceForbiddenChars(id);
 
+        if (preferences == null) { // should never be null
+            preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+        }
+
         if (type == Constants.TYPE_TRACKING_ID) {
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.TRACKING_ID, editedID);  // firebase child path
             editor.putString(Constants.TRACKING_ID_RAW, id);  // id to show in UI
             editor.commit();
-            trackID = editedID;
-            trackIdRaw = id;
             ifTrackingOnTurnItOff();
 
-        } else if (type == Constants.TYPE_RECEIVING_ID) {
-            // TODO how to propagate now that ID changed ??
-//            if (!id.equals(receiveIdRaw)) {
-//                deleteOldDeviceLocationFromPref();
-//            }
-        } else {
-            //this should never happen
-            Log.d(Constants.TAG, "#2#Error");
-            return;
         }
-
         // If footer then we remove footer add new Rec ID and append footer
         if (position == -1) {
             SettingsObject footer = recIdDataSet.get(recIdDataSet.size() - 1);
@@ -204,11 +245,17 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
             recIdDataSet.set(position, new SettingsObject(alias, id, editedID));
         }
         Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, createFinalJsonString());
-        ((AdapterReceivingIds) adapterForRecIdList).update(recIdDataSet);
+        ((AdapterReceivingIds) adapterForRecIdList).notifyDataSetChanged();
+        // propagate change of id
+        if (type == Constants.TYPE_RECEIVING_ID) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(Constants.RECEIVING_ID_CHANGE, true);
+            editor.commit();
+        }
+
     }
 
     private void savePassword(int type, String password) {
-
         if (type == Constants.TYPE_PASSWORD_ACTIVE) {
             isLocked = true;
             for (int i = 0; i < recIdDataSet.size(); i++) {
@@ -231,7 +278,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
             editor.commit();
         }
 
-        ((AdapterReceivingIds) adapterForRecIdList).update(recIdDataSet);
+        ((AdapterReceivingIds) adapterForRecIdList).notifyDataSetChanged();
     }
 
     private void createPassDialog() {
@@ -336,7 +383,13 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
                 createRecIdDialog(Constants.TYPE_RECEIVING_ID, position);
                 break;
             case Constants.TYPE_FOOTER:
-                createRecIdDialog(Constants.TYPE_RECEIVING_ID, -1);
+                // We will insert new rec id only if the total count in list is less than 10
+                // which means 5 default + max 5 rec ids
+                if (recIdDataSet.size() < 10) {
+                    createRecIdDialog(Constants.TYPE_RECEIVING_ID, -1);
+                } else {
+                    Utility.showToast(getApplicationContext(), "Max list length reached");
+                }
                 break;
             default:
                 break;
@@ -403,4 +456,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
             Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, saveListToFile);
         }
     }
+
+
 }
