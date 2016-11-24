@@ -13,8 +13,8 @@ public class Constants {
     public static final String KEY_LONGITUDE = "longitude_key";
     public static final String KEY_TIMESTAMP = "timestamp_key";
     public static final String KEY_ITEM_ORDER = "rec_id_order";
-    public static final String KEY_ADDRESS = "address_key";
-    public static final String KEY_BATTERY_LEVEL = "battery_LEVEL_key";
+    public static final String KEY_POSIION = "position_of_selected_device";
+    public static final String KEY_ALIAS_ARRAY = "alias_array_for_map";
     public static final String PREF_TRACKR = "-tracker_PREF";
     public static final String NEW_UPDATE = "TrackR_Update";
     public static final String TRACKING_STATE = "trackr_gps_state";

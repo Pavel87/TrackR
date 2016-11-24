@@ -113,7 +113,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 //            displayDeviceLocation(false);
         } else {
             spawnReceiverIdViews();
-            convertJsonStringToLocList();
+            locationRecList = Utility.convertJsonStringToLocList(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+            if( locationRecList == null){
+                locationRecList =  new HashMap<>();
+            }
 
             if (locationRecList.size() == 0) {
                 displayDeviceLocation(null, true);
@@ -182,7 +185,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             @Override
             public void onClick(View v) {
                 if (locationRecList.containsKey(itemNumber)) {
-                    Intent sharingIntent = Utility.createShareIntent(Utility.updateShareIntent(getApplicationContext(), locationRecList.get(itemNumber).getLatitude(),
+                    Intent sharingIntent = Utility.createShareIntent(Utility.updateShareIntent(getApplicationContext(),
+                            recIdDataSet.get(itemNumber).getAlias(), locationRecList.get(itemNumber).getLatitude(),
                             locationRecList.get(itemNumber).getLongitude(), locationRecList.get(itemNumber).getTimestamp(),
                             locationRecList.get(itemNumber).getAddress(), locationRecList.get(itemNumber).getBatteryLevel()));
 
@@ -207,7 +211,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void openSettings() {
-        if(Utility.checkPlayServices(getApplicationContext())) {
+        if (Utility.checkPlayServices(getApplicationContext())) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         }
@@ -273,11 +277,11 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             return;
         }
         Intent intent = new Intent(this, MapDetailActivity.class);
-        intent.putExtra(Constants.KEY_LATITUDE, locationRecList.get(itemNumber).getLatitude());
-        intent.putExtra(Constants.KEY_LONGITUDE, locationRecList.get(itemNumber).getLongitude());
-        intent.putExtra(Constants.KEY_TIMESTAMP, Utility.parseDate(locationRecList.get(itemNumber).getTimestamp()));
-        intent.putExtra(Constants.KEY_ADDRESS, locationRecList.get(itemNumber).getAddress());
-        intent.putExtra(Constants.KEY_BATTERY_LEVEL, locationRecList.get(itemNumber).getBatteryLevel());
+//        intent.putExtra(Constants.KEY_LATITUDE, locationRecList.get(itemNumber).getLatitude());
+//        intent.putExtra(Constants.KEY_LONGITUDE, locationRecList.get(itemNumber).getLongitude());
+//        intent.putExtra(Constants.KEY_TIMESTAMP, Utility.parseDate(locationRecList.get(itemNumber).getTimestamp()));
+//        intent.putExtra(Constants.KEY_ADDRESS, locationRecList.get(itemNumber).getAddress());
+//        intent.putExtra(Constants.KEY_BATTERY_LEVEL, locationRecList.get(itemNumber).getBatteryLevel());
         startActivity(intent);
     }
 
@@ -759,25 +763,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         return sb.toString();
     }
 
-    private void convertJsonStringToLocList() {
-        String jsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
-        if (jsonString.equals("")) {
-            return;
-        }
-        try {
-            JSONObject jsnobject = new JSONObject(jsonString);
-            JSONArray jsonArray = jsnobject.getJSONArray("locrecords");
 
-            for (int i = 0; i < jsonArray.length(); i++) {
-                LocationRecord locationRecord = Utility.createLocationRecordFromJson((JSONObject) jsonArray.get(i));
-                if (locationRecord != null) {
-                    locationRecList.put(locationRecord.getId(), locationRecord);
-                }
-            }
-        } catch (JSONException e) {
-            Log.d(Constants.TAG, "#7# Error getting LocRecord JSON obj or array. " + e.getMessage());
-        }
-    }
 
 
     private boolean refreshViewsIfChangeOccured() {

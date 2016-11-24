@@ -14,27 +14,46 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+
 public class MapDetailActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    private double longitude, latitude;
-    private String lastSeen = null;
-
+    private int position = 0;
+    private List<String> alias = new ArrayList<>();
+    private HashMap<Integer, LocationRecord> locationRecList = null;
     private GoogleMap mMap;
+
+    private int markerCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_detail);
 
+
+
+        locationRecList = Utility.convertJsonStringToLocList(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+        if( locationRecList == null){
+            locationRecList =  new HashMap<>();
+        }
         Intent intent = getIntent();
-        latitude = intent.getDoubleExtra(Constants.KEY_LATITUDE,0);
-        longitude = intent.getDoubleExtra(Constants.KEY_LONGITUDE,0);
-        lastSeen = intent.getStringExtra(Constants.KEY_TIMESTAMP);
+        position= intent.getIntExtra(Constants.KEY_POSIION, -1);
+        alias = intent.getStringArrayListExtra(Constants.KEY_ALIAS_ARRAY);
+
+        if(alias.size() == 0){
+            alias.add("TrackR®");
+        }
+
+
+        markerCount = locationRecList.size();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
     }
 
     /**
@@ -50,12 +69,17 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        if (latitude == 0) return; // this should not happen
+        if (markerCount == 0) return; // this should not happen
 
-        final LatLng location = new LatLng(latitude, longitude);
-        mMap.addMarker(new MarkerOptions().position(location).
-                title(lastSeen));
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(location,16f));
+        for(int i = 0; i < markerCount; i ++) {
+            final LatLng location = new LatLng(locationRecList.get(i).getLatitude(), locationRecList.get(i).getLongitude());
+
+            mMap.addMarker(new MarkerOptions().position(location).
+                    title(alias.get(i) + "\n" + Utility.parseDate(locationRecList.get(i).getTimestamp())));
+
+        }
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(locationRecList.get(position).getLatitude(), locationRecList.get(position).getLongitude()),16f));
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -65,7 +89,7 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
             @Override
             public boolean onMarkerClick(Marker marker) {
                 CircleOptions cOptions = new CircleOptions();
-                cOptions.center(location).fillColor(getResources().getColor(R.color.map_radius))
+                cOptions.center(marker.getPosition()).fillColor(getResources().getColor(R.color.map_radius))
                         .strokeColor(Color.BLUE).radius(25).strokeWidth(0.6f).visible(true);
                 mMap.addCircle(cOptions);
                 return false;

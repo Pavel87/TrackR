@@ -31,6 +31,7 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -42,6 +43,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -158,7 +160,7 @@ public class Utility {
     }
 
 
-    public static StringBuilder updateShareIntent(Context context, double latitude, double longitude, long timestamp, String address, double batteryLevel) {
+    public static StringBuilder updateShareIntent(Context context, String deviceName, double latitude, double longitude, long timestamp, String address, double batteryLevel) {
         StringBuilder sb = new StringBuilder();
         sb.append(context.getResources().getString(R.string.share_header));
         sb.append("\n");
@@ -168,19 +170,22 @@ public class Utility {
         sb.append("\n\n");
         //body
         // TODO add ID & NAME
+
+        sb.append("Device: " + deviceName);
+        sb.append("\n");
         sb.append("Coordinates");
         sb.append("\n");
         sb.append("Latitude: " + latitude);
         sb.append("\n");
         sb.append("Longitude: " + longitude);
-        sb.append("\n\n");
+        sb.append("\n");
         sb.append("Last Seen At: " + new Date(timestamp).toString());
-        sb.append("\n\n");
+        sb.append("\n");
         sb.append("Address:");
         sb.append("\n");
         sb.append("" + address);
-        sb.append("\n\n");
-        sb.append("Battery Level: " + String.format("%.2f", batteryLevel) + " %");
+        sb.append("\n");
+        sb.append("Battery Level: " + String.format("%.0f", batteryLevel) + " %");
         sb.append("\n");
         sb.append(context.getResources().getString(R.string.share_header));
         sb.append("\n\n");
@@ -284,7 +289,7 @@ public class Utility {
         }
     }
 
-    public static void showToast(Context context, CharSequence text){
+    public static void showToast(Context context, CharSequence text) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.trackr_notification_top, null);
         TextView toastText = (TextView) view.findViewById(R.id.toastText);
@@ -301,7 +306,7 @@ public class Utility {
     public static boolean saveJsonStringToFile(String path, String data) {
 
         File file = new File(path);
-        if(file.exists()){
+        if (file.exists()) {
             file.delete();
 //            try {
 //                file.createNewFile();
@@ -320,7 +325,7 @@ public class Utility {
             e.printStackTrace();
             Log.e(Constants.TAG, "Failed to write rec ids in file: " + e.getMessage());
         } finally {
-            if (writer != null){
+            if (writer != null) {
                 try {
                     writer.close();
                 } catch (IOException e) {
@@ -334,7 +339,7 @@ public class Utility {
     public static String loadJsonStringFromFile(String path) {
 
         File file = new File(path);
-        if (!file.exists()){
+        if (!file.exists()) {
             return "";
         }
 
@@ -345,14 +350,14 @@ public class Utility {
             reader = new BufferedReader(new FileReader(file));
             String line;
             readOutput.append("");
-            while((line = reader.readLine()) != null) {
+            while ((line = reader.readLine()) != null) {
                 readOutput.append(line);
             }
         } catch (IOException e) {
             e.printStackTrace();
             Log.e(Constants.TAG, "Failed to read rec ids from file: " + e.getMessage());
         } finally {
-            if (reader != null){
+            if (reader != null) {
                 try {
                     reader.close();
                 } catch (IOException e) {
@@ -388,8 +393,8 @@ public class Utility {
     }
 
 
-    public static Animation getAnimation(){
-        RotateAnimation rotate = new RotateAnimation(30, 360, Animation.RELATIVE_TO_SELF, 0.5f,  Animation.RELATIVE_TO_SELF, 0.5f);
+    public static Animation getAnimation() {
+        RotateAnimation rotate = new RotateAnimation(30, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
         rotate.setDuration(300);
         return rotate;
     }
@@ -406,6 +411,29 @@ public class Utility {
             return false;
         }
         return true;
+    }
+
+    public static HashMap<Integer, LocationRecord> convertJsonStringToLocList(String filePath) {
+        String jsonString = Utility.loadJsonStringFromFile(filePath);
+        if (jsonString.equals("")) {
+            return null;
+        }
+        HashMap<Integer, LocationRecord> locationRecList = new HashMap<>();
+        try {
+            JSONObject jsnobject = new JSONObject(jsonString);
+            JSONArray jsonArray = jsnobject.getJSONArray("locrecords");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                LocationRecord locationRecord = Utility.createLocationRecordFromJson((JSONObject) jsonArray.get(i));
+                if (locationRecord != null) {
+                    locationRecList.put(locationRecord.getId(), locationRecord);
+                }
+            }
+            return locationRecList;
+        } catch (JSONException e) {
+            Log.d(Constants.TAG, "#7# Error getting LocRecord JSON obj or array. " + e.getMessage());
+        }
+        return null;
     }
 
 }
