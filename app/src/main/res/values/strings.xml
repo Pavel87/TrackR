@@ -62,4 +62,5 @@
     <string name="enter_rec_id">Add New Device ID</string>
     <string name="alias_required">Friendly name is now mandatory field.</string>
     <string name="password_length_wrong">Password length is wrong.</string>
+    <string name="google_play_services_outdated">TrackR requires Google Play Services are up to date for correct functionality.</string>
 </resources>

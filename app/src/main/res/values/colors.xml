@@ -13,4 +13,5 @@
     <color name="toast_background">#CF244FA7</color>
     <color name="text_nightMode">@color/textLight</color>
     <color name="text_critical">#FF2F2F</color>
+    <color name="marker_area">#BF618AE8</color>
 </resources>

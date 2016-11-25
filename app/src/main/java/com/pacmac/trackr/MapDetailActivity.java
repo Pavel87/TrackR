@@ -1,14 +1,14 @@
 package com.pacmac.trackr;
 
 import android.content.Intent;
-import android.graphics.Color;
-import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v4.app.FragmentActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
@@ -69,17 +69,20 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        if (markerCount == 0) return; // this should not happen
+        if (markerCount == 0 ||  alias.size() == 0) return; // this should not happen
 
-        for(int i = 0; i < markerCount; i ++) {
-            final LatLng location = new LatLng(locationRecList.get(i).getLatitude(), locationRecList.get(i).getLongitude());
+        for(int i = 0; i < alias.size(); i ++) {
+            if(locationRecList.containsKey(i)) {
+                final LatLng location = new LatLng(locationRecList.get(i).getLatitude(), locationRecList.get(i).getLongitude());
 
-            mMap.addMarker(new MarkerOptions().position(location).
-                    title(alias.get(i) + "\n" + Utility.parseDate(locationRecList.get(i).getTimestamp())));
-
+                mMap.addMarker(new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))
+                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+            }
         }
 
-        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(locationRecList.get(position).getLatitude(), locationRecList.get(position).getLongitude()),16f));
+        if(locationRecList.containsKey(position)) {
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(locationRecList.get(position).getLatitude(), locationRecList.get(position).getLongitude()), 16f));
+        }
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
@@ -89,8 +92,8 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
             @Override
             public boolean onMarkerClick(Marker marker) {
                 CircleOptions cOptions = new CircleOptions();
-                cOptions.center(marker.getPosition()).fillColor(getResources().getColor(R.color.map_radius))
-                        .strokeColor(Color.BLUE).radius(25).strokeWidth(0.6f).visible(true);
+                cOptions.center(marker.getPosition()).fillColor(getResources().getColor(R.color.marker_area))
+                        .strokeColor(getResources().getColor(R.color.map_radius)).radius(25).strokeWidth(0.6f).visible(true);
                 mMap.addCircle(cOptions);
                 return false;
             }

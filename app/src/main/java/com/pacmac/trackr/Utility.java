@@ -29,6 +29,7 @@ import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.json.JSONArray;
@@ -54,7 +55,7 @@ import java.util.UUID;
 
 public class Utility {
 
-
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     public final static int MY_PERMISSIONS_REQUEST = 8;
 
     /**
@@ -400,16 +401,18 @@ public class Utility {
     }
 
 
-    public static boolean checkPlayServices(Context context) {
-        int status = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
-        if (status != ConnectionResult.SUCCESS) {
-            if (GooglePlayServicesUtil.isUserRecoverableError(status)) {
-                showToast(context, "This app requires Google Play services are up to date for correct functionality");
-            } else {
-                showToast(context, "This device is not supported.");
+    public static boolean checkPlayServices(Activity activity) {
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        int result = googleAPI.isGooglePlayServicesAvailable(activity);
+        if (result != ConnectionResult.SUCCESS) {
+            if (googleAPI.isUserResolvableError(result)) {
+                googleAPI.getErrorDialog(activity, result,
+                        PLAY_SERVICES_RESOLUTION_REQUEST).show();
+                showToast(activity.getApplicationContext(), activity.getString(R.string.google_play_services_outdated));
             }
             return false;
         }
+
         return true;
     }
 

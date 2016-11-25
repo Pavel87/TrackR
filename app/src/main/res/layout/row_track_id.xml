@@ -19,17 +19,17 @@
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
             android:text="@string/trackingID"
-            android:textColor="@android:color/black"
-            android:textSize="22sp" />
+            android:textColor="@android:color/secondary_text_light"
+            android:textSize="14sp" />
 
         <TextView
             android:id="@+id/trackingID"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:fontFamily="sans-serif-light"
+            android:textColor="@android:color/black"
             android:text=""
-            android:textColor="@android:color/secondary_text_light"
-            android:textSize="14sp" />
+            android:textSize="16sp" />
 
     </LinearLayout>
 

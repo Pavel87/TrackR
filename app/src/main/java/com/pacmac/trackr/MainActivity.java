@@ -31,6 +31,8 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -38,8 +40,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements NetworkStateListener {
 
@@ -114,8 +116,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         } else {
             spawnReceiverIdViews();
             locationRecList = Utility.convertJsonStringToLocList(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
-            if( locationRecList == null){
-                locationRecList =  new HashMap<>();
+            if (locationRecList == null) {
+                locationRecList = new HashMap<>();
             }
 
             if (locationRecList.size() == 0) {
@@ -211,7 +213,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void openSettings() {
-        if (Utility.checkPlayServices(getApplicationContext())) {
+        if (Utility.checkPlayServices(this)) {
             Intent intent = new Intent(this, SettingsActivity.class);
             startActivity(intent);
         }
@@ -277,11 +279,14 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             return;
         }
         Intent intent = new Intent(this, MapDetailActivity.class);
-//        intent.putExtra(Constants.KEY_LATITUDE, locationRecList.get(itemNumber).getLatitude());
-//        intent.putExtra(Constants.KEY_LONGITUDE, locationRecList.get(itemNumber).getLongitude());
-//        intent.putExtra(Constants.KEY_TIMESTAMP, Utility.parseDate(locationRecList.get(itemNumber).getTimestamp()));
-//        intent.putExtra(Constants.KEY_ADDRESS, locationRecList.get(itemNumber).getAddress());
-//        intent.putExtra(Constants.KEY_BATTERY_LEVEL, locationRecList.get(itemNumber).getBatteryLevel());
+
+        ArrayList<String> aliasList = new ArrayList<>();
+        for (int i = 0; i < recIdCount; i++) {
+            aliasList.add(recIdDataSet.get(i).getAlias());
+        }
+        intent.putExtra(Constants.KEY_ALIAS_ARRAY, aliasList);
+        intent.putExtra(Constants.KEY_POSIION, itemNumber);
+
         startActivity(intent);
     }
 
@@ -326,6 +331,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                     long timeStamp = (long) snapshot.child("timestamp").getValue();
                                     Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + recIdDataSet.get(i).getAlias());
 
+                                    // check if timestamps are same and if yes then don't
+                                    // update loc record to save duplicate porcessing
+
+                                    if (locationRecList.containsKey(i) && locationRecList.get(i).getTimestamp() == timeStamp) {
+                                        continue;
+                                    }
                                     // Store location and request addres translation
                                     locationRecList.put(i, new LocationRecord(id, latitude, longitude, timeStamp,
                                             (float) batteryLevel));
@@ -337,9 +348,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                         displayDeviceLocation(locationRecList.get(i), false);
                                         Log.d(Constants.TAG, "should display this object: " + createJsonArrayString());
                                     }
-
                                     Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayString());
-//                                    Log.d(Constants.TAG, createJsonArrayString());
                                 } else if (progressDialog != null && progressDialog.isShowing()) {
                                     Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
                                 }
@@ -349,25 +358,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 //                    if (isDataReceived && oldTimestamp == locationRecord.getTimestamp()) {
 //                        // TODO may want to show how many hours/minutes ago was the location updated
 //                        Utility.showToast(getApplicationContext(), getString(R.string.device_didnot_report_location));
-//                    }
                                 }
-                                searchBtn.setEnabled(true);
+
                             }
                         }
                     }
-
-
-//                    long timestamp = (long) snapshot.child("timestamp").getValue();
-//                    String id = snapshot.getKey();
-//                    if (timestamp < timeThreshold) {
-//                        Log.d(Constants.TAG, id + " ID was not updated in last 7 days - likely not in use anymore");
-//                        firebase.child(id).removeValue();
-//                    }
+                    searchBtn.setEnabled(true);
                 }
-//
-//            firebase.removeEventListener(this);
-//            Log.d(Constants.TAG,"Firebase goes offline");
-//            firebase.goOffline();
             }
 
             @Override
@@ -762,8 +759,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         sb.append("]}");
         return sb.toString();
     }
-
-
 
 
     private boolean refreshViewsIfChangeOccured() {

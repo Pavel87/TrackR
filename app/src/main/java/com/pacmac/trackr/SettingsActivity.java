@@ -193,7 +193,8 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
                 String id = newID.getText().toString();
                 String aliasText = alias.getText().toString();
 
-                if (aliasText.length() > 0 && aliasText.length() <= 14) {
+                if (aliasText.length() > 0 && aliasText.length() <= 12) {
+                    aliasText.trim();
                     // TODO NEED TO CREATE RULE FOR IDs (characters which we can use)
                     if (id != null && id.length() > 7 && id.length() < 32) {
                         saveIDandUpdateView(type, aliasText, id, position);
