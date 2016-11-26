@@ -514,7 +514,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         for (int i = 0; i < recIdCount; i++) {
 
-            if (!locationRecList.containsKey(i)) {
+            if (locationRecList.containsKey(i)) {
                 // if location record exist and last location is stall then we want to updated
                 shouldConnectToFB = !(locationRecList.get(i).getTimestamp() > (System.currentTimeMillis() - Constants.UPDATE_TIMEOUT));
             } else {
