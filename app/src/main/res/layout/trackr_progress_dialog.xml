@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_vertical"
             android:fontFamily="sans-serif-medium"
-            android:text="Loading Data From Server"
+            android:text="Searching Device1 Loation"
             android:textStyle="bold"
             android:paddingRight="16dp"
             android:textSize="16sp" />

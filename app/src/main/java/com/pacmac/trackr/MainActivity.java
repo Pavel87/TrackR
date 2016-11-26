@@ -46,6 +46,7 @@ import java.util.Map;
 public class MainActivity extends AppCompatActivity implements NetworkStateListener {
 
     private TextView tLastLocation, tTimestamp, tAddress, tBatteryLevel;
+    private TextView progressText;
     private View mapBtn;
     private ImageButton searchBtn, settingsBtn, shareBtn;
     private ImageView imageBG;
@@ -160,14 +161,16 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                         }
                         LayoutInflater inflater = getLayoutInflater();
                         View view = inflater.inflate(R.layout.trackr_progress_dialog, null);
-                        TextView textView = (TextView) view.findViewById(R.id.progressText);
-                        textView.setText(getString(R.string.progress_searching));
+                        progressText = (TextView) view.findViewById(R.id.progressText);
                         progressDialog.setContentView(view);
                         progressDialog.setCancelable(false);
                         progressDialog.show();
                     }
+                    progressText.setText(getString(R.string.progress_searching)
+                            + " " + recIdDataSet.get(itemNumber).getAlias()
+                            + " " + getString(R.string.location));
                     progressDialog.show();
-                    new Handler().postDelayed(dismissDialogRunnable, 20 * 1000);
+                    new Handler().postDelayed(dismissDialogRunnable, 10 * 1000);
                 } else {
                     Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
                     enableSearchButton();
@@ -262,7 +265,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void getLastKnownLocation() {
         if (isConnected) {
             // retrieve Location from FB for currently selected ID
-            retrieveLocation(itemNumber);
+            retrieveLocation();
         } else {
             Utility.showToast(getApplicationContext(), getString(R.string.no_connection));
             enableSearchButton();
@@ -299,7 +302,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
 
-    private void retrieveLocation(final int item) {
+    private void retrieveLocation() {
 
         final Firebase firebase = new Firebase("https://trackr1.firebaseio.com");
         firebase.goOnline();
@@ -314,10 +317,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     firebase.goOffline();
 
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                        //Log.d(Constants.TAG, "Firebase snapshot KEY: " + snapshot.getKey());
-                        for (int i = 0; i < recIdCount; i++) {
-                            if (snapshot.getKey().equals(recIdDataSet.get(i).getSafeId())) {
 
+                        for (int i = 0; i < recIdCount; i++) {
+
+                            if (snapshot.getKey().equals(recIdDataSet.get(i).getSafeId())) {
                                 // Processing received data
                                 if (snapshot.hasChildren()) {
                                     Long idLong = ((Long) snapshot.child("id").getValue());
@@ -335,6 +338,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                     // update loc record to save duplicate porcessing
 
                                     if (locationRecList.containsKey(i) && locationRecList.get(i).getTimestamp() == timeStamp) {
+                                        if(i == itemNumber && progressDialog != null && progressDialog.isShowing()) {
+                                            Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
+                                        }
                                         continue;
                                     }
                                     // Store location and request addres translation
@@ -350,20 +356,20 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                     }
                                     Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayString());
                                 } else if (progressDialog != null && progressDialog.isShowing()) {
-                                    Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
+                                    Utility.showToast(getApplicationContext(), getString(R.string.device_didnot_report_location));
                                 }
-                                if (progressDialog != null && progressDialog.isShowing()) {
-                                    progressDialog.dismiss();
-                                    // if there was network request but location is same as before then notify user
-//                    if (isDataReceived && oldTimestamp == locationRecord.getTimestamp()) {
-//                        // TODO may want to show how many hours/minutes ago was the location updated
-//                        Utility.showToast(getApplicationContext(), getString(R.string.device_didnot_report_location));
-                                }
-
+                            }
+                        }
+                        searchBtn.setEnabled(true);
+                        if (progressDialog != null && progressDialog.isShowing()) {
+                            progressDialog.dismiss();
+                            if (!locationRecList.containsKey(itemNumber)) {
+                                Utility.showToast(getApplicationContext(), getString(R.string.rec_id_not_found)
+                                        + " " + recIdDataSet.get(itemNumber).getAlias());
                             }
                         }
                     }
-                    searchBtn.setEnabled(true);
+
                 }
             }
 
@@ -506,28 +512,22 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             return false;
         }
         boolean shouldConnectToFB = true;
-
-
 //
 //        // If I have location record and timestamp of last device upload is smalled than 15 minutes then I don't want to do update
 
         for (int i = 0; i < recIdCount; i++) {
 
-            if (locationRecList.containsKey(i)) {
+            if (!locationRecList.containsKey(i)) {
+                // if location record exist and last location is stall then we want to updated
                 shouldConnectToFB = !(locationRecList.get(i).getTimestamp() > (System.currentTimeMillis() - Constants.UPDATE_TIMEOUT));
+            } else {
+                // if location record doesn't exist for this id then we want to request data from server
+                shouldConnectToFB = true;
             }
             if (shouldConnectToFB) {
                 break;
             }
         }
-
-        // TODO ids have been refreshed then we want to update
-//        // but if Ids changes since last time then we want to try to fetch new data
-//        if (!recIdFromPref.equals(receivingId)) {
-//            shouldConnectToFB = true;
-//            receivingId = recIdFromPref;
-//            resetLocationAndRefreshScreen();
-//        }
 
         if (shouldConnectToFB) {
             getLastKnownLocation();
@@ -656,9 +656,14 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         public void run() {
             if (progressDialog != null && progressDialog.isShowing()) {
                 progressDialog.dismiss();
-                // TODO check this message
-                Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
+                if (!locationRecList.containsKey(itemNumber)) {
+                    Utility.showToast(getApplicationContext(), getString(R.string.rec_id_not_found)
+                            + " " + recIdDataSet.get(itemNumber).getAlias());
+                } else {
+                    Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
+                }
             }
+            firebase.goOffline();
             searchBtn.setEnabled(true);
         }
     };

@@ -50,7 +50,7 @@
     <string name="neveragain">Do not show this again</string>
     <string name="last_location_fresh">Last known location has already been shown.</string>
     <string name="rec_id_wrong">Receiving ID is likely wrong. Try to double check both IDs.</string>
-    <string name="progress_searching">Searching For Device</string>
+    <string name="progress_searching">Searching for</string>
     <string name="extract_data">Extract Location Data To:</string>
     <string name="conn_error">Connection Error Occurred.</string>
     <string name="device_didnot_report_location">The last known location is already displayed.</string>
@@ -63,4 +63,7 @@
     <string name="alias_required">Friendly name is now mandatory field.</string>
     <string name="password_length_wrong">Password length is wrong.</string>
     <string name="google_play_services_outdated">TrackR requires Google Play Services are up to date for correct functionality.</string>
+    <string name="rec_id_not_found">TrackR did not find any location for</string>
+    <string name="location">location</string>
+    <string name="no_new_updates">There are no new location updates.</string>
 </resources>
