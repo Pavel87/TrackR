@@ -42,6 +42,7 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -438,5 +439,19 @@ public class Utility {
         }
         return null;
     }
+
+    public static String createFinalJsonString(ArrayList<SettingsObject> recIdObjList) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("{\"receiverids\":[");
+        // We have to exclude first 4 items related to track mode and last item which is footer
+        for (int i = 4; i < recIdObjList.size() - 2; i++) {
+            sb.append(recIdObjList.get(i).convertToJSONString(i) + ",");
+        }
+        sb.append(recIdObjList.get(recIdObjList.size() - 2).convertToJSONString(recIdObjList.size() - 2));
+        sb.append("]}");
+        return sb.toString();
+    }
+
 
 }

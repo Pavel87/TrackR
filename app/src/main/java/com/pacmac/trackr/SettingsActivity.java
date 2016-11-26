@@ -60,7 +60,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
             }
             //Remove swiped item from list and notify the RecyclerView
             recIdDataSet.remove(position);
-            Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, createFinalJsonString());
+            Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, Utility.createFinalJsonString(recIdDataSet));
             ((AdapterReceivingIds) adapterForRecIdList).notifyDataSetChanged();   //update(recIdDataSet);
 
             Log.d(Constants.TAG, " view # swiped: " +position);
@@ -245,7 +245,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
         } else {
             recIdDataSet.set(position, new SettingsObject(alias, id, editedID));
         }
-        Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, createFinalJsonString());
+        Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, Utility.createFinalJsonString(recIdDataSet));
         ((AdapterReceivingIds) adapterForRecIdList).notifyDataSetChanged();
         // propagate change of id
         if (type == Constants.TYPE_RECEIVING_ID) {
@@ -397,21 +397,6 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
         }
     }
 
-
-    private String createFinalJsonString() {
-        StringBuilder sb = new StringBuilder();
-
-        sb.append("{\"receiverids\":[");
-        // We have to exclude first 4 items related to track mode and last item which is footer
-        for (int i = 4; i < recIdDataSet.size() - 2; i++) {
-            sb.append(recIdDataSet.get(i).convertToJSONString(i) + ",");
-        }
-        sb.append(recIdDataSet.get(recIdDataSet.size() - 2).convertToJSONString(recIdDataSet.size() - 2));
-        sb.append("]}");
-        return sb.toString();
-    }
-
-
     private void prepareListForAdapter() {
 
         if (preferences.getBoolean(Constants.FIRST_RUN, true)) {
@@ -453,8 +438,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
             recIdDataSet.add(new SettingsObject("Phone #1", id, id));
             recIdDataSet.add(new SettingsObject(Constants.TYPE_FOOTER, "FOOTER"));
             // we will save initial values in file now after first start
-            String saveListToFile = createFinalJsonString();
-            Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, saveListToFile);
+            Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, Utility.createFinalJsonString(recIdDataSet));
         }
     }
 

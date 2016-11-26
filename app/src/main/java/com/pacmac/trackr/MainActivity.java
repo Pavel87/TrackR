@@ -684,6 +684,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             String recId = preferences.getString(Constants.RECEIVING_ID, "");
             String recIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, "");
 
+            // TODO this piece might be removed later as it is only for pre v2 upgrades
             if(!recId.equals("")){
                 // we likely upgraded from older version delete pref here
                 SharedPreferences.Editor editor = preferences.edit();
@@ -694,6 +695,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
                 recIdDataSet.add(new SettingsObject("TrackR1", recIdRaw, recId));
                 recIdCount = recIdDataSet.size();
+                // Save upgraded REC IDs into file
+                Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, Utility.createFinalJsonString(recIdDataSet));
+
             }
             return;
         }
