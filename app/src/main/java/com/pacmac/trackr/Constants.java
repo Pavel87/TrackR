@@ -11,7 +11,6 @@ public class Constants {
     public static final String KEY_ID = "id_record_key";
     public static final String KEY_LATITUDE = "latitude_key";
     public static final String KEY_LONGITUDE = "longitude_key";
-    public static final String KEY_TIMESTAMP = "timestamp_key";
     public static final String KEY_ITEM_ORDER = "rec_id_order";
     public static final String KEY_POSIION = "position_of_selected_device";
     public static final String KEY_ALIAS_ARRAY = "alias_array_for_map";
@@ -20,6 +19,8 @@ public class Constants {
     public static final String TRACKING_STATE = "trackr_gps_state";
     public static final String TRACKING_ID = "trackr_gps_ID";
     public static final String TRACKING_ID_RAW = "trackr_gps_ID_raw";
+    public static final String RECEIVING_ID_RAW = "receiver_gps_ID_raw";
+    public static final String RECEIVING_ID = "receiver_gps_ID";
     public static final String RECEIVING_ID_CHANGE = "receiver_gps_ID_changed";
     public static final String PACKAGE_NAME = "com.pacmac.trackr";
     public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";

@@ -31,8 +31,6 @@ import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -40,7 +38,6 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class MainActivity extends AppCompatActivity implements NetworkStateListener {
@@ -680,9 +677,24 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     private void populateRecIdsList() {
         String jsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
-
         if (jsonString.equals("")) {
             // file doesn't exist
+
+            //backward compatibility
+            String recId = preferences.getString(Constants.RECEIVING_ID, "");
+            String recIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, "");
+
+            if(!recId.equals("")){
+                // we likely upgraded from older version delete pref here
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putString(Constants.RECEIVING_ID, "");
+                editor.putString(Constants.RECEIVING_ID_RAW, "");
+                //TODO may want to clear other preferences as well as those are deprecated
+                editor.commit();
+
+                recIdDataSet.add(new SettingsObject("TrackR1", recIdRaw, recId));
+                recIdCount = recIdDataSet.size();
+            }
             return;
         }
 
@@ -775,7 +787,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
         if (preferences.getBoolean(Constants.RECEIVING_ID_CHANGE, false)) {
 
-            // TODO maybe we can wipe only changed ids and its location
+            // TODO maybe I can wipe only changed ids and its location
 
             recIdDataSet.clear();
             locationRecList.clear();
