@@ -58,10 +58,6 @@ public class LocationService extends Service implements LocationListener, Google
         child = preferences.getString(Constants.TRACKING_ID, "Error");
         if (child.equals("Error")) stopSelf();
 
-        Firebase.setAndroidContext(getApplicationContext());
-        firebase = new Firebase("https://trackr1.firebaseio.com");
-        firebase.goOffline();
-
         mGoogleApiClient.connect();
         Log.d(Constants.TAG, "LocationService Started");
         return START_STICKY;
@@ -111,7 +107,7 @@ public class LocationService extends Service implements LocationListener, Google
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         float level = getBatteryLevel();
-        if (level >= 30) {
+        if (level >= 25) {
             createLocationRequest(Constants.TIME_BATTERY_OK);
             Log.d(Constants.TAG, "Battery OK: " + level);
             lastBatLevel = true;
@@ -132,18 +128,18 @@ public class LocationService extends Service implements LocationListener, Google
     public void onLocationChanged(Location lastLocation) {
         long time = lastLocation.getTime();
         double batteryLevel = Math.round(getBatteryLevel() * 100.0) / 100.0;
-        //Log.d(Constants.TAG, ("Updating FIREBASE: " + lastLocation.getLatitude() + " " + lastLocation.getLongitude() + " || " + lastLocation.getAccuracy()));
-        // TODO update ID
+        firebase = new Firebase("https://trackr1.firebaseio.com");
+        firebase.keepSynced(false);
         firebase.goOnline();
-        Log.d(Constants.TAG, "Firebase goes online");
+        Log.d(Constants.TAG, "Firebase goes online - attempt to update location");
         firebase.child(child).setValue(new LocationTxObject(0, lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel), this);
-        if (batteryLevel >= 30 && !lastBatLevel) {
+        if (batteryLevel >= 25 && !lastBatLevel) {
             lastBatLevel = true;
             stopLocationUpdates();
             createLocationRequest(Constants.TIME_BATTERY_OK);
             startLocationUpdates();
-        } else if (batteryLevel < 30 && lastBatLevel) {
+        } else if (batteryLevel < 25 && lastBatLevel) {
             lastBatLevel = false;
             stopLocationUpdates();
             createLocationRequest(Constants.TIME_BATTERY_LOW);

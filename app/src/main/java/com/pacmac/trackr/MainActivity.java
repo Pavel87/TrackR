@@ -30,6 +30,7 @@ import android.widget.TextView;
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
 import com.firebase.client.FirebaseError;
+import com.firebase.client.Logger;
 import com.firebase.client.ValueEventListener;
 
 import org.json.JSONArray;
@@ -176,12 +177,11 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 }
             }
         });
-        Firebase.setAndroidContext(getApplicationContext());
-        if (firebase == null) {
-            firebase = new Firebase("https://trackr1.firebaseio.com");
-        }
-        Log.d(Constants.TAG, "Firebase goes offline");
-        firebase.goOffline();
+//        if (firebase == null) {
+//            firebase = new Firebase("https://trackr1.firebaseio.com");
+//        }
+//        Log.d(Constants.TAG, "Firebase goes offline");
+//        firebase.goOffline();
         // at last we want to start tracking service if not started and if
         // device is in tracking mode
         startTrackingService();
@@ -283,17 +283,14 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             skipfbCallOnReconfiguration = false;
             return;
         }
+        firebase = new Firebase("https://trackr1.firebaseio.com");
         firebase.goOnline();
         Log.d(Constants.TAG, "Firebase goes online");
-        firebase.keepSynced(true);
+        firebase.keepSynced(false);
         firebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 {
-                    firebase.removeEventListener(this);
-                    firebase.goOffline();
-                    Log.d(Constants.TAG, "Firebase goes offline");
-
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 
                         for (int i = 0; i < recIdCount; i++) {
@@ -356,6 +353,11 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                     + " " + recIdDataSet.get(itemNumber).getAlias());
                         }
                     }
+
+
+                    firebase.removeEventListener(this);
+                    firebase.goOffline();
+                    Log.d(Constants.TAG, "Firebase goes offline");
 
                 }
             }
