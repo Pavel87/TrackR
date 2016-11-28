@@ -213,8 +213,8 @@ public class Utility {
         sb.append(context.getString(R.string.updateMsg4));
         sb.append("\n");
         sb.append(context.getString(R.string.updateMsg5));
-//        sb.append("\n");
-//        sb.append(context.getString(R.string.updateMsg6));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg6));
         sb.append("\n");
         sb.append(context.getString(R.string.updateMsg7));
         builder.setMessage(sb.toString());
@@ -299,7 +299,7 @@ public class Utility {
 
         Toast toast = new Toast(context);
         toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.TOP, 0, 0);
-        toast.setDuration(Toast.LENGTH_LONG);
+        toast.setDuration(Toast.LENGTH_SHORT);
         toast.setView(view);
         toast.show();
     }
@@ -377,8 +377,8 @@ public class Utility {
 
     public static SettingsObject createSettingsObjectFromJson(JSONObject object) {
         try {
-            return new SettingsObject((String) object.getString("alias"),
-                    (String) object.getString("id"), (String) object.getString("safeId"));
+            return new SettingsObject(Constants.TYPE_NORMAL, object.getString("alias"),
+                    object.getString("id"), object.getString("safeId"));
         } catch (JSONException e) {
             Log.d(Constants.TAG, "#3# Error parsing json from file. " + e.getMessage());
         }
@@ -443,12 +443,20 @@ public class Utility {
     public static String createFinalJsonString(ArrayList<SettingsObject> recIdObjList) {
         StringBuilder sb = new StringBuilder();
 
+
+
         sb.append("{\"receiverids\":[");
-        // We have to exclude first 4 items related to track mode and last item which is footer
-        for (int i = 4; i < recIdObjList.size() - 2; i++) {
-            sb.append(recIdObjList.get(i).convertToJSONString(i) + ",");
+        //if passed list has only length == 1 then we are upgrading from v1.7
+        // TODO if statement can be removed later on
+        if(recIdObjList.size() ==1){
+            sb.append(recIdObjList.get(0).convertToJSONString(0));
+        } else {
+            // We have to exclude first 4 items related to track mode and last item which is footer
+            for (int i = 4; i < recIdObjList.size() - 2; i++) {
+                sb.append(recIdObjList.get(i).convertToJSONString(i) + ",");
+            }
+            sb.append(recIdObjList.get(recIdObjList.size() - 2).convertToJSONString(recIdObjList.size() - 2));
         }
-        sb.append(recIdObjList.get(recIdObjList.size() - 2).convertToJSONString(recIdObjList.size() - 2));
         sb.append("]}");
         return sb.toString();
     }

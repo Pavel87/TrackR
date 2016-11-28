@@ -5,31 +5,43 @@
     android:orientation="vertical">
 
     <LinearLayout
-        android:id="@+id/txID"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:paddingBottom="25dp"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="25dp">
+        android:orientation="horizontal">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:text="@string/trackingID"
-            android:textColor="@android:color/secondary_text_light"
-            android:textSize="14sp" />
+        <LinearLayout
+            android:id="@+id/friendlyName"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center_vertical"
+            android:orientation="vertical"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp">
 
-        <TextView
-            android:id="@+id/trackingID"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-light"
-            android:textColor="@android:color/black"
-            android:text=""
-            android:textSize="16sp" />
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:ellipsize="marquee"
+                android:fontFamily="sans-serif-light"
+                android:text="@string/trackingID"
+                android:textColor="@android:color/black"
+                android:textSize="22sp" />
+
+            <TextView
+                android:id="@+id/trackingID"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="left"
+                android:text="sdasdas-djaksdj-a0ksjda-sdasdadsasdasd"
+                android:fontFamily="sans-serif-light"
+                android:textColor="@android:color/secondary_text_light"
+                android:textSize="16sp" />
+
+
+        </LinearLayout>
 
     </LinearLayout>
 

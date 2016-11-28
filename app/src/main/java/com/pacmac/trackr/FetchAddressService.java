@@ -52,46 +52,102 @@ public class FetchAddressService extends IntentService {
 
     public String getAdress(double latitude, double longitude) {
 
-        if(longitude == 0) return getResources().getString(R.string.address_loc_error);
+        if (longitude == 0) return getResources().getString(R.string.address_loc_error);
         Geocoder geocoder = new Geocoder(this, Locale.getDefault());
         List<Address> addresses = null;
         try {
-            addresses = geocoder.getFromLocation(latitude, longitude, 1);
+            addresses = geocoder.getFromLocation(latitude, longitude, 3);
         } catch (IOException e) {
             Log.d(Constants.TAG, "Cannot translate the location: IO Exception");
             codeResult = Constants.ERROR;
             e.printStackTrace();
         }
 
-        if (addresses == null || addresses.isEmpty()) {
-            codeResult = Constants.ERROR;
-            return getResources().getString(R.string.address_not_found);
+        // If results available it will iterate through results and fill the fields
+        if (addresses != null && addresses.size() > 0) {
+
+            String[] addressOutput = new String[5];
+
+            for (Address address : addresses) {
+                if (addressOutput[0] == null) {
+                    addressOutput[0] = address.getSubThoroughfare(); // 123 house number
+                }
+                if (addressOutput[1] == null) {
+                    addressOutput[1] = formatStreetString(address.getThoroughfare()); // Street
+                }
+                if (addressOutput[2] == null) {
+                    addressOutput[2] = address.getLocality();  // Vancouver
+                }
+                if (addressOutput[3] == null) {
+                    addressOutput[3] = address.getCountryCode(); // CA
+                }
+
+                if (addressOutput[4] == null) {
+                    addressOutput[4] = address.getPostalCode();  // 129 321
+                }
+
+//                if (addressOutput[5] == null) {
+//                    addressOutput[5] = address.getAdminArea(); // British Columbia
+//                }
+
+            }
+
+            StringBuilder result = new StringBuilder();
+            for (int i = 1; i < addressOutput.length; i++) {
+                if (addressOutput[i - 1] == null) {
+                    continue;
+                }
+                result.append(addressOutput[i - 1]).append(", ");
+            }
+            // add last element
+            if (addressOutput[addressOutput.length - 1] != null) {
+                result.append(addressOutput[addressOutput.length - 1]);
+            }
+
+            // make sure we have some address
+            if (addressOutput.length == 0) {
+                codeResult = Constants.ERROR;
+                return getResources().getString(R.string.address_not_found);
+            }
+
+            codeResult = Constants.SUCCESS;
+            // remove comma and white space before return
+            String output = result.toString().trim();
+            if (output.lastIndexOf(",") == output.length() - 1) {
+                output = output.substring(0, output.lastIndexOf(","));
+            }
+            return output;
+        }
+        codeResult = Constants.ERROR;
+        return getResources().getString(R.string.address_not_found);
+    }
+
+
+    private String formatStreetString(String input){
+
+        String formatedInput = input;
+
+        if(input != null){
+            if(input.contains("Street")){
+                formatedInput = input.replace("Street", "St");
+            } else if(input.contains("Avenue")) {
+                formatedInput = input.replace("Avenue", "Ave");
+            } else if(input.contains("Drive")) {
+                formatedInput = input.replace("Avenue", "Dr");
+            } else if(input.contains("Place")) {
+                formatedInput = input.replace("Avenue", "Pl");
+            } else if(input.contains("Highway")) {
+                formatedInput = input.replace("Avenue", "Hwy");
+            } else if(input.contains("Parkway")) {
+                formatedInput = input.replace("Avenue", "Pwy");
+            } else {
+                formatedInput = input;
+            }
+        } else {
+            return formatedInput;
         }
 
-        StringBuilder result = new StringBuilder();
-
-        String temp = addresses.get(0).getSubThoroughfare();    // get house number
-        result.append(temp != null ? (temp + ", ") : "");
-        temp = addresses.get(0).getThoroughfare();              // getStreet
-        result.append(temp != null ? (temp + "\n") : "\n");
-
-        temp = addresses.get(0).getLocality();                  // getCity
-        result.append(temp != null ? (temp + ", ") : "");
-        temp = addresses.get(0).getPostalCode();                // getPostalCode
-        result.append(temp != null ? (temp + "\n") : "\n");
-
-        temp = addresses.get(0).getAdminArea();                  // Region/Province
-        result.append(temp != null ? (temp + ", ") : "");
-        temp = addresses.get(0).getCountryCode();                // get Country Code
-        result.append(temp != null ? (temp + "\n") : "\n");
-
-
-        if (result == null) {
-            codeResult = Constants.ERROR;
-            return getResources().getString(R.string.address_na);
-        }
-        codeResult = Constants.SUCCESS;
-        return result.toString();
+        return formatedInput;
     }
 
 }

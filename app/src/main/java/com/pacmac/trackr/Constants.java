@@ -8,7 +8,6 @@ public class Constants {
     public static final String TAG = "TrackR";
     public static final String RATING_POPUP_COUNTER = "rating_popup_counter";
     public static final String RATING_POPUP_ENABLED = "rating_popup_enabled";
-    public static final String KEY_ID = "id_record_key";
     public static final String KEY_LATITUDE = "latitude_key";
     public static final String KEY_LONGITUDE = "longitude_key";
     public static final String KEY_ITEM_ORDER = "rec_id_order";
@@ -29,16 +28,11 @@ public class Constants {
     public static final String PADLOCK_ACTIVE = "padlock_active";
     public static final String PADLOCK_PASS = "padlock_pass";
 
-    public static final String REMOTE_USER_ID = "user_id";
-    public static final String REMOTE_ADDRESS = "user_address";
-
     public static final String JSON_REC_IDS_FILE_NAME = "/recIdsJson";
     public static final String JSON_LOC_FILE_NAME = "/locRecsJson";
 
     public static final int SUCCESS = 0;
     public static final int ERROR = 134;
-    public static final int TYPE_TRACKING_ID = 0;
-    public static final int TYPE_RECEIVING_ID = 1;
     public static final int TYPE_PASSWORD_ACTIVE = 2;
     public static final int TYPE_PASSWORD_NOT_ACTIVE = 3;
     public final static int UPDATE_TIMEOUT = 10 * 60 * 1000;

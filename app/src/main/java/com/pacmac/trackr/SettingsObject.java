@@ -22,9 +22,10 @@ public class SettingsObject {
     /**
      * Constructor used for tracking ID and receiver IDs
      */
-    public SettingsObject(String alias, String id, String safeId) {
+    public SettingsObject(int rowType, String alias, String id, String safeId) {
         if (alias != null)
             this.alias = alias;
+        this.rowType = rowType;
         this.id = id;
         this.safeId = safeId;
         //row type is 0 by default

@@ -52,6 +52,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private boolean isConnected = false;
     private boolean isTrackingOn = false;
     private boolean skipConnReceiverTrigger = true;
+    private boolean skipfbCallOnReconfiguration = false;
 
     private AddressResultReceiver resultReceiver;
     private Handler handler;
@@ -107,22 +108,23 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         connReceiver = new NetworkStateChangedReceiver();
         connReceiver.setConnectionListener(this);
 
-        // restore location on reconfiguration
-        if (savedInst != null && savedInst.getInt(Constants.KEY_ID, -1) != -1) {
-            //TODO save which ID is selected
-//            displayDeviceLocation(false);
-        } else {
-            spawnReceiverIdViews();
-            locationRecList = Utility.convertJsonStringToLocList(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
-            if (locationRecList == null) {
-                locationRecList = new HashMap<>();
-            }
 
-            if (locationRecList.size() == 0) {
-                displayDeviceLocation(null, true);
-            } else {
-                displayDeviceLocation(locationRecList.get(itemNumber), false);
-            }
+        // restore location on reconfiguration
+        if (savedInst != null) {
+            itemNumber = savedInst.getInt(Constants.KEY_ITEM_ORDER, 0);
+            skipfbCallOnReconfiguration = true;
+
+        }
+        locationRecList = Utility.convertJsonStringToLocList(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+        if (locationRecList == null) {
+            locationRecList = new HashMap<>();
+        }
+        spawnReceiverIdViews(itemNumber);
+
+        if (locationRecList.size() == 0 || !locationRecList.containsKey(itemNumber)) {
+            displayDeviceLocation(null, true);
+        } else {
+            displayDeviceLocation(locationRecList.get(itemNumber), false);
         }
 
         checkConnectivity();
@@ -150,31 +152,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     return;
                 }
 
-                if (checkIfshouldTryRetrieveDevicePosition()) {
-                    if (progressDialog == null) {
-                        progressDialog = new Dialog(MainActivity.this);
-                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
-                            progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-                        }
-                        LayoutInflater inflater = getLayoutInflater();
-                        View view = inflater.inflate(R.layout.trackr_progress_dialog, null);
-                        progressText = (TextView) view.findViewById(R.id.progressText);
-                        progressDialog.setContentView(view);
-                        progressDialog.setCancelable(false);
-                        progressDialog.show();
-                    }
-                    progressText.setText(getString(R.string.progress_searching)
-                            + " " + recIdDataSet.get(itemNumber).getAlias()
-                            + " " + getString(R.string.location));
-                    progressDialog.show();
-                    new Handler().postDelayed(dismissDialogRunnable, 10 * 1000);
-                } else {
-                    Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
-                    enableSearchButton();
-                    if (locationRecList.containsKey(itemNumber) && locationRecList.get(itemNumber).getAddress().equals("") && isConnected) {
-                        getAdress(itemNumber);
-                    }
-                }
+                tryToRetrieveNewLocationWithProgress();
             }
         });
         settingsBtn.setOnClickListener(new View.OnClickListener() {
@@ -212,6 +190,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         showRateMyAppDialog();
     }
 
+
     private void openSettings() {
         if (Utility.checkPlayServices(this)) {
             Intent intent = new Intent(this, SettingsActivity.class);
@@ -222,7 +201,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "").equals(appVersion)) {
+        if (!preferences.getString(Constants.NEW_UPDATE, "2.0").equals(appVersion)) {
             Utility.createAlertDialog(MainActivity.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
@@ -300,8 +279,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
 
     private void retrieveLocation() {
-
-        final Firebase firebase = new Firebase("https://trackr1.firebaseio.com");
+        if (skipfbCallOnReconfiguration) {
+            skipfbCallOnReconfiguration = false;
+            return;
+        }
         firebase.goOnline();
         Log.d(Constants.TAG, "Firebase goes online");
         firebase.keepSynced(true);
@@ -309,9 +290,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 {
-                    Log.d(Constants.TAG, "Firebase goes offline");
                     firebase.removeEventListener(this);
                     firebase.goOffline();
+                    Log.d(Constants.TAG, "Firebase goes offline");
 
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 
@@ -335,8 +316,17 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                     // update loc record to save duplicate porcessing
 
                                     if (locationRecList.containsKey(i) && locationRecList.get(i).getTimestamp() == timeStamp) {
-                                        if(i == itemNumber && progressDialog != null && progressDialog.isShowing()) {
-                                            Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
+                                        if (i == itemNumber && progressDialog != null && progressDialog.isShowing()) {
+                                            if (timeStamp < System.currentTimeMillis() - Constants.TIME_BATTERY_LOW) {
+                                                Utility.showToast(getApplicationContext(),
+                                                        recIdDataSet.get(i).getAlias() + " " + getString(R.string.no_new_updates));
+                                            } else {
+                                                Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
+                                                if (locationRecList.get(itemNumber).getAddress().equals("") ||
+                                                        locationRecList.get(itemNumber).getAddress().equals(getString(R.string.not_available))) {
+                                                    getAdress(i);
+                                                }
+                                            }
                                         }
                                         continue;
                                     }
@@ -345,11 +335,11 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                             (float) batteryLevel));
 
 
-                                    // as we do multiple id request we want to display only currently selected ID
+                                    // as we do multiple id request we want to display
+                                    // only currently selected ID if there was any new update
                                     if (i == itemNumber) {
                                         getAdress(i);
                                         displayDeviceLocation(locationRecList.get(i), false);
-                                        Log.d(Constants.TAG, "should display this object: " + createJsonArrayString());
                                     }
                                     Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayString());
                                 } else if (progressDialog != null && progressDialog.isShowing()) {
@@ -357,13 +347,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                 }
                             }
                         }
-                        searchBtn.setEnabled(true);
-                        if (progressDialog != null && progressDialog.isShowing()) {
-                            progressDialog.dismiss();
-                            if (!locationRecList.containsKey(itemNumber)) {
-                                Utility.showToast(getApplicationContext(), getString(R.string.rec_id_not_found)
-                                        + " " + recIdDataSet.get(itemNumber).getAlias());
-                            }
+                    }
+                    searchBtn.setEnabled(true);
+                    if (progressDialog != null && progressDialog.isShowing()) {
+                        progressDialog.dismiss();
+                        if (!locationRecList.containsKey(itemNumber)) {
+                            Utility.showToast(getApplicationContext(), getString(R.string.rec_id_not_found)
+                                    + " " + recIdDataSet.get(itemNumber).getAlias());
                         }
                     }
 
@@ -386,85 +376,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         });
     }
 
-
-//        String child = recIdDataSet.get(item).getSafeId();
-//        Log.d(Constants.TAG, "Firebase goes online");
-//        firebase.goOnline();
-//        firebase.keepSynced(false);
-//        firebase.child(child).addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot snapshot) {
-//                Log.d(Constants.TAG, "Firebase goes offline");
-//                firebase.removeEventListener(this);
-//                firebase.goOffline();
-//
-//                // Processing received data
-//                if (snapshot.hasChildren()) {
-//                    isDataReceived = true;
-//                    Long idLong = ((Long) snapshot.child("id").getValue());
-//                    int id = -1;
-//                    double batteryLevel = -1;
-//                    if (idLong != null) {
-//                        id = idLong.intValue();
-//                        batteryLevel = (double) snapshot.child("batteryLevel").getValue();
-//                    }
-//                    double latitude = (double) snapshot.child("latitude").getValue();
-//                    double longitude = (double) snapshot.child("longitude").getValue();
-//                    long timeStamp = (long) snapshot.child("timestamp").getValue();
-//                    Log.i(Constants.TAG, "Recovered data from FB for id: " + item + " alias: " + recIdDataSet.get(item).getAlias());
-//
-//                    // Store location and request addres translation
-//                    locationRecList.put(item ,new LocationRecord(id, latitude, longitude, timeStamp,
-//                            (float) batteryLevel));
-//                    getAdress(item);
-//
-//
-//                    // as we do multiple id request we want to display only currently selected ID
-//                    if(item == itemNumber) {
-//                        displayDeviceLocation(locationRecList.get(item), false);
-//                    }
-//                    // SAVE last known location in SharedPreferences
-//                    if (preferences != null) {
-//                        SharedPreferences.Editor prefEditor = preferences.edit();
-//                        //TODO instead will save as JSON in file
-////                        prefEditor.putInt(Constants.REMOTE_USER_ID, locationRecord.getId());
-////                        prefEditor.putFloat(Constants.REMOTE_LATITUDE, (float) locationRecord.getLatitude());
-////                        prefEditor.putFloat(Constants.REMOTE_LONGITUDE, (float) locationRecord.getLongitude());
-////                        prefEditor.putFloat(Constants.REMOTE_BATTERY_LEVEL, (float) locationRecord.getBatteryLevel());
-////                        prefEditor.putLong(Constants.REMOTE_TIMESTAMP, locationRecord.getTimestamp());
-////                        prefEditor.putString(Constants.REMOTE_ADDRESS, locationRecord.getAddress());
-//                        prefEditor.commit();
-//                    }
-//                } else if (progressDialog != null && progressDialog.isShowing()) {
-//                    Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
-//                }
-//                if (progressDialog != null && progressDialog.isShowing()) {
-//                    progressDialog.dismiss();
-//                    // if there was network request but location is same as before then notify user
-////                    if (isDataReceived && oldTimestamp == locationRecord.getTimestamp()) {
-////                        // TODO may want to show how many hours/minutes ago was the location updated
-////                        Utility.showToast(getApplicationContext(), getString(R.string.device_didnot_report_location));
-////                    }
-//                }
-//                searchBtn.setEnabled(true);
-//            }
-//
-//            @Override
-//            public void onCancelled(FirebaseError firebaseError) {
-//                isDataReceived = false;
-//                Log.i(Constants.TAG, "Update Cancelled" + firebaseError.getMessage());
-//                firebase.goOffline();
-//                Log.d(Constants.TAG, "Firebase goes offline");
-//
-//                // Dismiss progress dialog if it is showing right now
-//                if (progressDialog != null && progressDialog.isShowing()) {
-//                    progressDialog.dismiss();
-//                    Utility.showToast(getApplicationContext(), getString(R.string.conn_error));
-//                }
-//                searchBtn.setEnabled(true);
-//            }
-//        });
-//        }
 
     private void startIntentService(LocationRecord locationRecord, int item) {
         Intent intent = new Intent(getApplicationContext(), FetchAddressService.class);
@@ -532,22 +443,11 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         return shouldConnectToFB;
     }
 
-    private void resetLocationAndRefreshScreen() {
-        if (preferences != null) {
-            int id = preferences.getInt(Constants.REMOTE_USER_ID, -1);
-            if (id == -1) {
-//                locationRecord = null;
-            }
-        }
-        // Will clear the old device location
-        displayDeviceLocation(null, true);
-    }
 
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         if (locationRecList.size() != 0) {
             outState.putInt(Constants.KEY_ITEM_ORDER, itemNumber);
-
         }
         super.onSaveInstanceState(outState);
     }
@@ -581,7 +481,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 locationRecList.get(itemOrder).setAddress(address);
             }
         }
-
     }
 
     @Override
@@ -685,7 +584,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             String recIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, "");
 
             // TODO this piece might be removed later as it is only for pre v2 upgrades
-            if(!recId.equals("")){
+            if (!recId.equals("")) {
                 // we likely upgraded from older version delete pref here
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putString(Constants.RECEIVING_ID, "");
@@ -693,7 +592,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 //TODO may want to clear other preferences as well as those are deprecated
                 editor.commit();
 
-                recIdDataSet.add(new SettingsObject("TrackR1", recIdRaw, recId));
+                recIdDataSet.add(new SettingsObject(Constants.TYPE_NORMAL, "TrackR1", recIdRaw, recId));
                 recIdCount = recIdDataSet.size();
                 // Save upgraded REC IDs into file
                 Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, Utility.createFinalJsonString(recIdDataSet));
@@ -718,14 +617,14 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         recIdCount = recIdDataSet.size();
     }
 
-    private void spawnReceiverIdViews() {
+    private void spawnReceiverIdViews(int itemSelected) {
         final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.receivingIDPanel);
         LayoutInflater inflater = getLayoutInflater();
 
         for (int i = 0; i < recIdCount; i++) {
             View view = inflater.inflate(R.layout.tracking_id_button_layout, null);
             TextView item = (TextView) view.findViewById(R.id.recIdLabel);
-            if (i == 0) item.setSelected(true);
+            if (i == itemSelected) item.setSelected(true);
             item.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
@@ -751,7 +650,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             linearLayout.addView(view);
 
             if (recIdDataSet.size() > 0) {
-                itemNumber = 0;
+                itemNumber = itemSelected;
             }
         }
     }
@@ -806,13 +705,43 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             displayDeviceLocation(null, true);
 
             populateRecIdsList();
-            spawnReceiverIdViews();
-            getLastKnownLocation();
+            spawnReceiverIdViews(0);
+            tryToRetrieveNewLocationWithProgress();
             return true;
         }
         return false;
     }
 
+    private void tryToRetrieveNewLocationWithProgress() {
+        if (checkIfshouldTryRetrieveDevicePosition()) {
+            if (progressDialog == null) {
+                progressDialog = new Dialog(MainActivity.this);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+                    progressDialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                }
+                LayoutInflater inflater = getLayoutInflater();
+                View view = inflater.inflate(R.layout.trackr_progress_dialog, null);
+                progressText = (TextView) view.findViewById(R.id.progressText);
+                progressDialog.setContentView(view);
+                progressDialog.setCancelable(false);
+                progressDialog.show();
+            }
+            progressText.setText(getString(R.string.progress_searching)
+                    + " " + recIdDataSet.get(itemNumber).getAlias()
+                    + " " + getString(R.string.location));
+            progressDialog.show();
+            new Handler().postDelayed(dismissDialogRunnable, 10 * 1000);
+        } else {
+            Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
+            enableSearchButton();
+            if (locationRecList.containsKey(itemNumber) &&
+                    (locationRecList.get(itemNumber).getAddress().equals("") ||
+                            locationRecList.get(itemNumber).getAddress().equals(getString(R.string.not_available)))
+                    && isConnected) {
+                getAdress(itemNumber);
+            }
+        }
+    }
 
 }
 

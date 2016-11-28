@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="app_name">TrackR</string>
     <string name="last_location">Letzte Bekannte Lage</string>
     <string name="coord">Koordinaten</string>
     <string name="local_time">Zuletzt Gesehen:</string>
@@ -36,12 +37,12 @@
     <string name="no_location">Keine gültige Adresse angegeben</string>
     <string name="share_header">*****************************</string>
     <string name="new_update_title">Neue Aktualisierung v</string>
-    <string name="updateMsg1">- German localization available.</string>
-    <string name="updateMsg2">- </string>
-    <string name="updateMsg3">- </string>
-    <string name="updateMsg4">- </string>
-    <string name="updateMsg5">- </string>
-    <string name="updateMsg6">- </string>
+    <string name="updateMsg1">- NEW option to track up to 5 devices.</string>
+    <string name="updateMsg2">- Added list of tracked devices in Settings.</string>
+    <string name="updateMsg3">- Buttons to switch between tracked devices.</string>
+    <string name="updateMsg4">- Map is now supporting multiple devices.</string>
+    <string name="updateMsg5">- German localization available.</string>
+    <string name="updateMsg6">- Added version check for GooglePlay Services.</string>
     <string name="updateMsg7">- Bug fixes.</string>
     <string name="rateApp">Wie gefällt Ihnen TrackR?</string>
     <string name="rta_dialog_message">TrackR ist stolz darauf das sie diese App nutzen. Bitte nehmen Sie sich einigen Minuten Zeit um diese App im Google Store zu bewerten. Wir schätzen ebenfalls jegliche Art von Rückmeldung oder Verbesserungsvorschläge.</string>
@@ -54,4 +55,19 @@
     <string name="extract_data">Daten extrahieren unter:</string>
     <string name="conn_error">Es ist ein Verbindungsfehler aufgetreten.</string>
     <string name="device_didnot_report_location">ie letzte bekannte Adresse wurde bereits angezeigt.</string>
+
+    <string name="friendly_name">Freundlicher Name</string>
+    <string name="rec_id">ID:</string>
+    <string name="rec_id_list_title">Liste der verfolgten Geräte</string>
+    <string name="friendlyName">Freundlicher Name</string>
+    <string name="deviceId">Geräte ID</string>
+    <string name="enter_rec_id">Neue Geräte-ID hinzufügen</string>
+    <string name="alias_required">Freundlicher Name ist Pflichtfeld.</string>
+    <string name="password_length_wrong">Kennwortlänge ist falsch.</string>
+    <string name="google_play_services_outdated">TrackR requires Google Play Services are up to date for correct functionality.</string>
+    <string name="rec_id_not_found">TrackR fand keinen Ort für</string>
+    <string name="location">Lage</string>
+    <string name="no_new_updates">Gerät seinen Standort nicht länger als 40 Minuten sendet.</string>
+
+
 </resources>

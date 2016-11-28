@@ -7,73 +7,76 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal">
+        android:orientation="vertical">
 
         <LinearLayout
-            android:id="@+id/friendlyName"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:layout_weight="1"
             android:gravity="center_vertical"
             android:orientation="vertical"
+            android:paddingTop="24dp"
+            android:paddingBottom="24dp"
             android:paddingLeft="16dp"
             android:paddingRight="16dp">
 
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/friendly_name"
-                android:textColor="@android:color/secondary_text_light"
-                android:textSize="14sp" />
+            <!--<TextView-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_gravity="left"-->
+            <!--android:fontFamily="sans-serif-light"-->
+            <!--android:text="@string/friendlyName"-->
+            <!--android:paddingLeft="24dp"-->
+            <!--android:textColor="@android:color/secondary_text_light"-->
+            <!--android:textSize="22sp" />-->
+
 
             <TextView
                 android:id="@+id/aliasId"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="left|center_vertical"
+                android:layout_gravity="left"
                 android:ellipsize="marquee"
                 android:fontFamily="sans-serif-light"
-                android:gravity="center_vertical"
                 android:lines="1"
-                android:text="123456789012"
+                android:text="Kamil"
                 android:textColor="@android:color/black"
-                android:textSize="18sp" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/rxID"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1.6"
-            android:orientation="vertical"
-            android:paddingBottom="10dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="10dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_horizontal"
-                android:fontFamily="sans-serif-light"
-                android:text="@string/rec_id"
-                android:textColor="@android:color/secondary_text_light"
-                android:textSize="16sp" />
+                android:textSize="22sp" />
 
             <TextView
                 android:id="@+id/receivingID"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_gravity="center"
+                android:layout_gravity="left"
                 android:ellipsize="marquee"
                 android:fontFamily="sans-serif-light"
                 android:lines="1"
                 android:text="sdasdas-djaksdj-a0ksjda-sdasdadsasdasd"
-                android:textColor="@android:color/black"
+                android:textColor="@android:color/secondary_text_light"
                 android:textSize="16sp" />
+
         </LinearLayout>
+
+        <!--<LinearLayout-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:orientation="vertical"-->
+        <!--android:paddingBottom="10dp"-->
+        <!--android:paddingLeft="16dp"-->
+        <!--android:paddingRight="16dp"-->
+        <!--android:paddingTop="10dp">-->
+
+        <!--<TextView-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_gravity="left"-->
+        <!--android:fontFamily="sans-serif-light"-->
+        <!--android:text="@string/deviceId"-->
+        <!--android:paddingLeft="24dp"-->
+        <!--android:textColor="@android:color/secondary_text_light"-->
+        <!--android:textSize="22sp" />-->
+
+
+        <!--</LinearLayout>-->
 
     </LinearLayout>
 
