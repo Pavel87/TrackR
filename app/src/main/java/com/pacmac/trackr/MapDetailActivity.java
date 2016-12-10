@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Random;
 
 public class MapDetailActivity extends FragmentActivity implements OnMapReadyCallback {
 
@@ -27,22 +28,25 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
 
     private int markerCount = 0;
 
+    private int[] CHRISTMAS_ICONS = { R.drawable.img1, R.drawable.img2, R.drawable.img3,
+            R.drawable.img4, R.drawable.img5, R.drawable.img6, R.drawable.img7, R.drawable.img8,
+            R.drawable.img9, R.drawable.img10 };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_detail);
 
 
-
         locationRecList = Utility.convertJsonStringToLocList(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
-        if( locationRecList == null){
-            locationRecList =  new HashMap<>();
+        if (locationRecList == null) {
+            locationRecList = new HashMap<>();
         }
         Intent intent = getIntent();
-        position= intent.getIntExtra(Constants.KEY_POSIION, -1);
+        position = intent.getIntExtra(Constants.KEY_POSIION, -1);
         alias = intent.getStringArrayListExtra(Constants.KEY_ALIAS_ARRAY);
 
-        if(alias.size() == 0){
+        if (alias.size() == 0) {
             alias.add("TrackR®");
         }
 
@@ -69,18 +73,23 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        if (markerCount == 0 ||  alias.size() == 0) return; // this should not happen
+        if (markerCount == 0 || alias.size() == 0) return; // this should not happen
 
-        for(int i = 0; i < alias.size(); i ++) {
-            if(locationRecList.containsKey(i)) {
+        Random random  = new Random(System.currentTimeMillis());
+
+        for (int i = 0; i < alias.size(); i++) {
+            if (locationRecList.containsKey(i)) {
                 final LatLng location = new LatLng(locationRecList.get(i).getLatitude(), locationRecList.get(i).getLongitude());
 
-                mMap.addMarker(new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))
-                .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker)));
+                int imgIndex = random.nextInt(9);
+
+                MarkerOptions markerOptions = new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))
+                        .icon(BitmapDescriptorFactory.fromResource(CHRISTMAS_ICONS[imgIndex]));
+                mMap.addMarker(markerOptions);
             }
         }
 
-        if(locationRecList.containsKey(position)) {
+        if (locationRecList.containsKey(position)) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(locationRecList.get(position).getLatitude(), locationRecList.get(position).getLongitude()), 16f));
         }
 

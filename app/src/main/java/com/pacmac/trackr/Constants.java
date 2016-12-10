@@ -31,6 +31,8 @@ public class Constants {
     public static final String JSON_REC_IDS_FILE_NAME = "/recIdsJson";
     public static final String JSON_LOC_FILE_NAME = "/locRecsJson";
 
+    public final static String REG_KEY = "ieg9ioa9qhlbnff2714e6s1a8n";
+
     public static final int SUCCESS = 0;
     public static final int ERROR = 134;
     public static final int TYPE_PASSWORD_ACTIVE = 2;
