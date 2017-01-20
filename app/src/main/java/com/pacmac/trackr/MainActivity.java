@@ -200,12 +200,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-//        if (!preferences.getString(Constants.NEW_UPDATE, "2.0").equals(appVersion)) {
-//            Utility.createAlertDialog(MainActivity.this);
-//            SharedPreferences.Editor editor = preferences.edit();
-//            editor.putString(Constants.NEW_UPDATE, appVersion);
-//            editor.commit();
-//        }
+        if (!preferences.getString(Constants.NEW_UPDATE, "2.0").equals(appVersion)) {
+            Utility.createAlertDialog(MainActivity.this);
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putString(Constants.NEW_UPDATE, appVersion);
+            editor.commit();
+        }
     }
 
     private void showRateMyAppDialog() {

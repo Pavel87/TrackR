@@ -2,6 +2,7 @@ package com.pacmac.trackr;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -47,15 +48,15 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
         alias = intent.getStringArrayListExtra(Constants.KEY_ALIAS_ARRAY);
 
         if (alias.size() == 0) {
-            alias.add("TrackR®");
+            alias.add("TrackR");
         }
 
 
         markerCount = locationRecList.size();
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
-        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+        SupportMapFragment mapFragment = SupportMapFragment.newInstance();
+        getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, mapFragment).commit();
         mapFragment.getMapAsync(this);
 
     }
@@ -81,10 +82,12 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
             if (locationRecList.containsKey(i)) {
                 final LatLng location = new LatLng(locationRecList.get(i).getLatitude(), locationRecList.get(i).getLongitude());
 
-                int imgIndex = random.nextInt(9);
+       //         int imgIndex = random.nextInt(9);
 
+//                MarkerOptions markerOptions = new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))
+//                        .icon(BitmapDescriptorFactory.fromResource(CHRISTMAS_ICONS[imgIndex]));
                 MarkerOptions markerOptions = new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))
-                        .icon(BitmapDescriptorFactory.fromResource(CHRISTMAS_ICONS[imgIndex]));
+                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
                 mMap.addMarker(markerOptions);
             }
         }

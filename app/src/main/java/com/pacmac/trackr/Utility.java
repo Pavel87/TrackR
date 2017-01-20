@@ -132,8 +132,13 @@ public class Utility {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                    long timestamp = (long) snapshot.child("timestamp").getValue();
+                    long timestamp = timeThreshold - 1;
+                    try {
+                        //Some stored keys might be in weird format likely because people use //\\
+                        timestamp = (long) snapshot.child("timestamp").getValue();
+                    } catch (Exception ex) {
+                        Log.d(Constants.TAG, "Error while deleting old records: " + ex.getMessage() + " " + snapshot.toString());
+                    }
                     String id = snapshot.getKey();
                     if (timestamp < timeThreshold) {
                         Log.d(Constants.TAG, id + " ID was not updated in last 7 days - likely not in use anymore");
@@ -204,18 +209,18 @@ public class Utility {
 
         StringBuilder sb = new StringBuilder();
 
-        sb.append(context.getString(R.string.updateMsg1));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg2));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg3));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg4));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg5));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg6));
-        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg1));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg2));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg3));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg4));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg5));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg6));
+//        sb.append("\n");
         sb.append(context.getString(R.string.updateMsg7));
         builder.setMessage(sb.toString());
         sb = null;
@@ -444,11 +449,10 @@ public class Utility {
         StringBuilder sb = new StringBuilder();
 
 
-
         sb.append("{\"receiverids\":[");
         //if passed list has only length == 1 then we are upgrading from v1.7
         // TODO if statement can be removed later on
-        if(recIdObjList.size() ==1){
+        if (recIdObjList.size() == 1) {
             sb.append(recIdObjList.get(0).convertToJSONString(0));
         } else {
             // We have to exclude first 4 items related to track mode and last item which is footer

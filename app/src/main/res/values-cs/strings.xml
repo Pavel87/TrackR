@@ -23,6 +23,7 @@
     <string name="unlock">Odemknout</string>
     <string name="enter_id">Vlož Unikátní ID</string>
     <string name="id_entry_error">ID musí mít 8 nebo více znaků</string>
+    <string name="id_char_error">ID nesmí obsahovat znak "\" nebo "/".</string>
     <string name="pass_entry_error">Zadali jste chybné heslo</string>
     <string name="password_dialog">Rodičovský zámek</string>
     <string name="show_password">Ukaž heslo</string>
@@ -42,7 +43,7 @@
     <string name="updateMsg4">- Mapa nyní zobrazuje všechny sledované telefony.</string>
     <string name="updateMsg5">- Německá lokalizace.</string>
     <string name="updateMsg6">- Přidána kontrola GooglePlay Services verze.</string>
-    <string name="updateMsg7">- a další menší opravy.</string>
+    <string name="updateMsg7">- Opravy chyb.</string>
     <string name="rateApp">Jak se vám líbí TrackR?</string>
     <string name="rta_dialog_message"> TrackR team je poctěn každým, kdo aplikaci používá a
         neustále se jej snažíme vylepšovat k vaší spokojenosti. Pokud jste spokojeni zanechte

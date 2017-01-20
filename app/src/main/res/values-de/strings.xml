@@ -24,6 +24,7 @@
     <string name="unlock">Freischalten</string>
     <string name="enter_id">Eigenes ID eingeben</string>
     <string name="id_entry_error">Eigenes ID muss 8 oder mehr zeichen enthalten</string>
+    <string name="id_char_error">Id must not contain "\" and "/" characters.</string>
     <string name="pass_entry_error">Passwort stimmt nicht überein</string>
     <string name="password_dialog">Kindersicherung</string>
     <string name="show_password">Passwort anzeigen</string>
@@ -43,7 +44,7 @@
     <string name="updateMsg4">- Map is now supporting multiple devices.</string>
     <string name="updateMsg5">- German localization available.</string>
     <string name="updateMsg6">- Added version check for GooglePlay Services.</string>
-    <string name="updateMsg7">- Bug fixes.</string>
+    <string name="updateMsg7">- Crash fixes.</string>
     <string name="rateApp">Wie gefällt Ihnen TrackR?</string>
     <string name="rta_dialog_message">TrackR ist stolz darauf das sie diese App nutzen. Bitte nehmen Sie sich einigen Minuten Zeit um diese App im Google Store zu bewerten. Wir schätzen ebenfalls jegliche Art von Rückmeldung oder Verbesserungsvorschläge.</string>
     <string name="no_thanks">Später</string>

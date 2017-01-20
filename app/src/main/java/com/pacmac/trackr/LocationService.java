@@ -37,6 +37,8 @@ public class LocationService extends Service implements LocationListener, Google
     private String child = null;
     private boolean lastBatLevel = false;
 
+    private LocationTxObject locationTxObject= null;
+
     @Override
     public void onCreate() {
         super.onCreate();

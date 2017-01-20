@@ -23,6 +23,7 @@
     <string name="unlock">Unlock</string>
     <string name="enter_id">Enter Unique ID</string>
     <string name="id_entry_error">Unique ID must have have 8 or more characters</string>
+    <string name="id_char_error">Id must not contain "\" and "/" characters.</string>
     <string name="pass_entry_error">Password does not match</string>
     <string name="password_dialog">Parental Lock</string>
     <string name="show_password">Show Password</string>
@@ -42,7 +43,7 @@
     <string name="updateMsg4">- Map is now supporting multiple devices.</string>
     <string name="updateMsg5">- German Localization.</string>
     <string name="updateMsg6">- Added version check for GooglePlay Services.</string>
-    <string name="updateMsg7">- Bug fixes.</string>
+    <string name="updateMsg7">- Crash fixes.</string>
     <string name="rateApp">How do you like TrackR?</string>
     <string name="rta_dialog_message">TrackR development team is honoured by You using this app. Please take a few seconds and rate this app in Google Store. Also any kind of feedback or feature request is much appreciated.</string>
     <string name="no_thanks">Later</string>

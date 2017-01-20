@@ -148,8 +148,12 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
 
                 // TODO NEED TO CREATE RULE FOR IDs (characters which we can use)
                 if (id != null && id.length() > 7 && id.length() < 33) {
-                    saveIDandUpdateView(type, null, id, position);
-                    dialog.dismiss();
+                    if(id.contains("/") || id.contains("\\")) {
+                        Utility.showToast(getApplicationContext(), getString(R.string.id_char_error));
+                    } else {
+                        saveIDandUpdateView(type, null, id, position);
+                        dialog.dismiss();
+                    }
                 } else {
                     Utility.showToast(getApplicationContext(), getString(R.string.id_entry_error));
                 }
