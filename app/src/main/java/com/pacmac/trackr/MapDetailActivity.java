@@ -2,6 +2,7 @@ package com.pacmac.trackr;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 
@@ -59,6 +60,12 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
         getSupportFragmentManager().beginTransaction().add(R.id.fragment_container, mapFragment).commit();
         mapFragment.getMapAsync(this);
 
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
+
+        super.onSaveInstanceState(outState, outPersistentState);
     }
 
     /**

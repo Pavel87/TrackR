@@ -1,10 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="com.pacmac.trackr.SettingsActivity">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/receivingIdList"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:scrollbars="vertical">
+    </android.support.v7.widget.RecyclerView>
 
     <TextView
         android:id="@+id/appVersion"
@@ -14,19 +20,12 @@
         android:layout_alignParentTop="true"
         android:layout_marginRight="4dp"
         android:layout_marginTop="4dp"
+        android:textColor="@color/colorAccent"
         android:fontFamily="sans-serif-small"
         android:gravity="right"
         android:text="v1.4"
         android:textSize="14sp"
         android:textStyle="normal" />
-
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/receivingIdList"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="vertical">
-    </android.support.v7.widget.RecyclerView>
-
 
     <ImageButton
         android:id="@+id/padlock"

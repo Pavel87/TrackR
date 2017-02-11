@@ -45,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private TextView tLastLocation, tTimestamp, tAddress, tBatteryLevel;
     private TextView progressText;
     private View mapBtn;
-    private ImageButton searchBtn, settingsBtn, shareBtn;
+    private ImageButton searchBtn, settingsBtn, shareBtn, aboutBtn;
     private ImageView imageBG;
     private Dialog progressDialog = null;
 
@@ -95,6 +95,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         searchBtn = (ImageButton) findViewById(R.id.search);
         settingsBtn = (ImageButton) findViewById(R.id.settings);
         shareBtn = (ImageButton) findViewById(R.id.share);
+        aboutBtn = (ImageButton) findViewById(R.id.aboutBtn);
         imageBG = (ImageView) findViewById(R.id.imgBG);
 
         // renderScript Class works only from API 17 so have to check if it can
@@ -176,6 +177,16 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 }
             }
         });
+
+        aboutBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Intent i = new Intent(getApplicationContext(), AboutActivity.class);
+                startActivity(i);
+            }
+        });
+
 //        if (firebase == null) {
 //            firebase = new Firebase("https://trackr1.firebaseio.com");
 //        }
@@ -209,13 +220,17 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
     private void showRateMyAppDialog() {
-        int counter = preferences.getInt(Constants.RATING_POPUP_COUNTER, 0);
-        counter++;
-        if (counter > Constants.RATING_POPUP_ATTEMPTS) {
-            counter = 0;
-            Utility.showRateMyAppDialog(MainActivity.this, preferences);
+
+        if(preferences.getBoolean(Constants.RATING_POPUP_ENABLED, true)) {
+
+            int counter = preferences.getInt(Constants.RATING_POPUP_COUNTER, 0);
+            counter++;
+            if (counter > Constants.RATING_POPUP_ATTEMPTS) {
+                counter = 0;
+                Utility.showRateMyAppDialog(MainActivity.this, preferences);
+            }
+            preferences.edit().putInt(Constants.RATING_POPUP_COUNTER, counter).commit();
         }
-        preferences.edit().putInt(Constants.RATING_POPUP_COUNTER, counter).commit();
     }
 
     private Bitmap setBitmap() {
@@ -631,7 +646,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 public void onClick(View view) {
 
                     if (!view.isSelected()) {
-                        view.setAnimation(Utility.getAnimation());
+                        view.startAnimation(Utility.getAnimation());
 
                         itemNumber = Integer.parseInt(((TextView) view).getHint().toString());
                         invalidateRecButtonsViews(linearLayout);

@@ -121,7 +121,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
         });
 
         // adding  adapter to Rec ID list
-        adapterForRecIdList = new AdapterReceivingIds(recIdDataSet, this);
+        adapterForRecIdList = new AdapterReceivingIds(recIdDataSet, this, getApplicationContext());
         listOfRecIds.setAdapter(adapterForRecIdList);
         ItemTouchHelper itemTouchHelper = new ItemTouchHelper(simpleItemTouchCallback);
         itemTouchHelper.attachToRecyclerView(listOfRecIds);

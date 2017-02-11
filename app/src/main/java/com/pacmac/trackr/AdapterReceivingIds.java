@@ -1,11 +1,14 @@
 package com.pacmac.trackr;
 
+import android.content.Context;
+import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -19,6 +22,7 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
 
     private ArrayList<SettingsObject> mDataset;
     private SettingsInteractionListener listener = null;
+    private Context context;
 
 
     public void add(int position, SettingsObject item) {
@@ -37,9 +41,10 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
 //    }
 
     // Provide a suitable constructor (depends on the kind of dataset)
-    public AdapterReceivingIds(ArrayList<SettingsObject> myDataset, SettingsInteractionListener listener) {
+    public AdapterReceivingIds(ArrayList<SettingsObject> myDataset, SettingsInteractionListener listener, Context context) {
         mDataset = myDataset;
         this.listener = listener;
+        this.context = context;
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -102,6 +107,9 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
 
         } else if (type == Constants.TYPE_HEADER) {
             ((VHHeader) holder).header.setText(mDataset.get(position).getId());
+            if(position != 0) {
+                ((VHHeader) holder).headerImg.setImageDrawable(context.getResources().getDrawable(R.drawable.signs));
+            }
         } else if (type == Constants.TYPE_TRACKID) {
             ((VHTrackId) holder).trackingID.setText(mDataset.get(position).getId());
         } else if (type == Constants.TYPE_TRACK_SWITCH) {
@@ -162,10 +170,12 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
 
     class VHHeader extends RecyclerView.ViewHolder {
         public TextView header;
+        public ImageView headerImg;
 
         public VHHeader(View headerView) {
             super(headerView);
             header = (TextView) headerView.findViewById(R.id.header);
+            headerImg = (ImageView) headerView.findViewById(R.id.settingsImg);
         }
     }
 

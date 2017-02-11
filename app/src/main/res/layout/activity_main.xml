@@ -18,9 +18,9 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_above="@+id/mainInfoWindow"
+        android:layout_marginBottom="8dp"
         android:layout_marginLeft="8dp"
         android:layout_marginRight="8dp"
-        android:layout_marginBottom="8dp"
         android:orientation="horizontal">
 
 
@@ -79,8 +79,8 @@
                 android:fontFamily="sans-serif-medium"
                 android:gravity="center_vertical"
                 android:lines="2"
-                android:text="@string/loading"
                 android:paddingRight="16dp"
+                android:text="@string/loading"
                 android:textColor="@color/text_nightMode"
                 android:textSize="16sp" />
 
@@ -144,9 +144,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1.1"
                 android:fontFamily="sans-serif-medium"
-                android:paddingRight="8dp"
                 android:gravity="center_vertical"
                 android:lines="3"
+                android:paddingRight="8dp"
                 android:textColor="@color/text_nightMode"
                 android:textSize="16sp" />
 
@@ -254,11 +254,22 @@
         android:id="@+id/share"
         android:layout_width="56dp"
         android:layout_height="56dp"
+        android:layout_toLeftOf="@+id/aboutBtn"
+        android:layout_alignParentTop="true"
+        android:layout_marginTop="9dp"
+        android:background="@drawable/image_button_bg"
+        android:src="@drawable/share" />
+
+    <ImageButton
+        android:id="@+id/aboutBtn"
+        android:layout_width="56dp"
+        android:layout_height="56dp"
         android:layout_alignEnd="@+id/mainInfoWindow"
         android:layout_alignParentTop="true"
         android:layout_alignRight="@+id/mainInfoWindow"
         android:layout_marginTop="9dp"
         android:background="@drawable/image_button_bg"
-        android:src="@drawable/share" />
+        android:src="@drawable/about"
+        android:visibility="visible" />
 
 </RelativeLayout>

@@ -37,9 +37,9 @@
     <string name="no_location">Poloha sledovaného zařízení je v tento moment neznámá.</string>
     <string name="share_header">*****************************</string>
     <string name="new_update_title">Nová aktualizace pro TrackR v</string>
-    <string name="updateMsg1">- Přidána možnost sledovat více telefonů.</string>
-    <string name="updateMsg2">- Přidán seznam sledovaných telefonů v nastavení.</string>
-    <string name="updateMsg3">- Přidány tlačítka k přepínání sledovaných telefonů.</string>
+    <string name="updateMsg1">- New About Screen accessible from main screen.</string>
+    <string name="updateMsg2">- About screen includes useful tips in case app is not working correctly.</string>
+    <string name="updateMsg3">- Slight update to UI.</string>
     <string name="updateMsg4">- Mapa nyní zobrazuje všechny sledované telefony.</string>
     <string name="updateMsg5">- Německá lokalizace.</string>
     <string name="updateMsg6">- Přidána kontrola GooglePlay Services verze.</string>
@@ -69,4 +69,12 @@
     <string name="rec_id_not_found">TrackR nenašel polohu zařízení:</string>
     <string name="location">polohu</string>
     <string name="no_new_updates">neaktualizoval svoji polohu déle než 40 minut.</string>
+    <string name="not_working_button">Fix Me</string>
+    <string name="resolve">Resolve</string>
+    <string name="about_text">1) Launch the app and go to Settings\n\n2) Set the unique tracking ID in "remote" device.\n\n3) Switch ON tracking mode Note: You can enable parental lock by taping on padlock icon in bottom right corner.
+        Device starts transmitting its location once the tracking mode is ON every 20 minutes or 45 minutes on lower battery levels if there is live connection to internet\n\n4) Set up the second device which will act as a receiver - Launch TrackR and go to Settings\n\n5) Configure Tracked Device in "List of Tracked Devices" which corresponds to Tracking ID from step 2) and fill the friendly name for the tracked device\n\n6) Now you are all set and if you go back to main screen you should receive remote device location shortly. If not press refresh button\n\n
+        Note: You can configure up to 5 devices in "List of Tracked Devices".\n\nTo delete row in List of Tracked Devices you have to swipe right on the specific row</string>
+    <string name="about_text2">Application offers location tracking functionality between two android devices. App can run in two modes:\n\n-Location Transmitter\n\n-Location Receiver (of one or more devices)</string>
+    <string name="contact">For support contact pacmac.dev@gmail.com\n\nThank you for using Device Tracker, p@cmac.</string>
+    <string name="something_wrong">Something is wrong!</string>
 </resources>

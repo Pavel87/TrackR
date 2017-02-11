@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.PermissionChecker;
@@ -31,6 +32,7 @@ import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.android.gms.common.GooglePlayServicesUtil;
+import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -209,12 +211,12 @@ public class Utility {
 
         StringBuilder sb = new StringBuilder();
 
-//        sb.append(context.getString(R.string.updateMsg1));
-//        sb.append("\n");
-//        sb.append(context.getString(R.string.updateMsg2));
-//        sb.append("\n");
-//        sb.append(context.getString(R.string.updateMsg3));
-//        sb.append("\n");
+   sb.append(context.getString(R.string.updateMsg1));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg2));
+        sb.append("\n");
+        sb.append(context.getString(R.string.updateMsg3));
+        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg4));
 //        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg5));
@@ -407,9 +409,25 @@ public class Utility {
     }
 
 
+    public static int isGooglePlayAvailable(Context context) {
+        GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
+        return googleAPI.isGooglePlayServicesAvailable(context);
+    }
+
+    public static int[] getGooglePlayVersion(Context context) {
+        try {
+            String versionName = context.getPackageManager().getPackageInfo(GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE,0).versionName;
+            String[] versionComponents = versionName.split("\\.");
+            return new int[]{Integer.parseInt(versionComponents[0]), Integer.parseInt(versionComponents[1])};
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new int[]{-1,-1};
+    }
+
     public static boolean checkPlayServices(Activity activity) {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
-        int result = googleAPI.isGooglePlayServicesAvailable(activity);
+        int result = googleAPI.isGooglePlayServicesAvailable(activity.getApplicationContext());
         if (result != ConnectionResult.SUCCESS) {
             if (googleAPI.isUserResolvableError(result)) {
                 googleAPI.getErrorDialog(activity, result,
@@ -421,6 +439,32 @@ public class Utility {
 
         return true;
     }
+
+
+    public static boolean checkIfLocationIsEnabled(Context context) {
+        LocationManager lm = (LocationManager) context.getSystemService(Context.LOCATION_SERVICE);
+        boolean gps_enabled = false;
+        boolean network_enabled = false;
+
+        try {
+            gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        try {
+            network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+
+        if (!gps_enabled && !network_enabled) {
+            return false;
+        }
+        return true;
+    }
+
+
 
     public static HashMap<Integer, LocationRecord> convertJsonStringToLocList(String filePath) {
         String jsonString = Utility.loadJsonStringFromFile(filePath);
