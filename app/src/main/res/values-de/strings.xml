@@ -38,7 +38,7 @@
     <string name="no_location">Keine gültige Adresse angegeben</string>
     <string name="share_header">*****************************</string>
     <string name="new_update_title">Neue Aktualisierung v</string>
-    <string name="updateMsg1">- New About Screen accessible from main screen.</string>
+    <string name="updateMsg1">- NEW setting for location update frequency.</string>
     <string name="updateMsg2">- About screen includes useful tips in case app is not working correctly.</string>
     <string name="updateMsg3">- Slight update to UI.</string>
     <string name="updateMsg4">- Map is now supporting multiple devices.</string>
@@ -77,4 +77,5 @@
     <string name="about_text2">Application offers location tracking functionality between two android devices. App can run in two modes:\n\n-Location Transmitter\n\n-Location Receiver (of one or more devices)</string>
     <string name="contact">For support contact pacmac.dev@gmail.com\n\nThank you for using Device Tracker, p@cmac.</string>
     <string name="something_wrong">Something is wrong!</string>
+    <string name="update_freq_label">Location Update Frequency</string>
 </resources>

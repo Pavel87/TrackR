@@ -22,6 +22,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.Animation;
+import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -221,7 +223,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
     private void showRateMyAppDialog() {
 
-        if(preferences.getBoolean(Constants.RATING_POPUP_ENABLED, true)) {
+        if (preferences.getBoolean(Constants.RATING_POPUP_ENABLED, true)) {
 
             int counter = preferences.getInt(Constants.RATING_POPUP_COUNTER, 0);
             counter++;
@@ -328,7 +330,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
                                     if (locationRecList.containsKey(i) && locationRecList.get(i).getTimestamp() == timeStamp) {
                                         if (i == itemNumber && progressDialog != null && progressDialog.isShowing()) {
-                                            if (timeStamp < System.currentTimeMillis() - Constants.TIME_BATTERY_LOW) {
+                                            if (timeStamp < System.currentTimeMillis() -
+                                                    (preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) + 25) * 60 * 1000) {
+                                                // TODO UPDATE THIS MSG AS IT CAN BE MORE THAN 40 minutes
                                                 Utility.showToast(getApplicationContext(),
                                                         recIdDataSet.get(i).getAlias() + " " + getString(R.string.no_new_updates));
                                             } else {
@@ -418,7 +422,14 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         skipConnReceiverTrigger = true;
         registerReceiver(connReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
         if (!refreshViewsIfChangeOccured()) {
-            checkIfshouldTryRetrieveDevicePosition();
+            //checkIfshouldTryRetrieveDevicePosition();
+            if (recIdDataSet.size() == 0) {
+                Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
+                enableSearchButton();
+                return;
+            }
+
+            tryToRetrieveNewLocationWithProgress();
         }
     }
 
@@ -443,7 +454,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
             if (locationRecList.containsKey(i)) {
                 // if location record exist and last location is stall then we want to updated
-                shouldConnectToFB = !(locationRecList.get(i).getTimestamp() > (System.currentTimeMillis() - Constants.UPDATE_TIMEOUT));
+                long updateTimeout = (preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) / 2) * 60 * 1000;
+                shouldConnectToFB = !(locationRecList.get(i).getTimestamp() > (System.currentTimeMillis() - updateTimeout));
             } else {
                 // if location record doesn't exist for this id then we want to request data from server
                 shouldConnectToFB = true;
@@ -651,6 +663,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                         itemNumber = Integer.parseInt(((TextView) view).getHint().toString());
                         invalidateRecButtonsViews(linearLayout);
                         view.setSelected(true);
+
                         // check if we already hav any location for this id first
                         if (locationRecList.containsKey(itemNumber)) {
                             displayDeviceLocation(locationRecList.get(itemNumber), false);

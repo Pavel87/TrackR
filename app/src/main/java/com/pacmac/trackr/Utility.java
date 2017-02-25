@@ -213,10 +213,10 @@ public class Utility {
 
    sb.append(context.getString(R.string.updateMsg1));
         sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg2));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg3));
-        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg2));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg3));
+//        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg4));
 //        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg5));
@@ -500,7 +500,7 @@ public class Utility {
             sb.append(recIdObjList.get(0).convertToJSONString(0));
         } else {
             // We have to exclude first 4 items related to track mode and last item which is footer
-            for (int i = 4; i < recIdObjList.size() - 2; i++) {
+            for (int i = 5; i < recIdObjList.size() - 2; i++) {
                 sb.append(recIdObjList.get(i).convertToJSONString(i) + ",");
             }
             sb.append(recIdObjList.get(recIdObjList.size() - 2).convertToJSONString(recIdObjList.size() - 2));

@@ -16,6 +16,7 @@ public class Constants {
     public static final String PREF_TRACKR = "-tracker_PREF";
     public static final String NEW_UPDATE = "TrackR_Update";
     public static final String TRACKING_STATE = "trackr_gps_state";
+    public static final String TRACKING_FREQ = "trackr_update_freq";
     public static final String TRACKING_ID = "trackr_gps_ID";
     public static final String TRACKING_ID_RAW = "trackr_gps_ID_raw";
     public static final String RECEIVING_ID_RAW = "receiver_gps_ID_raw";
@@ -37,17 +38,16 @@ public class Constants {
     public static final int ERROR = 134;
     public static final int TYPE_PASSWORD_ACTIVE = 2;
     public static final int TYPE_PASSWORD_NOT_ACTIVE = 3;
-    public final static int UPDATE_TIMEOUT = 10 * 60 * 1000;
-    public final static int TIME_BATTERY_OK = 20 * 60 * 1000;
-    public final static int TIME_BATTERY_LOW = 45 * 60 * 1000;
+    public final static int TIME_BATTERY_OK = 20; // 20 * 60 * 1000;
     public final static int OLD_ID_THRESHOLD = 7*24 * 60 * 60 * 1000; // 7 days
-    public final static int RATING_POPUP_ATTEMPTS = 8; // popup will show after user open the app 8 times
+    public final static int RATING_POPUP_ATTEMPTS = 7; // popup will show after user open the app 8 times
 
     public static final int TYPE_HEADER = -1;
     public static final int TYPE_NORMAL = 0;
     public static final int TYPE_TRACKID = 1;
     public static final int TYPE_TRACK_SWITCH = 2;
     public static final int TYPE_FOOTER = 3;
+    public static final int TYPE_TRACK_FREQUENCY = 4;
 
 
 

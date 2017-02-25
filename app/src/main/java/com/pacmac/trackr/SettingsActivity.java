@@ -25,6 +25,8 @@ import java.util.ArrayList;
 
 public class SettingsActivity extends AppCompatActivity implements SettingsInteractionListener {
 
+    private final int MIN_ITEMS_IN_LIST = 7;
+
     private SharedPreferences preferences = null;
     private TextView appVersion;
     private ImageButton padlock;
@@ -53,7 +55,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
 
             int position = viewHolder.getAdapterPosition();
 
-            if (recIdDataSet.size() == 6) {
+            if (recIdDataSet.size() == MIN_ITEMS_IN_LIST) {
                 //this condition will ensure that we will keep at least 1 ID
                 ((AdapterReceivingIds) adapterForRecIdList).notifyDataSetChanged();
                 return;
@@ -148,7 +150,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
 
                 // TODO NEED TO CREATE RULE FOR IDs (characters which we can use)
                 if (id != null && id.length() > 7 && id.length() < 33) {
-                    if(id.contains("/") || id.contains("\\")) {
+                    if (id.contains("/") || id.contains("\\")) {
                         Utility.showToast(getApplicationContext(), getString(R.string.id_char_error));
                     } else {
                         saveIDandUpdateView(type, null, id, position);
@@ -349,6 +351,7 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
         if (isTrackingOn) {
             settingsInteractionRequest(1, new SettingsObject(Constants.TYPE_TRACK_SWITCH, !isTrackingOn));
         }
+        // TODO IF TRACKING WAS ON SHOW TOAST MSG TO USER THAT HE HAS TO TURN IT ON OR START IT AUTOMATICALLY
         return isTrackingOn;
     }
 
@@ -375,13 +378,19 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
                 }
                 recIdDataSet.set(position, object);
                 break;
+            case Constants.TYPE_TRACK_FREQUENCY:
+                if(ifTrackingOnTurnItOff()) {
+                    ((AdapterReceivingIds) adapterForRecIdList).notifyDataSetChanged();
+                    Utility.showToast(getApplicationContext(), "Tracking Mode has to be started again.");
+                }
+                break;
             case Constants.TYPE_NORMAL:
                 createRecIdDialog(Constants.TYPE_NORMAL, position);
                 break;
             case Constants.TYPE_FOOTER:
                 // We will insert new rec id only if the total count in list is less than 10
                 // which means 5 default + max 5 rec ids
-                if (recIdDataSet.size() < 10) {
+                if (recIdDataSet.size() < 11) {
                     createRecIdDialog(Constants.TYPE_NORMAL, -1);
                 } else {
                     Utility.showToast(getApplicationContext(), "Max list length reached");
@@ -406,10 +415,10 @@ public class SettingsActivity extends AppCompatActivity implements SettingsInter
 
         recIdDataSet.add(new SettingsObject(Constants.TYPE_HEADER, getString(R.string.title_activity_settings)));
         recIdDataSet.add(new SettingsObject(Constants.TYPE_TRACK_SWITCH, preferences.getBoolean(Constants.TRACKING_STATE, false)));
+        recIdDataSet.add(new SettingsObject(Constants.TYPE_TRACK_FREQUENCY, false)); // boolean has no value for this type
         recIdDataSet.add(new SettingsObject(Constants.TYPE_TRACKID, null, preferences.getString(Constants.TRACKING_ID_RAW, "Error #5#"),
                 preferences.getString(Constants.TRACKING_ID_RAW, "Error #5#")));
         recIdDataSet.add(new SettingsObject(Constants.TYPE_HEADER, getString(R.string.rec_id_list_title)));
-        // TODO add for loop to add all rec ids
 
         String jsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
 

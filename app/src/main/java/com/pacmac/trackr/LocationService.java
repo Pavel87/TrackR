@@ -37,14 +37,14 @@ public class LocationService extends Service implements LocationListener, Google
     private String child = null;
     private boolean lastBatLevel = false;
 
-    private LocationTxObject locationTxObject= null;
+    private int updateFreq = Constants.TIME_BATTERY_OK * 60 * 1000;;
+    private int updateFreqLowBat = updateFreq + 25 * 60 * 1000;;
 
     @Override
     public void onCreate() {
         super.onCreate();
 
     }
-
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -57,6 +57,7 @@ public class LocationService extends Service implements LocationListener, Google
                     .build();
         }
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+        updateLocFreqTime();
         child = preferences.getString(Constants.TRACKING_ID, "Error");
         if (child.equals("Error")) stopSelf();
 
@@ -105,16 +106,20 @@ public class LocationService extends Service implements LocationListener, Google
                 mGoogleApiClient, this);
     }
 
+    private void updateLocFreqTime(){
+        updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
+        updateFreqLowBat = updateFreq +25 * 60 * 1000; // low bat is + 25 minutes
+    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
         float level = getBatteryLevel();
         if (level >= 25) {
-            createLocationRequest(Constants.TIME_BATTERY_OK);
+            createLocationRequest(updateFreq);
             Log.d(Constants.TAG, "Battery OK: " + level);
             lastBatLevel = true;
         } else {
-            createLocationRequest(Constants.TIME_BATTERY_LOW);
+            createLocationRequest(updateFreqLowBat);
             Log.d(Constants.TAG, "Battery LOW: " + level);
             lastBatLevel = false;
         }
@@ -137,14 +142,16 @@ public class LocationService extends Service implements LocationListener, Google
         firebase.child(child).setValue(new LocationTxObject(0, lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel), this);
         if (batteryLevel >= 25 && !lastBatLevel) {
+            updateLocFreqTime();
             lastBatLevel = true;
             stopLocationUpdates();
-            createLocationRequest(Constants.TIME_BATTERY_OK);
+            createLocationRequest(updateFreq);
             startLocationUpdates();
         } else if (batteryLevel < 25 && lastBatLevel) {
+            updateLocFreqTime();
             lastBatLevel = false;
             stopLocationUpdates();
-            createLocationRequest(Constants.TIME_BATTERY_LOW);
+            createLocationRequest(updateFreqLowBat);
             startLocationUpdates();
         }
     }

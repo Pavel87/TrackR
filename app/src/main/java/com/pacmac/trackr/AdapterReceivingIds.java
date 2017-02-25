@@ -1,6 +1,7 @@
 package com.pacmac.trackr;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.BitmapFactory;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.SwitchCompat;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import java.util.ArrayList;
@@ -20,6 +22,7 @@ import java.util.ArrayList;
 
 public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
+    private final int SEEKBAR_OFFSET = 5;
     private ArrayList<SettingsObject> mDataset;
     private SettingsInteractionListener listener = null;
     private Context context;
@@ -30,15 +33,6 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
         notifyItemInserted(position);
     }
 
-//    public void update(ArrayList<SettingsObject> mDataset) {
-//        this.mDataset = mDataset;
-//        notifyDataSetChanged();
-//    }
-//    public void remove(String item) {
-//        int position = mDataset.indexOf(item);
-//        mDataset.remove(position);
-//        notifyItemRemoved(position);
-//    }
 
     // Provide a suitable constructor (depends on the kind of dataset)
     public AdapterReceivingIds(ArrayList<SettingsObject> myDataset, SettingsInteractionListener listener, Context context) {
@@ -70,6 +64,8 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
             return new VHItem(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_rec_id, parent, false));
         } else if (viewType == Constants.TYPE_TRACK_SWITCH) {
             return new VHTrackingSwitch(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_track_switch, parent, false));
+        } else if (viewType == Constants.TYPE_TRACK_FREQUENCY) {
+            return new VHTrackingFreq(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_track_freq, parent, false));
         } else if (viewType == Constants.TYPE_TRACKID) {
             return new VHTrackId(LayoutInflater.from(parent.getContext()).inflate(R.layout.row_track_id, parent, false));
         } else if (viewType == Constants.TYPE_FOOTER) {
@@ -107,18 +103,46 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
 
         } else if (type == Constants.TYPE_HEADER) {
             ((VHHeader) holder).header.setText(mDataset.get(position).getId());
-            if(position != 0) {
+            if (position != 0) {
                 ((VHHeader) holder).headerImg.setImageDrawable(context.getResources().getDrawable(R.drawable.signs));
             }
         } else if (type == Constants.TYPE_TRACKID) {
             ((VHTrackId) holder).trackingID.setText(mDataset.get(position).getId());
+        } else if (type == Constants.TYPE_TRACK_FREQUENCY) {
+            SharedPreferences preferences = context.getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, context.MODE_PRIVATE);
+            int freq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK);
+            ((VHTrackingFreq) holder).seekBar.setProgress(freq - SEEKBAR_OFFSET);
+            ((VHTrackingFreq) holder).updateTime.setText(freq + " min");
+            ((VHTrackingFreq) holder).seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+                    ((VHTrackingFreq) holder).updateTime.setText(String.valueOf(progress + SEEKBAR_OFFSET) + " min");
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    SharedPreferences preferences = context.getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, context.MODE_PRIVATE);
+                    SharedPreferences.Editor editor = preferences.edit();
+                    editor.putInt(Constants.TRACKING_FREQ, seekBar.getProgress() + SEEKBAR_OFFSET);
+                    editor.commit();
+                    if (listener != null) {
+                        listener.settingsInteractionRequest(position,mDataset.get(position));
+                    }
+                }
+            });
+
+
         } else if (type == Constants.TYPE_TRACK_SWITCH) {
             ((VHTrackingSwitch) holder).switchTracking.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     if (listener != null) {
                         boolean isChecked = ((VHTrackingSwitch) holder).switchTracking.isChecked();
-                    //    ((VHTrackingSwitch) holder).switchTracking.setChecked(!isChecked);
+                        //    ((VHTrackingSwitch) holder).switchTracking.setChecked(!isChecked);
                         mDataset.set(position, new SettingsObject(Constants.TYPE_TRACK_SWITCH, isChecked));
                         listener.settingsInteractionRequest(position, mDataset.get(position));
                     }
@@ -153,9 +177,6 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
     }
 
 
-
-
-
     public class VHItem extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
         public TextView recID;
@@ -185,6 +206,17 @@ public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewH
         public VHTrackingSwitch(View trackSwitchView) {
             super(trackSwitchView);
             switchTracking = (SwitchCompat) trackSwitchView.findViewById(R.id.switchTracking);
+        }
+    }
+
+    class VHTrackingFreq extends RecyclerView.ViewHolder {
+        private SeekBar seekBar = null;
+        private TextView updateTime = null;
+
+        public VHTrackingFreq(View trackSeekBarFreq) {
+            super(trackSeekBarFreq);
+            seekBar = (SeekBar) trackSeekBarFreq.findViewById(R.id.locUpdateFreq);
+            updateTime = (TextView) trackSeekBarFreq.findViewById(R.id.updateFreqText);
         }
     }
 

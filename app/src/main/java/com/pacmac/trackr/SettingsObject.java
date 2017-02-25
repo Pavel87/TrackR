@@ -7,7 +7,7 @@ package com.pacmac.trackr;
 
 public class SettingsObject {
 
-    // 0 - classic row // -1 == header  // 1 == tracking switch // 2 == tracking ID
+    // 0 - classic row // -1 == header  // 1 == tracking switch // 2 == tracking ID // 3 tracking freq
     /**
      * safeid is used for matching data in firebase as it ensures correct char set
      */
@@ -17,7 +17,6 @@ public class SettingsObject {
     private String alias = "TrackR1";
     private String id = "Receiving ID";
     private boolean isEnabled = true;
-
 
     /**
      * Constructor used for tracking ID and receiver IDs
@@ -52,10 +51,6 @@ public class SettingsObject {
         return alias;
     }
 
-    public void setAlias(String alias) {
-        this.alias = alias;
-    }
-
     public String getId() {
         return id;
     }
@@ -83,7 +78,6 @@ public class SettingsObject {
     public String getSafeId() {
         return safeId;
     }
-
 
     public String convertToJSONString(int position) {
         return "{ \"alias\": " + "\"" + alias + "\","
