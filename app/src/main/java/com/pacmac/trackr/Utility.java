@@ -211,8 +211,8 @@ public class Utility {
 
         StringBuilder sb = new StringBuilder();
 
-   sb.append(context.getString(R.string.updateMsg1));
-        sb.append("\n");
+//   sb.append(context.getString(R.string.updateMsg1));
+//        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg2));
 //        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg3));

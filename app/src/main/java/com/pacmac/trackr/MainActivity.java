@@ -75,7 +75,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     protected void onCreate(Bundle savedInst) {
         super.onCreate(savedInst);
         setContentView(R.layout.activity_main);
-
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
                 MODE_PRIVATE);
 
@@ -155,7 +154,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     return;
                 }
 
-                tryToRetrieveNewLocationWithProgress();
+                tryToRetrieveNewLocationWithProgress(true);
             }
         });
         settingsBtn.setOnClickListener(new View.OnClickListener() {
@@ -365,17 +364,15 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     }
                     searchBtn.setEnabled(true);
                     if (progressDialog != null && progressDialog.isShowing()) {
-                        progressDialog.dismiss();
+                        dismissDialog();
                         if (!locationRecList.containsKey(itemNumber)) {
                             Utility.showToast(getApplicationContext(), getString(R.string.rec_id_not_found)
                                     + " " + recIdDataSet.get(itemNumber).getAlias());
                         }
                     }
-
-
                     firebase.removeEventListener(this);
                     firebase.goOffline();
-                    Log.d(Constants.TAG, "Firebase goes offline");
+                    Log.i(Constants.TAG, "Firebase goes offline");
 
                 }
             }
@@ -384,11 +381,11 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             public void onCancelled(FirebaseError firebaseError) {
                 Log.i(Constants.TAG, "Update Cancelled" + firebaseError.getMessage());
                 firebase.goOffline();
-                Log.d(Constants.TAG, "Firebase goes offline");
+                Log.i(Constants.TAG, "Firebase goes offline");
 
                 // Dismiss progress dialog if it is showing right now
                 if (progressDialog != null && progressDialog.isShowing()) {
-                    progressDialog.dismiss();
+                    dismissDialog();
                     Utility.showToast(getApplicationContext(), getString(R.string.conn_error));
                 }
                 searchBtn.setEnabled(true);
@@ -396,6 +393,18 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         });
     }
 
+
+    private void dismissDialog() {
+        try {
+            if (MainActivity.this.isDestroyed()) {
+                progressDialog = null;
+            } else {
+                progressDialog.dismiss();
+            }
+        } catch (Exception e) {
+            Log.e(Constants.TAG, e.getMessage());
+        }
+    }
 
     private void startIntentService(LocationRecord locationRecord, int item) {
         Intent intent = new Intent(getApplicationContext(), FetchAddressService.class);
@@ -421,15 +430,14 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         super.onResume();
         skipConnReceiverTrigger = true;
         registerReceiver(connReceiver, new IntentFilter("android.net.conn.CONNECTIVITY_CHANGE"));
-        if (!refreshViewsIfChangeOccured()) {
+        if (!refreshViewsIfChangeOccured(false)) {
             //checkIfshouldTryRetrieveDevicePosition();
             if (recIdDataSet.size() == 0) {
                 Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
                 enableSearchButton();
                 return;
             }
-
-            tryToRetrieveNewLocationWithProgress();
+            tryToRetrieveNewLocationWithProgress(false);
         }
     }
 
@@ -440,6 +448,14 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         startTrackingService();
         // save loc collection before exit
         Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayString());
+    }
+
+    @Override
+    protected void onDestroy() {
+        if (progressDialog != null && progressDialog.isShowing()) {
+            progressDialog.dismiss();
+        }
+        super.onDestroy();
     }
 
     private boolean checkIfshouldTryRetrieveDevicePosition() {
@@ -579,7 +595,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         @Override
         public void run() {
             if (progressDialog != null && progressDialog.isShowing()) {
-                progressDialog.dismiss();
+                dismissDialog();
                 if (!locationRecList.containsKey(itemNumber)) {
                     Utility.showToast(getApplicationContext(), getString(R.string.rec_id_not_found)
                             + " " + recIdDataSet.get(itemNumber).getAlias());
@@ -710,7 +726,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     }
 
 
-    private boolean refreshViewsIfChangeOccured() {
+    private boolean refreshViewsIfChangeOccured(boolean showProgress) {
 
         if (preferences == null) {
             preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
@@ -735,13 +751,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
             populateRecIdsList();
             spawnReceiverIdViews(0);
-            tryToRetrieveNewLocationWithProgress();
+            tryToRetrieveNewLocationWithProgress(showProgress);
             return true;
         }
         return false;
     }
 
-    private void tryToRetrieveNewLocationWithProgress() {
+    private void tryToRetrieveNewLocationWithProgress(boolean showProgress) {
         if (checkIfshouldTryRetrieveDevicePosition()) {
             if (progressDialog == null) {
                 progressDialog = new Dialog(MainActivity.this);
@@ -753,12 +769,16 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 progressText = (TextView) view.findViewById(R.id.progressText);
                 progressDialog.setContentView(view);
                 progressDialog.setCancelable(false);
-                progressDialog.show();
+                if (showProgress) {
+                    progressDialog.show();
+                }
             }
             progressText.setText(getString(R.string.progress_searching)
                     + " " + recIdDataSet.get(itemNumber).getAlias()
                     + " " + getString(R.string.location));
-            progressDialog.show();
+            if (showProgress) {
+                progressDialog.show();
+            }
             new Handler().postDelayed(dismissDialogRunnable, 10 * 1000);
         } else {
             Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
