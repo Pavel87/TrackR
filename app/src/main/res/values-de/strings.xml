@@ -38,9 +38,9 @@
     <string name="no_location">Keine gültige Adresse angegeben</string>
     <string name="share_header">*****************************</string>
     <string name="new_update_title">Neue Aktualisierung v</string>
-    <string name="updateMsg1">- NEW setting for location update frequency.</string>
-    <string name="updateMsg2">- About screen includes useful tips in case app is not working correctly.</string>
-    <string name="updateMsg3">- Slight update to UI.</string>
+    <string name="updateMsg1">- Added new markers to map screen.</string>
+    <string name="updateMsg2">- UI - full tracked device name is now shown on main screen.</string>
+    <string name="updateMsg3">- UI - some app notification messages were updated to make better sense.</string>
     <string name="updateMsg4">- Map is now supporting multiple devices.</string>
     <string name="updateMsg5">- German localization available.</string>
     <string name="updateMsg6">- Added version check for GooglePlay Services.</string>
@@ -68,7 +68,7 @@
     <string name="google_play_services_outdated">TrackR requires Google Play Services are up to date for correct functionality.</string>
     <string name="rec_id_not_found">TrackR fand keinen Ort für</string>
     <string name="location">Lage</string>
-    <string name="no_new_updates">Gerät seinen Standort nicht länger als 40 Minuten sendet.</string>
+    <string name="no_new_updates">Gerät seinen Standort nicht länger als 20 Minuten sendet.</string>
     <string name="not_working_button">Fix Me</string>
     <string name="resolve">Resolve</string>
     <string name="about_text">1) Launch the app and go to Settings\n\n2) Set the unique tracking ID in "remote" device.\n\n3) Switch ON tracking mode Note: You can enable parental lock by taping on padlock icon in bottom right corner.
@@ -78,4 +78,6 @@
     <string name="contact">For support contact pacmac.dev@gmail.com\n\nThank you for using Device Tracker, p@cmac.</string>
     <string name="something_wrong">Something is wrong!</string>
     <string name="update_freq_label">Location Update Frequency</string>
+    <string name="no_rec_id">Go to Settings and setup tracked device id.</string>
+    <string name="no_rec_id_found">No device found.</string>
 </resources>

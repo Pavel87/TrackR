@@ -10,6 +10,7 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.TransitionDrawable;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -22,8 +23,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.ScaleAnimation;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -105,6 +106,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             imageBG.setImageBitmap(setBitmap());
         }
 
+        Firebase.setAndroidContext(getApplicationContext());
+
         handler = new Handler();
         resultReceiver = new AddressResultReceiver(handler);
         connReceiver = new NetworkStateChangedReceiver();
@@ -149,7 +152,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 }
 
                 if (recIdDataSet.size() == 0) {
-                    Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
+                    Utility.showToast(getApplicationContext(), getString(R.string.no_rec_id));
                     enableSearchButton();
                     return;
                 }
@@ -187,12 +190,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                 startActivity(i);
             }
         });
-
-//        if (firebase == null) {
-//            firebase = new Firebase("https://trackr1.firebaseio.com");
-//        }
-//        Log.d(Constants.TAG, "Firebase goes offline");
-//        firebase.goOffline();
         // at last we want to start tracking service if not started and if
         // device is in tracking mode
         startTrackingService();
@@ -212,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "2.0").equals(appVersion)) {
+        if (!preferences.getString(Constants.NEW_UPDATE, "2.0.12").equals(appVersion)) {
             Utility.createAlertDialog(MainActivity.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
@@ -331,7 +328,6 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                         if (i == itemNumber && progressDialog != null && progressDialog.isShowing()) {
                                             if (timeStamp < System.currentTimeMillis() -
                                                     (preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) + 25) * 60 * 1000) {
-                                                // TODO UPDATE THIS MSG AS IT CAN BE MORE THAN 40 minutes
                                                 Utility.showToast(getApplicationContext(),
                                                         recIdDataSet.get(i).getAlias() + " " + getString(R.string.no_new_updates));
                                             } else {
@@ -393,11 +389,14 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         });
     }
 
-
     private void dismissDialog() {
         try {
-            if (MainActivity.this.isDestroyed()) {
-                progressDialog = null;
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.JELLY_BEAN) {
+                if (MainActivity.this.isDestroyed()) {
+                    progressDialog = null;
+                } else {
+                    progressDialog.dismiss();
+                }
             } else {
                 progressDialog.dismiss();
             }
@@ -433,7 +432,8 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         if (!refreshViewsIfChangeOccured(false)) {
             //checkIfshouldTryRetrieveDevicePosition();
             if (recIdDataSet.size() == 0) {
-                Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
+                //Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
+                tLastLocation.setText(getString(R.string.no_rec_id_found));
                 enableSearchButton();
                 return;
             }
@@ -469,8 +469,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         for (int i = 0; i < recIdCount; i++) {
 
             if (locationRecList.containsKey(i)) {
-                // if location record exist and last location is stall then we want to updated
-                long updateTimeout = (preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) / 2) * 60 * 1000;
+                // if location record exist and last location is stall then we want to update
+                long updateTimeout = Constants.FB_REQUEST_TIMEOUT;
+//                long updateTimeout = (preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) / 2) * 60 * 1000;
                 shouldConnectToFB = !(locationRecList.get(i).getTimestamp() > (System.currentTimeMillis() - updateTimeout));
             } else {
                 // if location record doesn't exist for this id then we want to request data from server
@@ -664,21 +665,33 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void spawnReceiverIdViews(int itemSelected) {
         final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.receivingIDPanel);
         LayoutInflater inflater = getLayoutInflater();
+        final Animation in = new AlphaAnimation(0.2f, 1.0f);
+        in.setDuration(200);
+        final Animation out = new AlphaAnimation(1.0f, 0.5f);
+        out.setDuration(50);
 
         for (int i = 0; i < recIdCount; i++) {
             View view = inflater.inflate(R.layout.tracking_id_button_layout, null);
             TextView item = (TextView) view.findViewById(R.id.recIdLabel);
-            if (i == itemSelected) item.setSelected(true);
+
             item.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
                     if (!view.isSelected()) {
-                        view.startAnimation(Utility.getAnimation());
 
+
+                        view.startAnimation(out);
                         itemNumber = Integer.parseInt(((TextView) view).getHint().toString());
                         invalidateRecButtonsViews(linearLayout);
                         view.setSelected(true);
+                        // Tranisition of background
+                        TransitionDrawable transition = (TransitionDrawable) view.getBackground();
+                        transition.setCrossFadeEnabled(true);
+                        transition.startTransition(250);
+                        // Setting full alias name
+                        ((TextView) view).setText(recIdDataSet.get(itemNumber).getAlias());
+                        view.startAnimation(in);
 
                         // check if we already hav any location for this id first
                         if (locationRecList.containsKey(itemNumber)) {
@@ -690,7 +703,20 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                     }
                 }
             });
-            item.setText(recIdDataSet.get(i).getAlias().substring(0, 1));
+
+            if (i == itemSelected) {
+                item.setSelected(true);
+                item.startAnimation(out);
+                // Tranisition of background
+                TransitionDrawable transition = (TransitionDrawable) item.getBackground();
+                transition.setCrossFadeEnabled(true);
+                transition.startTransition(250);
+                item.setText(recIdDataSet.get(itemSelected).getAlias());
+                item.startAnimation(in);
+            } else {
+                item.setText(recIdDataSet.get(i).getAlias().substring(0, 1).toUpperCase());
+            }
+
             item.setHint(String.valueOf(i));
             linearLayout.addView(view);
 
@@ -704,6 +730,11 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void invalidateRecButtonsViews(LinearLayout linearLayout) {
         for (int i = 0; i < linearLayout.getChildCount(); i++) {
             linearLayout.getChildAt(i).findViewById(R.id.recIdLabel).setSelected(false);
+            ((TextView) linearLayout.getChildAt(i).findViewById(R.id.recIdLabel))
+                    .setText(recIdDataSet.get(i).getAlias().substring(0, 1).toUpperCase());
+            TransitionDrawable transition = (TransitionDrawable) linearLayout.getChildAt(i).findViewById(R.id.recIdLabel)
+                    .getBackground();
+            transition.resetTransition();
         }
     }
 

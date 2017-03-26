@@ -1,6 +1,7 @@
 package com.pacmac.trackr;
 
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.pacmac.trackr.mapmarker.IconGenerator;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -30,9 +32,9 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
 
     private int markerCount = 0;
 
-    private int[] CHRISTMAS_ICONS = { R.drawable.img1, R.drawable.img2, R.drawable.img3,
-            R.drawable.img4, R.drawable.img5, R.drawable.img6, R.drawable.img7, R.drawable.img8,
-            R.drawable.img9, R.drawable.img10 };
+//    private int[] CHRISTMAS_ICONS = {R.drawable.img1, R.drawable.img2, R.drawable.img3,
+//            R.drawable.img4, R.drawable.img5, R.drawable.img6, R.drawable.img7, R.drawable.img8,
+//            R.drawable.img9, R.drawable.img10};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,24 +85,45 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
 
         if (markerCount == 0 || alias.size() == 0) return; // this should not happen
 
-        Random random  = new Random(System.currentTimeMillis());
+        Random random = new Random(System.currentTimeMillis());
 
         for (int i = 0; i < alias.size(); i++) {
             if (locationRecList.containsKey(i)) {
                 final LatLng location = new LatLng(locationRecList.get(i).getLatitude(), locationRecList.get(i).getLongitude());
-
-       //         int imgIndex = random.nextInt(9);
-
+// CHRISTMAS ICONS
+//         int imgIndex = random.nextInt(9);
 //                MarkerOptions markerOptions = new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))
 //                        .icon(BitmapDescriptorFactory.fromResource(CHRISTMAS_ICONS[imgIndex]));
-                MarkerOptions markerOptions = new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))
-                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+
+                IconGenerator iconGenerator = new IconGenerator(getApplicationContext());
+                iconGenerator.setStyle(i + 3);
+                Bitmap bitmapMarker = iconGenerator.makeIcon(alias.get(i) + "\n"
+                        + Utility.parseDate(locationRecList.get(i).getTimestamp()));
+
+//                MarkerOptions markerOptions = new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))
+//                        .icon(BitmapDescriptorFactory.fromResource(R.drawable.marker));
+
+                MarkerOptions markerOptions = new MarkerOptions()
+                        .position(location)
+                        .icon(BitmapDescriptorFactory
+                                .fromBitmap(bitmapMarker))
+                        .flat(true);
+
                 mMap.addMarker(markerOptions);
             }
         }
 
         if (locationRecList.containsKey(position)) {
-            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(locationRecList.get(position).getLatitude(), locationRecList.get(position).getLongitude()), 16f));
+            mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(locationRecList.get(position).getLatitude(),
+                    locationRecList.get(position).getLongitude()), 16f));
+        } else {
+            for (int i = 0; i < alias.size(); i++) {
+                if (locationRecList.containsKey(i)) {
+                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(locationRecList.get(i).getLatitude(),
+                            locationRecList.get(i).getLongitude()), 16f));
+                    break;
+                }
+            }
         }
 
         mMap.getUiSettings().setMapToolbarEnabled(false);
@@ -112,7 +135,7 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
             public boolean onMarkerClick(Marker marker) {
                 CircleOptions cOptions = new CircleOptions();
                 cOptions.center(marker.getPosition()).fillColor(getResources().getColor(R.color.marker_area))
-                        .strokeColor(getResources().getColor(R.color.map_radius)).radius(25).strokeWidth(0.6f).visible(true);
+                        .strokeColor(getResources().getColor(R.color.map_radius)).radius(15).strokeWidth(0.6f).visible(true);
                 mMap.addCircle(cOptions);
                 return false;
             }

@@ -31,8 +31,6 @@ import com.firebase.client.FirebaseError;
 import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.common.api.GoogleApiClient;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -211,7 +209,7 @@ public class Utility {
 
         StringBuilder sb = new StringBuilder();
 
-//   sb.append(context.getString(R.string.updateMsg1));
+   sb.append(context.getString(R.string.updateMsg1));
 //        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg2));
 //        sb.append("\n");
@@ -401,14 +399,6 @@ public class Utility {
         return null;
     }
 
-
-    public static Animation getAnimation() {
-        RotateAnimation rotate = new RotateAnimation(30, 360, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
-        rotate.setDuration(300);
-        return rotate;
-    }
-
-
     public static int isGooglePlayAvailable(Context context) {
         GoogleApiAvailability googleAPI = GoogleApiAvailability.getInstance();
         return googleAPI.isGooglePlayServicesAvailable(context);
@@ -436,7 +426,6 @@ public class Utility {
             }
             return false;
         }
-
         return true;
     }
 

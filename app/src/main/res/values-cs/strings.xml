@@ -37,9 +37,9 @@
     <string name="no_location">Poloha sledovaného zařízení je v tento moment neznámá.</string>
     <string name="share_header">*****************************</string>
     <string name="new_update_title">Nová aktualizace pro TrackR v</string>
-    <string name="updateMsg1">- NOVÁ možnost nastavit interval aktualizace polohy.</string>
-    <string name="updateMsg2">- About screen includes useful tips in case app is not working correctly.</string>
-    <string name="updateMsg3">- Slight update to UI.</string>
+    <string name="updateMsg1">- Nové ukazatele na mapě</string>
+    <string name="updateMsg2">- UI - celý alias sledovaného telefonu je nyní zobrazen.</string>
+    <string name="updateMsg3">- UI - některé dialogy byly aktualizovány.</string>
     <string name="updateMsg4">- Mapa nyní zobrazuje všechny sledované telefony.</string>
     <string name="updateMsg5">- Německá lokalizace.</string>
     <string name="updateMsg6">- Přidána kontrola GooglePlay Services verze.</string>
@@ -53,7 +53,7 @@
     <string name="neveragain">Toto již nechci vidět</string>
     <string name="last_location_fresh">Poslední známá poloha je již zobrazena.</string>
     <string name="rec_id_wrong">Přijímací ID zřejmě neexistuje. Zkontrolujte zadané ID v obou zařízeních.</string>
-    <string name="progress_searching">Hledám </string>
+    <string name="progress_searching">Hledám...</string>
     <string name="extract_data">Sdílej GPS polohu s:</string>
     <string name="conn_error">Chyba spojení. Zkontrolujte zda vám funguje připojení do internetu</string>
     <string name="device_didnot_report_location">Poslední známá GPS poloha je již zobrazena.</string>
@@ -68,7 +68,7 @@
     <string name="google_play_services_outdated">TrackR vyžaduje Google Play Services aktualizaci pro správnou funkci.</string>
     <string name="rec_id_not_found">TrackR nenašel polohu zařízení:</string>
     <string name="location">polohu</string>
-    <string name="no_new_updates">neaktualizoval svoji polohu déle než 40 minut.</string>
+    <string name="no_new_updates">neaktualizoval svoji polohu.</string>
     <string name="not_working_button">Oprav mě</string>
     <string name="resolve">Vyřeš</string>
     <string name="about_text">1) Launch the app and go to Settings\n\n2) Set the unique tracking ID in "remote" device.\n\n3) Switch ON tracking mode Note: You can enable parental lock by taping on padlock icon in bottom right corner.
@@ -78,4 +78,6 @@
     <string name="contact">Pro technickou podporu, či jinými žádostmi zašlete email na pacmac.dev@gmail.com\n\nDěkujeme za používání Device Tracker, p@cmac.</string>
     <string name="something_wrong">Něco je špatně!</string>
     <string name="update_freq_label">Frekvence zasílání polohy</string>
+    <string name="no_rec_id">Jedná se o první start. Je třeba nastavit sledované zařízení v Nastavení.</string>
+    <string name="no_rec_id_found">GPS poloha nedostupná.</string>
 </resources>

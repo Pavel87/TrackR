@@ -30,7 +30,7 @@
         android:layout_width="56dp"
         android:layout_height="56dp"
         android:layout_alignParentRight="true"
-       android:layout_below="@+id/aboutBtn"
+        android:layout_below="@+id/aboutBtn"
         android:layout_marginRight="8dp"
         android:layout_marginTop="4dp"
         android:background="@drawable/image_button_bg"
@@ -171,20 +171,18 @@
                     android:gravity="right"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:text="@string/address"
+                    android:text="@string/batlevel"
                     android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/address"
+                    android:id="@+id/batteryLevel"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ellipsize="marquee"
                     android:fontFamily="sans-serif-medium"
-                    android:gravity="center_vertical"
-                    android:lines="2"
-                    android:paddingRight="16dp"
+                    android:lines="1"
                     android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
@@ -201,24 +199,26 @@
                 <TextView
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="center_vertical"
+                    android:layout_gravity="top"
                     android:layout_weight="1"
                     android:fontFamily="sans-serif-light"
                     android:gravity="right"
                     android:paddingLeft="16dp"
                     android:paddingRight="16dp"
-                    android:text="@string/batlevel"
+                    android:text="@string/address"
                     android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
                 <TextView
-                    android:id="@+id/batteryLevel"
+                    android:id="@+id/address"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ellipsize="marquee"
                     android:fontFamily="sans-serif-medium"
-                    android:lines="1"
+                    android:gravity="top"
+                    android:lines="2"
+                    android:paddingRight="16dp"
                     android:textColor="@color/text_nightMode"
                     android:textSize="16sp" />
 
