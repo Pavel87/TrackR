@@ -6,6 +6,10 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Button;
+import android.widget.LinearLayout;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -30,6 +34,8 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
     private HashMap<Integer, LocationRecord> locationRecList = null;
     private GoogleMap mMap;
 
+    private LinearLayout btnPanel = null;
+
     private int markerCount = 0;
 
 //    private int[] CHRISTMAS_ICONS = {R.drawable.img1, R.drawable.img2, R.drawable.img3,
@@ -41,6 +47,7 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_map_detail);
 
+        btnPanel = (LinearLayout) findViewById(R.id.trackPanel);
 
         locationRecList = Utility.convertJsonStringToLocList(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
         if (locationRecList == null) {
@@ -85,11 +92,28 @@ public class MapDetailActivity extends FragmentActivity implements OnMapReadyCal
 
         if (markerCount == 0 || alias.size() == 0) return; // this should not happen
 
-        Random random = new Random(System.currentTimeMillis());
+       // Random random = new Random(System.currentTimeMillis());
+
+       // LayoutInflater layoutInflater = getLayoutInflater();
+
 
         for (int i = 0; i < alias.size(); i++) {
             if (locationRecList.containsKey(i)) {
                 final LatLng location = new LatLng(locationRecList.get(i).getLatitude(), locationRecList.get(i).getLongitude());
+
+
+//                View view = layoutInflater.inflate(R.layout.map_button, btnPanel, false);
+//                Button button = (Button) view.findViewById(R.id.map_btn_id);
+//                button.setText(alias.get(i));
+//                button.setHint(String.valueOf(i));
+//                button.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//
+//                    }
+//                });
+
+
 // CHRISTMAS ICONS
 //         int imgIndex = random.nextInt(9);
 //                MarkerOptions markerOptions = new MarkerOptions().position(location).title(alias.get(i)).snippet(Utility.parseDate(locationRecList.get(i).getTimestamp()))

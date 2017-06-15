@@ -209,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "2.0.12").equals(appVersion)) {
+        if (!preferences.getString(Constants.NEW_UPDATE, "2.0.14").equals(appVersion)) {
             Utility.createAlertDialog(MainActivity.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
