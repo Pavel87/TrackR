@@ -80,4 +80,6 @@
     <string name="update_freq_label">Frekvence zasílání polohy</string>
     <string name="no_rec_id">Jedná se o první start. Je třeba nastavit sledované zařízení v Nastavení.</string>
     <string name="no_rec_id_found">GPS poloha nedostupná.</string>
+    <string name="rec_id_list_error">Sdílení vybraného zařízení je nedostupné.</string>
+
 </resources>

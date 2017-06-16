@@ -43,12 +43,11 @@ public class LocationService extends Service implements LocationListener, Google
     @Override
     public void onCreate() {
         super.onCreate();
-
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-
+        Firebase.setAndroidContext(getApplicationContext());
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)

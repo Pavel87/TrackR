@@ -170,12 +170,17 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
             @Override
             public void onClick(View v) {
                 if (locationRecList.containsKey(itemNumber)) {
-                    Intent sharingIntent = Utility.createShareIntent(Utility.updateShareIntent(getApplicationContext(),
-                            recIdDataSet.get(itemNumber).getAlias(), locationRecList.get(itemNumber).getLatitude(),
-                            locationRecList.get(itemNumber).getLongitude(), locationRecList.get(itemNumber).getTimestamp(),
-                            locationRecList.get(itemNumber).getAddress(), locationRecList.get(itemNumber).getBatteryLevel()));
+                    //due to OutOfBoundIndex Ex must check recIdDataSet for given item number
+                    if(recIdDataSet.size() > itemNumber) {
+                        Intent sharingIntent = Utility.createShareIntent(Utility.updateShareIntent(getApplicationContext(),
+                                recIdDataSet.get(itemNumber).getAlias(), locationRecList.get(itemNumber).getLatitude(),
+                                locationRecList.get(itemNumber).getLongitude(), locationRecList.get(itemNumber).getTimestamp(),
+                                locationRecList.get(itemNumber).getAddress(), locationRecList.get(itemNumber).getBatteryLevel()));
 
-                    startActivity(Intent.createChooser(sharingIntent, getString(R.string.extract_data)));
+                        startActivity(Intent.createChooser(sharingIntent, getString(R.string.extract_data)));
+                    } else {
+                        Utility.showToast(getApplicationContext(), getString(R.string.rec_id_list_error));
+                    }
                 } else {
                     Utility.showToast(getApplicationContext(), getString(R.string.no_location));
                 }
@@ -209,8 +214,9 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "2.0.14").equals(appVersion)) {
-            Utility.createAlertDialog(MainActivity.this);
+        if (!preferences.getString(Constants.NEW_UPDATE, "2.0.15").equals(appVersion)) {
+            //TODO uncomment this
+            // Utility.createAlertDialog(MainActivity.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
             editor.commit();
@@ -556,10 +562,12 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
      */
     private boolean isMyServiceRunning(Class<?> serviceClass) {
         ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
-        for (ActivityManager.RunningServiceInfo service : manager
-                .getRunningServices(Integer.MAX_VALUE)) {
-            if (serviceClass.getName().equals(service.service.getClassName())) {
-                return true;
+        if(manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager
+                    .getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceClass.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
             }
         }
         return false;

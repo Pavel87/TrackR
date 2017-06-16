@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.TransactionTooLargeException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AlertDialog;
@@ -239,9 +240,13 @@ public class Utility {
     public static String getCurrentAppVersion(Context context) {
         String appVersion = "N/A";
         try {
-            appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(), 0).versionName;
-
+            appVersion = context.getPackageManager().getPackageInfo(context.getPackageName(),
+                    PackageManager.GET_META_DATA).versionName;
         } catch (PackageManager.NameNotFoundException e) {
+            Log.e(Constants.TAG, "Exception while retrieving app packageInfo#1" + e.getMessage());
+            e.printStackTrace();
+        } catch (Exception e){
+            Log.e(Constants.TAG, "Exception while retrieving app packageInfo#2" + e.getMessage());
             e.printStackTrace();
         }
         return appVersion;
@@ -406,10 +411,12 @@ public class Utility {
 
     public static int[] getGooglePlayVersion(Context context) {
         try {
-            String versionName = context.getPackageManager().getPackageInfo(GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE,0).versionName;
+            String versionName = context.getPackageManager().getPackageInfo(GoogleApiAvailability.GOOGLE_PLAY_SERVICES_PACKAGE,
+                    PackageManager.GET_META_DATA).versionName;
             String[] versionComponents = versionName.split("\\.");
             return new int[]{Integer.parseInt(versionComponents[0]), Integer.parseInt(versionComponents[1])};
         } catch (Exception e) {
+            Log.e(Constants.TAG, "Exception while retrieving app packageInfo#3" + e.getMessage());
             e.printStackTrace();
         }
         return new int[]{-1,-1};
@@ -473,7 +480,7 @@ public class Utility {
             }
             return locationRecList;
         } catch (JSONException e) {
-            Log.d(Constants.TAG, "#7# Error getting LocRecord JSON obj or array. " + e.getMessage());
+            Log.e(Constants.TAG, "#7# Error getting LocRecord JSON obj or array. " + e.getMessage());
         }
         return null;
     }

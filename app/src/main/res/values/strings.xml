@@ -78,4 +78,5 @@
     <string name="update_freq_label">Location Update Frequency</string>
     <string name="no_rec_id">Go to Settings and setup tracked device id.</string>
     <string name="no_rec_id_found">No device found.</string>
+    <string name="rec_id_list_error">Sharing  data is not possible at the moment.</string>
 </resources>
