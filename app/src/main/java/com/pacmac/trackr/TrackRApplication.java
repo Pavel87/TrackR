@@ -17,13 +17,13 @@ public class TrackRApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            try {
-                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this);
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+//            try {
+//                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this);
+//            } catch (Exception e) {
+//                e.printStackTrace();
+//            }
+//        }
         Firebase.setAndroidContext(getApplicationContext());
         Firebase.getDefaultConfig().setPersistenceEnabled(false);
 

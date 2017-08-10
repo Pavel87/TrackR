@@ -18,7 +18,7 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".MainActivityV2">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -33,7 +33,6 @@
         <activity
             android:name=".MapDetailActivity"
             android:label="@string/title_activity_map_detail" />
-
         <receiver
             android:name=".RebootReceiver"
             android:enabled="true"

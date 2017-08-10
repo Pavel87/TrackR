@@ -19,7 +19,7 @@ import java.util.ArrayList;
  */
 
 
-public class AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
+public class  AdapterReceivingIds extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private final int SEEKBAR_OFFSET = 5;
     private ArrayList<SettingsObject> mDataset;

@@ -137,7 +137,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         mapBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                openMap();
+
+                startActivity(new Intent(getApplicationContext(), MainActivityV2.class));
+
+                //openMap();
             }
         });
         searchBtn.setOnClickListener(new View.OnClickListener() {
@@ -348,7 +351,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                     }
                                     // Store location and request addres translation
                                     locationRecList.put(i, new LocationRecord(id, latitude, longitude, timeStamp,
-                                            (float) batteryLevel));
+                                            (float) batteryLevel, recIdDataSet.get(i).getAlias()));
 
 
                                     // as we do multiple id request we want to display
@@ -357,7 +360,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
                                         getAdress(i);
                                         displayDeviceLocation(locationRecList.get(i), false);
                                     }
-                                    Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayString());
+                                    Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayStringFromUserRecords());
                                 } else if (progressDialog != null && progressDialog.isShowing()) {
                                     Utility.showToast(getApplicationContext(), getString(R.string.device_didnot_report_location));
                                 }
@@ -453,7 +456,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         unregisterReceiver(connReceiver);
         startTrackingService();
         // save loc collection before exit
-        Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayString());
+        Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, createJsonArrayStringFromUserRecords());
     }
 
     @Override
@@ -628,10 +631,13 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
 
 
     private void populateRecIdsList() {
-        String jsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
-        if (jsonString.equals("")) {
-            // file doesn't exist
+        locationRecList = Utility.convertJsonStringToLocList(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+        String recIdsJsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
 
+
+
+        if (recIdsJsonString.equals("")) {
+            // file doesn't exist
             //backward compatibility
             String recId = preferences.getString(Constants.RECEIVING_ID, "");
             String recIdRaw = preferences.getString(Constants.RECEIVING_ID_RAW, "");
@@ -655,9 +661,10 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         }
 
         try {
-            JSONObject jsnobject = new JSONObject(jsonString);
+            JSONObject jsnobject = new JSONObject(recIdsJsonString);
             JSONArray jsonArray = jsnobject.getJSONArray("receiverids");
             recIdDataSet.clear();
+
             for (int i = 0; i < jsonArray.length(); i++) {
                 SettingsObject settingsObject = Utility.createSettingsObjectFromJson((JSONObject) jsonArray.get(i));
                 if (settingsObject != null) {
@@ -746,7 +753,7 @@ public class MainActivity extends AppCompatActivity implements NetworkStateListe
         }
     }
 
-    private String createJsonArrayString() {
+    private String createJsonArrayStringFromUserRecords() {
         StringBuilder sb = new StringBuilder();
 
         sb.append("{\"locrecords\":[");

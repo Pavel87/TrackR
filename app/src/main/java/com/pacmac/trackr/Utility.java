@@ -1,6 +1,7 @@
 package com.pacmac.trackr;
 
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -9,7 +10,6 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
-import android.os.TransactionTooLargeException;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AlertDialog;
@@ -19,8 +19,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.Window;
-import android.view.animation.Animation;
-import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
@@ -47,6 +45,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -245,7 +244,7 @@ public class Utility {
         } catch (PackageManager.NameNotFoundException e) {
             Log.e(Constants.TAG, "Exception while retrieving app packageInfo#1" + e.getMessage());
             e.printStackTrace();
-        } catch (Exception e){
+        } catch (Exception e) {
             Log.e(Constants.TAG, "Exception while retrieving app packageInfo#2" + e.getMessage());
             e.printStackTrace();
         }
@@ -397,7 +396,9 @@ public class Utility {
 
     public static LocationRecord createLocationRecordFromJson(JSONObject object) {
         try {
-            return new LocationRecord(object.getInt("id"), object.getDouble("latitude"), object.getDouble("longitude"), object.getLong("timestamp"), object.getDouble("batteryLevel"), object.getString("address"));
+            return new LocationRecord(object.getInt("id"), object.getDouble("latitude"), object.getDouble("longitude"),
+                    object.getLong("timestamp"), object.getDouble("batteryLevel"), object.getString("address"),
+                    object.getString("alias"), object.getString("recId"), object.getString("safeId"));
         } catch (JSONException e) {
             Log.d(Constants.TAG, "#6# Error parsing locationRecord json from file. " + e.getMessage());
         }
@@ -419,7 +420,7 @@ public class Utility {
             Log.e(Constants.TAG, "Exception while retrieving app packageInfo#3" + e.getMessage());
             e.printStackTrace();
         }
-        return new int[]{-1,-1};
+        return new int[]{-1, -1};
     }
 
     public static boolean checkPlayServices(Activity activity) {
@@ -461,7 +462,6 @@ public class Utility {
     }
 
 
-
     public static HashMap<Integer, LocationRecord> convertJsonStringToLocList(String filePath) {
         String jsonString = Utility.loadJsonStringFromFile(filePath);
         if (jsonString.equals("")) {
@@ -485,6 +485,40 @@ public class Utility {
         return null;
     }
 
+    public static List<LocationRecord> convertJsonStringToUserRecords(String filePath) {
+        String jsonString = Utility.loadJsonStringFromFile(filePath);
+        if (jsonString.equals("")) {
+            return null;
+        }
+        List<LocationRecord> userRecords = new ArrayList<>();
+        try {
+            JSONObject jsnobject = new JSONObject(jsonString);
+            JSONArray jsonArray = jsnobject.getJSONArray("locrecords");
+
+            for (int i = 0; i < jsonArray.length(); i++) {
+                LocationRecord locationRecord = Utility.createLocationRecordFromJson((JSONObject) jsonArray.get(i));
+                if (locationRecord != null) {
+                    userRecords.add(locationRecord);
+                }
+            }
+            return userRecords;
+        } catch (JSONException e) {
+            Log.e(Constants.TAG, "#7# Error getting LocRecord JSON obj or array. " + e.getMessage());
+        }
+        return null;
+    }
+
+
+    // TODO this might be deprecated was ensuring backward compatibility
+    public static String createFinalJsonString(LocationRecord userRecord) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("{\"receiverids\":[");
+        sb.append(userRecord.convertToJSONForSettings(0));
+        sb.append("]}");
+        return sb.toString();
+    }
+
+
     public static String createFinalJsonString(ArrayList<SettingsObject> recIdObjList) {
         StringBuilder sb = new StringBuilder();
 
@@ -502,6 +536,103 @@ public class Utility {
             sb.append(recIdObjList.get(recIdObjList.size() - 2).convertToJSONString(recIdObjList.size() - 2));
         }
         sb.append("]}");
+        return sb.toString();
+    }
+
+
+    protected static void startTrackingService(Context context, final SharedPreferences preferences) {
+        boolean isTrackingOn = preferences.getBoolean(Constants.TRACKING_STATE, false);
+        if (isTrackingOn && !isMyServiceRunning(context, LocationService.class)) {
+            Intent intentService = new Intent(context, LocationService.class);
+            context.startService(intentService);
+        }
+    }
+
+
+    protected static void openSettings(Context context, Activity activity) {
+        if (Utility.checkPlayServices(activity)) {
+            Intent intent = new Intent(context, SettingsActivity.class);
+            context.startActivity(intent);
+        }
+    }
+
+    /**
+     * check the given service is running
+     *
+     * @param serviceClass class eg MyService.class
+     * @return boolean
+     */
+    private static boolean isMyServiceRunning(Context context, Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+        if (manager != null) {
+            for (ActivityManager.RunningServiceInfo service : manager
+                    .getRunningServices(Integer.MAX_VALUE)) {
+                if (serviceClass.getName().equals(service.service.getClassName())) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    protected static String createJsonArrayStringFromUserRecords(List<LocationRecord> userRecords) {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("{\"locrecords\":[");
+
+        if (userRecords != null) {
+            for (int i = 0; i < userRecords.size(); i++) {
+                if (i == userRecords.size() - 1) {
+                    sb.append(userRecords.get(i).getJSONString());
+                    break;
+                }
+                sb.append(userRecords.get(i).getJSONString() + ",");
+            }
+        }
+        sb.append("]}");
+        return sb.toString();
+    }
+
+
+    private static int DAY_LENGTH = 24 * 60 * 60;
+    private static int HOUR_LENGTH = 60 * 60;
+    private static int MINUTE_LENGTH = 60;
+
+    protected static String getLastUpdateString(long lastSeen) {
+
+        if (lastSeen == 0) {
+            return "Pending location update.";
+        }
+
+        long currentTime = System.currentTimeMillis();
+
+        long diff = currentTime - lastSeen;
+
+        if (diff <= 0) {
+            return "Error #TS1";
+        }
+
+        long diffSec = diff / 1000;
+
+        long days = diffSec / DAY_LENGTH;
+        long hours = diffSec % DAY_LENGTH / HOUR_LENGTH;
+        long mins = diffSec % DAY_LENGTH % HOUR_LENGTH / MINUTE_LENGTH;
+
+        if (days < 1 && hours < 1 && mins < 1) {
+            return "Just Now.";
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("Last seen ");
+        if (days > 0) {
+            sb.append(String.valueOf(days) + "d ");
+        }
+        if (hours > 0) {
+            sb.append(String.valueOf(hours) + "hr ");
+        }
+        if (mins > 0) {
+            sb.append(String.valueOf(mins) + "min ");
+        }
+        sb.append("ago.");
         return sb.toString();
     }
 

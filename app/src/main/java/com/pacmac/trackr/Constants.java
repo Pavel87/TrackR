@@ -51,5 +51,10 @@ public class Constants {
     public static final int TYPE_TRACK_FREQUENCY = 4;
 
 
+    public static final String ADDRESS_RESOLVER_ACTION = "TRACKR_ADDRESS_RESOLVER_ACTION";
+    public static final String ADDRESS_RESOLVER_ADDRESS = "TRACKR_ADDRESS_RESOLVER_ADDRESS";
+    public static final String ADDRESS_RESOLVER_ROWID = "TRACKR_ADDRESS_RESOLVER_ROWID";
+
+
 
 }
