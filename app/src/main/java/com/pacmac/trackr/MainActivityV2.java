@@ -1,6 +1,8 @@
 package com.pacmac.trackr;
 
 import android.Manifest;
+import android.app.Activity;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -10,16 +12,24 @@ import android.graphics.Bitmap;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.support.v4.app.FragmentActivity;
+import android.support.design.widget.AppBarLayout;
+import android.support.design.widget.BottomNavigationView;
+import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.MenuItem;
 import android.view.View;
-import android.widget.ImageButton;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.firebase.client.DataSnapshot;
 import com.firebase.client.Firebase;
@@ -30,9 +40,7 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.pacmac.trackr.mapmarker.IconGenerator;
 
@@ -40,16 +48,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Created by pacmac on 2017-08-05.
  */
-
-
-public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallback,
+public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallback,
         NetworkStateListener, TrackListMainAdapter.TrackListItemSelectedListener {
 
     private static final String TAG = "TrackRMain";
@@ -60,7 +66,10 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
-    ImageButton settingsBtn;
+    private AppBarLayout appBarCollapsable;
+    private CollapsingToolbarLayout collapsingToolbarLayout;
+    private BottomNavigationView bottomNavigation;
+    private LinearLayout noDeviceView;
 
     private NetworkStateChangedReceiver connReceiver = null;
     private boolean isConnected = false;
@@ -74,20 +83,20 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
     private boolean isPermissionEnabled = true;
 
     private boolean skipfbCallOnReconfiguration = false;
-
-
     private boolean isAddressResolverRegistred = false;
+
+    /**
+     * Adress resolver Receiver
+     */
     private BroadcastReceiver addressResolverReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
             String address = intent.getStringExtra(Constants.ADDRESS_RESOLVER_ADDRESS);
             int rowId = intent.getIntExtra(Constants.ADDRESS_RESOLVER_ROWID, -1);
             // make sure to return if rowId is out of bounds for userRecords
             if (rowId == -1 || userRecords.size() <= rowId) {
                 return;
             }
-
             //update userRecords with new address and invalidate row
             userRecords.get(rowId).setAddress(address);
             mAdapter.notifyItemChanged(rowId);
@@ -102,23 +111,43 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_v2);
+
+        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        String itemTitle = "Device Tracker";
+        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbarLayout.setTitle(itemTitle);
+        collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
                 MODE_PRIVATE);
 
+        isPermissionEnabled = Utility.checkPermission(getApplicationContext(), LOCATION_PERMISSION);
+
+        if (preferences.getBoolean(Constants.FIRST_RUN, true)) {
+            createDefaultIdsAndMyPhoneRow();
+            if(!isPermissionEnabled) {
+                showDialogForUserToEnableTracking();
+            }
+        } else {
+            loadUserRecordsFromFile();
+        }
+
+
         Firebase.setAndroidContext(getApplicationContext());
-        populateUserRecords();
 
         // restore location on reconfiguration
         if (savedInstanceState != null) {
             currentTracker = savedInstanceState.getInt(Constants.KEY_ITEM_ORDER, 0);
             skipfbCallOnReconfiguration = true;
-
         }
+
 
         connReceiver = new NetworkStateChangedReceiver();
         connReceiver.setConnectionListener(this);
 
-        mRecyclerView = findViewById(R.id.trackList);
+        noDeviceView = (LinearLayout) findViewById(R.id.emptyListView);
+        mRecyclerView = (RecyclerView) findViewById(R.id.trackList);
         mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
@@ -137,13 +166,11 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
             }
         });
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            isPermissionEnabled = Utility.checkPermission(getApplicationContext(),
-                    LOCATION_PERMISSION);
-        }
-        if (!isPermissionEnabled) {
-            Utility.displayExplanationForPermission(this, LOCATION_PERMISSION);
-        }
+        //add call back for switching user Records on the map
+        ((TrackListMainAdapter) mAdapter).setItemSelectedListener(this);
+
+
+        appBarCollapsable = (AppBarLayout) findViewById(R.id.appBarCollapsable);
 
         checkConnectivity();
         Utility.startTrackingService(getApplicationContext(), preferences);
@@ -159,33 +186,51 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
         getSupportFragmentManager().beginTransaction().add(R.id.map_container, mapFragment).commit();
         mapFragment.getMapAsync(this);
 
-        // Controls
-        settingsBtn = findViewById(R.id.settings);
-        settingsBtn.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                Utility.openSettings(getApplicationContext(), MainActivityV2.this);
+            public void onClick(View view) {
+                Utility.openUserEditActivity(MainActivityV2.this, -1, userRecords);
             }
         });
 
+        bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation);
+        bottomNavigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+            @Override
+            public boolean onNavigationItemSelected(MenuItem item) {
+                handleBottomNavigationItemSelected(item);
+                return true;
+            }
+        });
+
+        bottomNavigation.getMenu().getItem(0).setCheckable(false);
+        bottomNavigation.getMenu().getItem(1).setCheckable(false);
+        bottomNavigation.getMenu().getItem(2).setCheckable(false);
+
+        if (userRecords.size() == 0) {
+            noDeviceView.setVisibility(View.VISIBLE);
+            appBarCollapsable.setExpanded(false);
+        }
     }
+
+
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (userRecords.size() > 0) {
+            appBarCollapsable.setExpanded(true);
+        }
+        enableButtonsInNavBar();
         skipConnReceiverTrigger = true;
         registerReceiver(connReceiver, new IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION));
-        if (!refreshViewsIfChangeOccured(false)) {
-            showUsersLocationOnMap();
-            checkIfshouldTryRetrieveDevicePosition();
-            if (userRecords == null || userRecords.size() == 0) {
-                //Utility.showToast(getApplicationContext(), getString(R.string.rec_id_wrong));
-                // tLastLocation.setText(getString(R.string.no_rec_id_found));
-                //  enableSearchButton();
-                return;
-            }
-            // tryToRetrieveNewLocationWithProgress(false);
+
+        if (isPermissionEnabled) {
+            Utility.startTrackingService(getApplicationContext(), preferences);
         }
+        showUsersLocationOnMap();
+        checkIfshouldTryRetrieveDevicePosition();
+
     }
 
     @Override
@@ -223,16 +268,16 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
         mMap.getUiSettings().setAllGesturesEnabled(false);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
 
-        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-            @Override
-            public boolean onMarkerClick(Marker marker) {
-                CircleOptions cOptions = new CircleOptions();
-                cOptions.center(marker.getPosition()).fillColor(getResources().getColor(R.color.marker_area))
-                        .strokeColor(getResources().getColor(R.color.map_radius)).radius(15).strokeWidth(0.6f).visible(true);
-                mMap.addCircle(cOptions);
-                return false;
-            }
-        });
+//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+//            @Override
+//            public boolean onMarkerClick(Marker marker) {
+//                CircleOptions cOptions = new CircleOptions();
+//                cOptions.center(marker.getPosition()).fillColor(getResources().getColor(R.color.marker_area))
+//                        .strokeColor(getResources().getColor(R.color.map_radius)).radius(15).strokeWidth(0.6f).visible(true);
+//                mMap.addCircle(cOptions);
+//                return false;
+//            }
+//        });
 
         showUsersLocationOnMap();
 
@@ -248,18 +293,6 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String permissions[],
-                                           int[] grantResults) {
-        if (requestCode == Utility.MY_PERMISSIONS_REQUEST) {
-            isPermissionEnabled = Utility.checkPermission(getApplicationContext(),
-                    LOCATION_PERMISSION);
-        }
-        if (isPermissionEnabled) {
-            checkIfshouldTryRetrieveDevicePosition();
-        }
-    }
-
-    @Override
     public void connectionChanged(boolean isConnected) {
         Log.d(Constants.TAG, "Conn changed: " + isConnected);
         this.isConnected = isConnected;
@@ -272,7 +305,8 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
     @Override
     public void OnItemSelected(int position) {
         currentTracker = position;
-        if(mMap != null) {
+        if (mMap != null) {
+            appBarCollapsable.setExpanded(true, true);
             if (userRecords.get(currentTracker).getLatitude() != 0 || userRecords.get(currentTracker).getLongitude() != 0) {
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userRecords.get(currentTracker).getLatitude(),
                         userRecords.get(currentTracker).getLongitude()), 16f));
@@ -282,10 +316,103 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
         }
     }
 
+    @Override
+    public void OnItemEditClicked(int position) {
+        Utility.openUserEditActivity(this, position, userRecords);
+    }
+
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent resultIntent) {
+
+        Log.d(TAG, "Activity Result :" + requestCode);
+        if (requestCode == Constants.EDIT_RESULT_REQUEST_CODE) {
+
+            if (resultCode == Activity.RESULT_OK) {
+                Log.d(TAG, "Activity Result OK");
+                boolean retrieveLocations = false;
+                int position = resultIntent.getIntExtra(Constants.EDIT_USER_POSITION, -10);
+
+                String alias = resultIntent.getStringExtra(Constants.EDIT_USER_ALIAS);
+                String id = resultIntent.getStringExtra(Constants.EDIT_USER_ID);
+                int profileImageId = resultIntent.getIntExtra(Constants.EDIT_USER_IMG, R.drawable.user0);
+//                  int img = resultIntent.getIntExtra(Constants.EDIT_USER_IMG, -1);
+                // if position is = -1 then it is very new record
+                if (position == -1) {
+                    userRecords.add(new LocationRecord(userRecords.size(), id, Utility.checkAndReplaceForbiddenChars(id), alias, profileImageId));
+                    retrieveLocations = true;
+                    mAdapter.notifyItemInserted(userRecords.size() - 1);
+                } else {
+                    userRecords.get(position).setAlias(alias);
+                    userRecords.get(position).setProfileImageId(profileImageId);
+                    if (!userRecords.get(position).getRecId().equals(id)) {
+                        userRecords.get(position).setRecId(id);
+                        userRecords.get(position).setSafeId(Utility.checkAndReplaceForbiddenChars(id));
+                        userRecords.get(position).resetParams();
+                        retrieveLocations = true;
+                    }
+                    mAdapter.notifyItemChanged(position);
+                    // update img resource
+                }
+                Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
+                        Utility.createJsonArrayStringFromUserRecords(userRecords));
+
+                if (retrieveLocations) {
+                    getLastKnownLocation();
+                }
+
+            } else if (resultCode == Activity.RESULT_CANCELED) {
+                Log.d(TAG, "Activity RESULT_CANCELED");
+            } else if (resultCode == Constants.EDIT_DELETE_POSITION) {
+                Log.d(TAG, "Activity EDIT_DELETE_POSITION");
+                int position = resultIntent.getIntExtra(Constants.EDIT_USER_POSITION, -10);
+                if (position >= 0) {
+                    userRecords.remove(position);
+                    mAdapter.notifyItemRemoved(position);
+                }
+                Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
+                        Utility.createJsonArrayStringFromUserRecords(userRecords));
+            }
+        } else if (requestCode == Constants.SETTINGS_REQUESTCODE) {
+            if (resultCode == Constants.SETTINGS_UPDATE_RESULT) {
+                Log.d(TAG, "Activity result: SETTINGS_UPDATE_RESULT");
+                loadUserRecordsFromFile();
+                ((TrackListMainAdapter) mAdapter).updateViews(userRecords);
+            }
+        }
+
+        // Display no item in list image and message
+        if (userRecords.size() == 0) {
+            noDeviceView.setVisibility(View.VISIBLE);
+            appBarCollapsable.setExpanded(false);
+            Log.d(TAG, "no device view - VISIBLE");
+
+        } else {
+            Log.d(TAG, "no device view - GONE");
+            noDeviceView.setVisibility(View.GONE);
+        }
+    }
+
     /**
      * Methods
      */
-
+    private void handleBottomNavigationItemSelected(MenuItem item) {
+        item.setEnabled(false);
+        switch (item.getItemId()) {
+            case R.id.navigation_about:
+//                Intent i = new Intent(getApplicationContext(), AboutActivity.class);
+                Intent i = new Intent(getApplicationContext(), HelpActivity.class);
+                startActivity(i);
+                break;
+            case R.id.navigation_share:
+                Utility.showToast(getApplicationContext(), "Share function not yet implemented.");
+                item.setEnabled(true);
+                break;
+            case R.id.navigation_settings:
+                Utility.openSettings(getApplicationContext(), MainActivityV2.this);
+                break;
+        }
+    }
 
     private void checkConnectivity() {
         ConnectivityManager conn = (ConnectivityManager) this
@@ -298,8 +425,34 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
         }
     }
 
-       private void populateUserRecords() {
+
+    private void createDefaultIdsAndMyPhoneRow() {
+
+        SharedPreferences.Editor editor = preferences.edit();
+        String trackId = Utility.generateUniqueID().substring(0, 10);
+        editor.putString(Constants.TRACKING_ID, trackId);
+        editor.putString(Constants.TRACKING_ID_RAW, trackId);
+        //Enable tracking of this phone on start
+        editor.putBoolean(Constants.TRACKING_STATE, isPermissionEnabled);
+        editor.putBoolean(Constants.FIRST_RUN, false);
+        editor.commit();
+
+        if (isPermissionEnabled) {
+            userRecords = Utility.convertJsonStringToUserRecords(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+            userRecords.add(new LocationRecord(-10, trackId, trackId, "My Phone", -1));
+            Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
+                    Utility.createJsonArrayStringFromUserRecords(userRecords));
+        }
+    }
+
+    private void loadUserRecordsFromFile() {
         userRecords = Utility.convertJsonStringToUserRecords(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+        Log.d(TAG, "userRecords.size: " + userRecords.size());
+        if (userRecords.size() > 0 && !userRecords.get(0).getRecId().equals("")) {
+            return;
+        }
+
+        // To support deprecated code I need to use the rest of this method.
         String recIdsJsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
 
         if (recIdsJsonString.equals("")) {
@@ -319,14 +472,14 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
 
                 LocationRecord record = userRecords.get(0);
                 if (record == null || !record.getRecId().equals(recId)) {
-                    userRecords.add(new LocationRecord(0, recId, safeId, "TrackR1"));
+                    userRecords.add(new LocationRecord(0, recId, safeId, "TrackR1", -1));
                     // Save upgraded REC IDs into file
-                    Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME, Utility.createFinalJsonString(userRecords.get(0)));
+                    Utility.saveJsonStringToFile(getFilesDir() +
+                            Constants.JSON_REC_IDS_FILE_NAME, Utility.createFinalJsonString(userRecords.get(0)));
                 }
             }
             return;
         }
-
 
         try {
             JSONObject jsnobject = new JSONObject(recIdsJsonString);
@@ -335,9 +488,9 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
             for (int i = 0; i < jsonArray.length(); i++) {
                 SettingsObject settingsObject = Utility.createSettingsObjectFromJson((JSONObject) jsonArray.get(i));
                 if (settingsObject != null) {
-                    if (userRecords == null) {
+                    if (userRecords.size() == 0) {
                         userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(),
-                                settingsObject.getAlias()));
+                                settingsObject.getAlias(), -1));
                     } else {
                         if (userRecords.size() > i) {
                             // if userRecord exist keep it and update missing ones
@@ -354,10 +507,12 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
                                 }
                             }
                         }
-                        userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias()));
+                        userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
                     }
                 }
             }
+            File obsoleteFile = new File(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
+            obsoleteFile.delete();
         } catch (JSONException e) {
             Log.d(TAG, "#4# Error getting JSON obj or array. " + e.getMessage());
         }
@@ -428,7 +583,12 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
                                     double latitude = (double) snapshot.child("latitude").getValue();
                                     double longitude = (double) snapshot.child("longitude").getValue();
                                     long timeStamp = (long) snapshot.child("timestamp").getValue();
-
+                                    int cellQuality = -1;
+                                    // cellQuality will be null on older app versions
+                                    Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
+                                    if (cellQualityLong != null) {
+                                        cellQuality = cellQualityLong.intValue();
+                                    }
                                     Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + userRecords.get(i).getAlias());
 
                                     // check if timestamps are same and if yes then don't
@@ -444,7 +604,7 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
                                     }
 
                                     // Store location and request addres translation
-                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel);
+                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality);
                                     mAdapter.notifyItemChanged(i);
                                     getAddress(i);
                                     Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
@@ -512,44 +672,6 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
         }
     }
 
-    private boolean refreshViewsIfChangeOccured(boolean showProgress) {
-
-        if (preferences == null) {
-            preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
-                    MODE_PRIVATE);
-        }
-
-        if (preferences.getBoolean(Constants.RECEIVING_ID_CHANGE, false)) {
-
-            // TODO maybe I can wipe only changed ids and its location
-
-            userRecords.clear();
-            Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME, Utility.createJsonArrayStringFromUserRecords(userRecords));
-
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean(Constants.RECEIVING_ID_CHANGE, false);
-            editor.commit();
-            // display loading screen
-//            displayDeviceLocation(null, true);
-
-            populateUserRecords();
-            ((TrackListMainAdapter) mAdapter).updateViews(userRecords);
-            // update views
-//            mAdapter.notifyDataSetChanged();
-            tryToRetrieveNewLocationWithProgress();
-            return true;
-        }
-        return false;
-    }
-
-    private void tryToRetrieveNewLocationWithProgress() {
-        if (checkIfshouldTryRetrieveDevicePosition()) {
-
-        } else {
-            Utility.showToast(getApplicationContext(), getString(R.string.last_location_fresh));
-        }
-    }
-
     private void registerAddressResolverReceiver() {
         if (!isAddressResolverRegistred) {
             IntentFilter intentFilter = new IntentFilter(Constants.ADDRESS_RESOLVER_ACTION);
@@ -565,9 +687,8 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
         }
     }
 
-
-    private void showUsersLocationOnMap(){
-        if(mMap == null) {
+    private void showUsersLocationOnMap() {
+        if (mMap == null) {
             return;
         }
         mMap.clear();
@@ -577,11 +698,11 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
             if (userRecords.get(i).getLatitude() != 0 || userRecords.get(i).getLongitude() != 0) {
                 final LatLng location = new LatLng(userRecords.get(i).getLatitude(), userRecords.get(i).getLongitude());
 
-
                 IconGenerator iconGenerator = new IconGenerator(getApplicationContext());
                 iconGenerator.setStyle(i + 3);
-                Bitmap bitmapMarker = iconGenerator.makeIcon(userRecords.get(i).getAlias() + "\n"
-                        + Utility.parseDate(userRecords.get(i).getTimestamp()));
+//                iconGenerator.setBackground();
+                Bitmap bitmapMarker = iconGenerator.makeIcon(userRecords.get(i).getProfileImageId());
+
 
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(location)
@@ -590,27 +711,62 @@ public class MainActivityV2 extends FragmentActivity implements OnMapReadyCallba
                         .flat(true);
 
                 mMap.addMarker(markerOptions);
-                //add call back for switching user Records on the map
-                ((TrackListMainAdapter) mAdapter).setItemSelectedListener(this);
             }
         }
 
+        // make sure if do not try to display deleted device
+        if (currentTracker >= userRecords.size()) {
+            currentTracker = 0;
+        }
         if (userRecords.get(currentTracker).getLatitude() != 0 || userRecords.get(currentTracker).getLongitude() != 0) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userRecords.get(currentTracker).getLatitude(),
                     userRecords.get(currentTracker).getLongitude()), 16f));
         } else {
             Utility.showToast(getApplicationContext(), "Ups nothing to show for " + userRecords.get(currentTracker).getAlias());
-
-//            for (int i = 0; i < userRecords.size(); i++) {
-//                if (userRecords.get(i).getLatitude() != 0 || userRecords.get(i).getLongitude() != 0) {
-//                    mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userRecords.get(i).getLatitude(),
-//                            userRecords.get(i).getLongitude()), 16f));
-//                    break;
-//                }
-//            }
         }
+
     }
 
+
+    private void showDialogForUserToEnableTracking() {
+
+        final Dialog dialog = new Dialog(MainActivityV2.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_default);
+        dialog.setCancelable(false);
+
+        TextView title = dialog.findViewById(R.id.title);
+        title.setText(getString(R.string.dialog_title_track_enable));
+        TextView content = dialog.findViewById(R.id.content);
+        content.setText(getString(R.string.dialog_content_track_enable));
+
+        Button yesButton = dialog.findViewById(R.id.dialogYes);
+        yesButton.setText(R.string.dialog_setup);
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Utility.openSettings(getApplicationContext(), MainActivityV2.this);
+                dialog.dismiss();
+            }
+        });
+
+        Button noButton = dialog.findViewById(R.id.dialogCancel);
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+
+    private void enableButtonsInNavBar(){
+        bottomNavigation.getMenu().getItem(0).setEnabled(true);
+        bottomNavigation.getMenu().getItem(1).setEnabled(true);
+        bottomNavigation.getMenu().getItem(2).setEnabled(true);
+    }
 
 }
 

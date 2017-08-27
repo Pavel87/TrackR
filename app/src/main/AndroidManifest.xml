@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pacmac.trackr">
+          package="com.pacmac.trackr">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:name=".TrackRApplication"
@@ -18,40 +18,99 @@
         android:largeHeap="true"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivityV2">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <meta-data
-            android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
 
         <activity
-            android:name=".MapDetailActivity"
-            android:label="@string/title_activity_map_detail" />
+            android:name=".IntroActivity"
+            android:screenOrientation="portrait"
+            android:noHistory="true"
+            android:theme="@style/AppTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+
+        </activity>
+
+        <activity
+            android:name=".MainActivityV2"
+            android:screenOrientation="portrait">
+
+        </activity>
+
         <receiver
             android:name=".RebootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
         <service
             android:name=".LocationService"
             android:enabled="true"
-            android:exported="false" />
-        <service
-            android:name=".FetchAddressService"
-            android:exported="false" />
-        <service android:name="com.tutelatechnologies.sdk.framework.TutelaSDKService"></service>
-        <activity android:name=".SettingsActivity" />
-        <activity android:name=".AboutActivity" />
+            android:exported="false"/>
+
+        <service android:name="com.tutelatechnologies.sdk.framework.TutelaSDKService"/>
+
+        <activity
+            android:name=".AboutActivity"
+            android:label="@string/title_activity_help"
+            android:parentActivityName=".MainActivityV2"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pacmac.trackr.MainActivityV2"/>
+        </activity>
+
+        <activity
+            android:name=".HelpActivity"
+            android:label="@string/title_activity_help"
+            android:parentActivityName=".MainActivityV2"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pacmac.trackr.MainActivityV2"/>
+        </activity>
+        <activity
+            android:name=".AddDeviceActivity"
+            android:label="@string/title_activity_add_device"
+            android:parentActivityName=".MainActivityV2"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pacmac.trackr.MainActivityV2"/>
+        </activity>
+        <activity
+            android:name=".ImageGallery"
+            android:label="Chose Profile Image"
+            android:parentActivityName=".AddDeviceActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pacmac.trackr.AddDeviceActivity"/>
+        </activity>
+        <activity
+            android:name=".SettingsActivityV2"
+            android:label="@string/title_activity_settings_v2"
+            android:parentActivityName=".MainActivityV2"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.pacmac.trackr.MainActivityV2"/>
+        </activity>
+
+        <meta-data
+            android:name="com.google.android.geo.API_KEY"
+            android:value="@string/google_maps_key"/>
+
     </application>
+
 
 </manifest>

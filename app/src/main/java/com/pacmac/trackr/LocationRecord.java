@@ -9,45 +9,74 @@ public class LocationRecord {
     private long timestamp = 0;
     private double longitude, latitude;
     private int id = -1;
+    //TODO replace default drawable
+    private int profileImageId = R.drawable.user0;
     private double batteryLevel = -1;
     private String address = "";
     private String alias = "TrackR";
     private String recId = "";
     private String safeId = "ID-safe";
+    private int cellQuality = -1;
 
-    public LocationRecord(int id, String recId, String safeId, String alias) {
+    public LocationRecord(int id, String recId, String safeId, String alias, int profileImageId) {
         this.id = id;
         this.alias = alias;
         this.recId = recId;
         this.safeId = safeId;
+        // -1 is passed for compat reasons now, will use default
+        if(profileImageId != -1) {
+            this.profileImageId = profileImageId;
+        }
     }
 
-    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel) {
+    protected void resetParams(){
+        timestamp = 0;
+        longitude = 0;
+        latitude = 0;
+        address = "";
+        batteryLevel = -1;
+    }
+
+    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
         this.batteryLevel = batteryLevel;
+        this.cellQuality = cellQuality;
     }
 
-    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, String address) {
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.timestamp = timestamp;
-        this.batteryLevel = batteryLevel;
-        this.address = address;
-    }
+//    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, String address) {
+//        this.latitude = latitude;
+//        this.longitude = longitude;
+//        this.timestamp = timestamp;
+//        this.batteryLevel = batteryLevel;
+//        this.address = address;
+//    }
 
 
-    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, String alias) {
+    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, String alias, int cellQuality) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
         this.batteryLevel = batteryLevel;
         this.alias = alias;
+        this.cellQuality = cellQuality;
     }
 
-    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, String address, String alias) {
+//    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, String address, String alias) {
+//        this.id = id;
+//        this.latitude = latitude;
+//        this.longitude = longitude;
+//        this.timestamp = timestamp;
+//        this.batteryLevel = batteryLevel;
+//        this.address = address;
+//        this.alias = alias;
+//    }
+
+    public LocationRecord(int id, double latitude, double longitude, long timestamp,
+                          double batteryLevel, String address, String alias,
+                          String recId, String safeId, int profileImageId, int cellQuality) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -55,19 +84,10 @@ public class LocationRecord {
         this.batteryLevel = batteryLevel;
         this.address = address;
         this.alias = alias;
-    }
-
-    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, String address, String alias, String recId, String safeId) {
-        this.id = id;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.timestamp = timestamp;
-        this.batteryLevel = batteryLevel;
-        this.address = address;
-        this.alias = alias;
-    }
-
-    public LocationRecord() {
+        this.recId = recId;
+        this.safeId = safeId;
+        this.profileImageId = profileImageId;
+        this.cellQuality = cellQuality;
     }
 
     public double getLongitude() {
@@ -142,6 +162,22 @@ public class LocationRecord {
         this.recId = recId;
     }
 
+    public int getProfileImageId() {
+        return profileImageId;
+    }
+
+    public void setProfileImageId(int profileImageId) {
+        this.profileImageId = profileImageId;
+    }
+
+    public int getCellQuality() {
+        return cellQuality;
+    }
+
+    public void setCellQuality(int cellQuality) {
+        this.cellQuality = cellQuality;
+    }
+
     @Override
     public String toString() {
         return getLatitude() + ", " + getLongitude();
@@ -157,7 +193,9 @@ public class LocationRecord {
                 + "\"address\": " + "\"" + address + "\","
                 + "\"alias\": " + "\"" + alias + "\","
                 + "\"recId\": " + "\"" + recId + "\","
-                + "\"safeId\": " + "\"" + safeId + "\"}";
+                + "\"safeId\": " + "\"" + safeId + "\","
+                + "\"profileImageId\": " + "\"" + profileImageId + "\","
+                + "\"cellQuality\": " + "\"" + cellQuality + "\"}";
     }
 
     public String convertToJSONForSettings(int position) {

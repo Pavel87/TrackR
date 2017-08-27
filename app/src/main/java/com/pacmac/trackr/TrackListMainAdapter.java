@@ -31,7 +31,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         this.listener = listener;
     }
 
-    protected void updateViews(List<LocationRecord> newDataSet){
+    protected void updateViews(List<LocationRecord> newDataSet) {
         this.mDataset = newDataSet;
         notifyDataSetChanged();
     }
@@ -46,7 +46,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
     // Return the size of your dataset (invoked by the layout manager)
     @Override
     public int getItemCount() {
-        if(mDataset == null) {
+        if (mDataset == null) {
             return 0;
         }
         return mDataset.size();
@@ -61,6 +61,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
     }
 
     private final static String TAG = "TrackListMainAdapter";
+
     // Replace the contents of a view (invoked by the layout manager)
     @Override
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
@@ -70,7 +71,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(listener != null){
+                if (listener != null) {
                     listener.OnItemSelected(holder.getLayoutPosition());
                     return;
                 }
@@ -81,41 +82,59 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         ((ViewHolderForRow) holder).alias.setText(mDataset.get(position).getAlias());
         ((ViewHolderForRow) holder).lastUpdateTime.setText(Utility.getLastUpdateString(mDataset.get(position).getTimestamp()));
         ((ViewHolderForRow) holder).address.setText(mDataset.get(position).getAddress());
+        ((ViewHolderForRow) holder).cellQualityText.setText(getSignalQualityText(mDataset.get(position).getCellQuality(),
+                ((ViewHolderForRow) holder).cellQualityIndicator));
 
         // set battery % and indicator
         double batteryLevel = mDataset.get(position).getBatteryLevel();
-        if(batteryLevel == -1){
+        if (batteryLevel == -1) {
             ((ViewHolderForRow) holder).batteryLevel.setText("NA");
         } else {
-            ((ViewHolderForRow) holder).batteryLevel.setText(String.valueOf(batteryLevel) +"%");
+            ((ViewHolderForRow) holder).batteryLevel.setText(String.valueOf(batteryLevel) + "%");
         }
         setBatteryIndicatorDrawable(((ViewHolderForRow) holder).batIndicator, batteryLevel);
-
+        ((ViewHolderForRow) holder).userEdit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                if (listener != null) {
+                    listener.OnItemEditClicked(holder.getLayoutPosition());
+                }
+            }
+        });
+        ((ViewHolderForRow) holder).profileImage.setImageDrawable(context.getDrawable(mDataset.get(position).getProfileImageId()));
     }
 
     protected class ViewHolderForRow extends RecyclerView.ViewHolder {
         // each data item is just a string in this case
-        public TextView alias;
-        public TextView lastUpdateTime;
-        public TextView address;
-        public TextView batteryLevel;
-        public ImageView batIndicator;
+        protected TextView alias;
+        protected TextView lastUpdateTime;
+        protected TextView address;
+        protected TextView batteryLevel;
+        protected ImageView batIndicator;
+        protected ImageView userEdit;
+        protected ImageView profileImage;
+        protected ImageView cellQualityIndicator;
+        protected TextView cellQualityText;
 
-        public ViewHolderForRow(View rowView) {
+        protected ViewHolderForRow(View rowView) {
             super(rowView);
             alias = rowView.findViewById(R.id.alias);
             lastUpdateTime = rowView.findViewById(R.id.updateTime);
             address = rowView.findViewById(R.id.address);
             batteryLevel = rowView.findViewById(R.id.batteryLevel);
             batIndicator = rowView.findViewById(R.id.batIndicator);
+            userEdit = rowView.findViewById(R.id.userEdit);
+            profileImage = rowView.findViewById(R.id.profileImage);
+            cellQualityIndicator = rowView.findViewById(R.id.cellServiceIndicator);
+            cellQualityText = rowView.findViewById(R.id.cellService);
         }
     }
 
     private void setBatteryIndicatorDrawable(ImageView batteryIndicatorView, double batteryLevel) {
         if (context != null) {
-            if(batteryLevel > 75) {
+            if (batteryLevel > 75) {
                 batteryIndicatorView.setImageDrawable(context.getDrawable(R.drawable.bat1));
-            } else if(batteryLevel > 20) {
+            } else if (batteryLevel > 20) {
                 batteryIndicatorView.setImageDrawable(context.getDrawable(R.drawable.bat2));
 
             } else {
@@ -124,9 +143,42 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
     }
 
-    protected interface TrackListItemSelectedListener {
-        void OnItemSelected(int position);
+    private String getSignalQualityText(int level, ImageView indicatorView) {
+        switch (level) {
+            case 0:
+                return SignalQuality.Poor.name();
+            case 1:
+                return SignalQuality.Bad.name();
+            case 2:
+                return SignalQuality.Average.name();
+            case 3:
+                indicatorView.setImageDrawable(context.getDrawable(R.drawable.sig_good));
+                return SignalQuality.Good.name();
+            case 4:
+                indicatorView.setImageDrawable(context.getDrawable(R.drawable.sig_full));
+                return SignalQuality.Great.name();
+
+            default:
+                indicatorView.setImageDrawable(context.getDrawable(R.drawable.sig_no));
+                return SignalQuality.Unknown.name();
+        }
+
     }
 
+    protected interface TrackListItemSelectedListener {
+        void OnItemSelected(int position);
+
+        void OnItemEditClicked(int position);
+    }
+
+    private enum SignalQuality {
+        Great,
+        Good,
+        Average,
+        Bad,
+        Poor,
+        None,
+        Unknown
+    }
 
 }

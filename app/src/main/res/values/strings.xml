@@ -13,7 +13,7 @@
     <string name="last_seen">Last Seen</string>
     <string name="action_settings">Settings</string>
     <string name="title_activity_settings">Settings</string>
-    <string name="trackingOn">Tracking Mode</string>
+    <string name="trackingOn">Tracking mode</string>
     <string name="trackingID">Tracking ID</string>
     <string name="receivingID">Receiving ID</string>
     <string name="turning_on">Turning Tracking ON</string>
@@ -73,10 +73,33 @@
         Device starts transmitting its location once the tracking mode is ON every 20 minutes or 45 minutes on lower battery levels if there is live connection to internet\n\n4) Set up the second device which will act as a receiver - Launch TrackR and go to Settings\n\n5) Configure Tracked Device in "List of Tracked Devices" which corresponds to Tracking ID from step 2) and fill the friendly name for the tracked device\n\n6) Now you are all set and if you go back to main screen you should receive remote device location shortly. If not press refresh button\n\n
         Note: You can configure up to 5 devices in "List of Tracked Devices".\n\nTo delete row in List of Tracked Devices you have to swipe right on the specific row</string>
     <string name="about_text2">Application offers location tracking functionality between two android devices. App can run in two modes:\n\n-Location Transmitter\n\n-Location Receiver (of one or more devices)</string>
-    <string name="contact">For support contact pacmac.dev@gmail.com\n\nThank you for using Device Tracker, p@cmac.</string>
+    <string name="contact">For support contact pacmac.dev@gmail.com\nThank you for using Device Tracker, p@cmac.</string>
     <string name="something_wrong">Something is wrong!</string>
-    <string name="update_freq_label">Location Update Frequency</string>
+    <string name="update_freq_label">Location update frequency</string>
     <string name="no_rec_id">Go to Settings and setup tracked device id.</string>
     <string name="no_rec_id_found">No device found.</string>
     <string name="rec_id_list_error">Sharing  data is not possible at the moment.</string>
+    <string name="title_activity_add_device">Add New Device</string>
+    <string name="title_activity_help">Help</string>
+    <string name="title_activity_settings_v2">Settings</string>
+    <string name="title_activity_template">TemplateActivity</string>
+    <string name="dialog_title_track_enable">Setup Tracking</string>
+    <string name="dialog_content_track_enable">If you want to enable tracking of this device click YES. Otherwise this device will be only capable to receive other device locations.</string>
+    <string name="dialog_setup">Setup</string>
+
+
+    <string name="help_header_about">About Android Device Tracker</string>
+    <string name="help_header_contact">Contact</string>
+    <string name="help_header_how_to">How To Use Device Tracker</string>
+    <string name="help_header_how_to_set_tracking">How To Enable Tracking</string>
+    <string name="help_header_how_to_set_receiver">How To Add Tracked Device</string>
+
+     <string name="help_child_about">TBD: Application offers location tracking functionality between two android devices. App can run in two modes:\n\n-Location Transmitter\n\n-Location Receiver (of one or more devices)</string>
+    <string name="help_child_contact">For support contact pacmac.dev@gmail.com\n\nThank you for using Device Tracker, p@cmac.</string>
+    <string name="help_child_how_to">TO BE DONE</string>
+    <string name="help_child_how_to_set_tracking">TBD how to set tracking</string>
+    <string name="help_child_how_to_set_receiver">TBD how to add device in the list</string>
+
+
+
 </resources>

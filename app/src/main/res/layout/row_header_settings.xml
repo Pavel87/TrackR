@@ -16,7 +16,7 @@
             android:layout_height="40dp"
             android:paddingLeft="16dp"
             android:layout_gravity="center_vertical"
-            android:src="@drawable/cogwheel"/>
+            android:src="@drawable/invite"/>
 
     <TextView
         android:id="@+id/header"

@@ -25,6 +25,8 @@ import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.pacmac.trackr.R;
@@ -42,8 +44,9 @@ import com.pacmac.trackr.R;
 public class IconGenerator {
     private final Context mContext;
 
-    private ViewGroup mContainer;
+    private LinearLayout mContainer;
     private RotationLayout mRotationLayout;
+    ImageView profileImage;
     private TextView mTextView;
     private View mContentView;
 
@@ -59,20 +62,31 @@ public class IconGenerator {
     public IconGenerator(Context context) {
         mContext = context;
         mBackground = new BubbleDrawable(mContext.getResources());
-        mContainer = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.amu_text_bubble, null);
-        mRotationLayout = (RotationLayout) mContainer.getChildAt(0);
-        mContentView = mTextView = (TextView) mRotationLayout.findViewById(R.id.amu_text);
+//        mContainer = (ViewGroup) LayoutInflater.from(mContext).inflate(R.layout.amu_text_bubble, null);
+        mContainer = (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.trackr_marker, null);
+
+        profileImage = mContainer.findViewById(R.id.profile_image);
+        profileImage.setBackground(mContext.getDrawable(R.drawable.marker_bg));
+
+//        mRotationLayout = (RotationLayout) mContainer.getChildAt(0);
+//        mContentView = mTextView = mRotationLayout.findViewById(R.id.amu_text);
         setStyle(STYLE_DEFAULT);
     }
 
     /**
      * Sets the text content, then creates an icon with the current style.
      *
-     * @param text the text content to display inside the icon.
      */
-    public Bitmap makeIcon(CharSequence text) {
-        if (mTextView != null) {
-            mTextView.setText(text);
+//    public Bitmap makeIcon(CharSequence text) {
+//        if (mTextView != null) {
+//            mTextView.setText(text);
+//        }
+//
+//        return makeIcon();
+//    }
+    public Bitmap makeIcon(int img) {
+        if (profileImage != null) {
+            profileImage.setImageDrawable(mContext.getDrawable(img));
         }
 
         return makeIcon();
@@ -120,9 +134,6 @@ public class IconGenerator {
 
     /**
      * Sets the child view for the icon.
-     * <p/>
-     * If the view contains a {@link TextView} with the id "text", operations such as {@link
-     * #setTextAppearance} and {@link #makeIcon(String)} will operate upon that {@link TextView}.
      */
     public void setContentView(View contentView) {
         mRotationLayout.removeAllViews();
@@ -219,7 +230,7 @@ public class IconGenerator {
      */
     public void setColor(int color) {
         mBackground.setColor(color);
-        setBackground(mBackground);
+        setBackground(mContext.getDrawable(R.drawable.marker_bg));
     }
 
     /**
@@ -231,16 +242,19 @@ public class IconGenerator {
     // View#setBackgroundDrawable is compatible with pre-API level 16 (Jelly Bean).
     public void setBackground(Drawable background) {
         mContainer.setBackgroundDrawable(background);
+        mContainer.setElevation(10);
+
+
 
         // Force setting of padding.
         // setBackgroundDrawable does not call setPadding if the background has 0 padding.
-        if (background != null) {
-            Rect rect = new Rect();
-            background.getPadding(rect);
-            mContainer.setPadding(rect.left, rect.top, rect.right, rect.bottom);
-        } else {
-            mContainer.setPadding(0, 0, 0, 0);
-        }
+//        if (background != null) {
+//            Rect rect = new Rect();
+//            background.getPadding(rect);
+//            mContainer.setPadding(rect.left, rect.top, rect.right, rect.bottom);
+//        } else {
+//            mContainer.setPadding(12, 12, 12, 5);
+//        }
     }
 
     /**

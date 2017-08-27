@@ -1,335 +1,340 @@
 <?xml version="1.0" encoding="utf-8"?>
-
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<android.support.design.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:layout_marginBottom="16dp"
-    android:orientation="vertical">
+    tools:context="com.pacmac.trackr.AboutActivity">
+
+    <android.support.design.widget.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:theme="@style/AppTheme.AppBarOverlay">
+
+        <android.support.v7.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="?attr/colorPrimary"
+            app:popupTheme="@style/AppTheme.PopupOverlay"/>
+
+    </android.support.design.widget.AppBarLayout>
+
+    <!--<android.support.constraint.ConstraintLayout-->
+    <!--android:layout_width="match_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--app:layout_behavior="@string/appbar_scrolling_view_behavior"-->
+    <!--tools:context="com.pacmac.trackr.AddDeviceActivity"-->
+    <!--tools:showIn="@layout/activity_add_device">-->
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        tools:layout_editor_absoluteX="8dp"
+        tools:layout_editor_absoluteY="8dp"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
 
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
-
-        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:paddingBottom="20dp"
-            android:paddingLeft="16dp"
-            android:paddingRight="16dp"
-            android:paddingTop="20dp">
+            android:layout_height="match_parent"
+            android:orientation="vertical">
 
-            <ImageView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:paddingRight="16dp"
-                android:src="@mipmap/ic_launcher" />
 
-            <TextView
+
+            <LinearLayout
+                android:id="@+id/fixmeLayout"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:elegantTextHeight="true"
-                android:fontFamily="sans-serif-medium"
-                android:text="ABOUT device Tracker"
-                android:textAllCaps="true"
-                android:textColor="@color/colorPrimary"
-                android:textSize="20sp"
-                android:textStyle="italic|bold" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/fixmeLayout"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_margin="8dp"
-            android:elevation="4dp"
-            android:orientation="horizontal"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_weight="2"
-                android:padding="10dp"
-                android:text="@string/something_wrong"
-                android:textSize="16dp"
-                android:textStyle="bold" />
-
-            <Button
-                android:id="@+id/fixmeBtn"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:layout_weight="1"
-                android:background="@drawable/button_white"
-                android:text="@string/not_working_button"
-                android:textColor="@color/colorPrimary"
-                android:textStyle="bold" />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/locPermission"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@android:drawable/dialog_holo_light_frame"
-            android:elevation="4dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
                 android:layout_margin="8dp"
                 android:elevation="4dp"
-                android:orientation="vertical">
+                android:orientation="horizontal"
+                android:visibility="gone">
 
                 <TextView
-                    android:layout_width="wrap_content"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="Location Permission is DISABLED"
+                    android:layout_gravity="center_vertical"
+                    android:layout_weight="2"
+                    android:padding="10dp"
+                    android:text="@string/something_wrong"
                     android:textSize="16dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-small"
-                    android:padding="8dp"
-                    android:text="For correct functionality of the Device Tracker it is mandatory to enable location permission. You can do so by going to:\nSettings>Apps>TrackR>Permissions>Enable Location permission." />
+                    android:textStyle="bold"/>
 
                 <Button
-                    android:id="@+id/resolvePermission"
-                    android:layout_width="wrap_content"
+                    android:id="@+id/fixmeBtn"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
+                    android:layout_gravity="center"
                     android:layout_weight="1"
                     android:background="@drawable/button_white"
-                    android:text="@string/resolve"
+                    android:text="@string/not_working_button"
                     android:textColor="@color/colorPrimary"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"/>
 
             </LinearLayout>
 
-        </LinearLayout>
-
-        //*****
-
-        <LinearLayout
-            android:id="@+id/locGpsVersion"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@android:drawable/dialog_holo_light_frame"
-            android:elevation="4dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
             <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="8dp"
-                android:elevation="4dp"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="Google Play Service version NOT updated"
-                    android:textSize="16dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-small"
-                    android:padding="8dp"
-                    android:text="For correct functionality of the Device Tracker it is mandatory to update your Google Play Service version to version 9.6.1 or higher." />
-
-                <TextView
-                    android:id="@+id/currentGpsVersion"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-small"
-                    android:padding="8dp"
-                    android:text="" />
-
-
-                <Button
-                    android:id="@+id/resolveGooglePlayVersion"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:layout_weight="1"
-                    android:background="@drawable/button_white"
-                    android:text="@string/resolve"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-
-        <LinearLayout
-            android:id="@+id/locGpsUnavailable"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@android:drawable/dialog_holo_light_frame"
-            android:elevation="4dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="8dp"
-                android:elevation="4dp"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="Google Play Service is NOT Available"
-                    android:textSize="16dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-small"
-                    android:padding="8dp"
-                    android:text="For correct functionality of the Device Tracker it is mandatory to have Google Play Service installed and version 9.6.1 or higher. Navigate to Settings>Apps: Find Google Play Services app in the list and check its version. You may want to also try to reboot your phone." />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/locationDisabled"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="8dp"
-            android:background="@android:drawable/dialog_holo_light_frame"
-            android:elevation="4dp"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center_vertical"
-                android:layout_margin="8dp"
-                android:elevation="4dp"
-                android:orientation="vertical"
-                android:visibility="visible">
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="Location Settings is DISABLED"
-                    android:textSize="16dp"
-                    android:textStyle="bold" />
-
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:fontFamily="sans-serif-small"
-                    android:padding="8dp"
-                    android:text="For correct functionality of the Device Tracker it is mandatory to enable global location settings. Navigate to System Settings>Location: and enable location." />
-
-                <Button
-                    android:id="@+id/resolveLocationDisabled"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="right"
-                    android:layout_weight="1"
-                    android:background="@drawable/button_white"
-                    android:text="@string/resolve"
-                    android:textColor="@color/colorPrimary"
-                    android:textStyle="bold" />
-
-            </LinearLayout>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/aboutAppText"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:visibility="visible">
-
-            <LinearLayout
+                android:id="@+id/locPermission"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:background="@android:drawable/dialog_holo_light_frame"
                 android:elevation="4dp"
                 android:orientation="vertical"
-                android:visibility="visible">
+                android:visibility="gone">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/about_text2" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="8dp"
+                    android:elevation="4dp"
+                    android:orientation="vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Location Permission is DISABLED"
+                        android:textSize="16dp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-small"
+                        android:padding="8dp"
+                        android:text="For correct functionality of the Device Tracker it is mandatory to enable location permission. You can do so by going to:\nSettings>Apps>TrackR>Permissions>Enable Location permission."/>
+
+                    <Button
+                        android:id="@+id/resolvePermission"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_white"
+                        android:text="@string/resolve"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
+            //*****
 
             <LinearLayout
+                android:id="@+id/locGpsVersion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:background="@android:drawable/dialog_holo_light_frame"
                 android:elevation="4dp"
                 android:orientation="vertical"
-                android:visibility="visible">
+                android:visibility="gone">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/about_text" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="8dp"
+                    android:elevation="4dp"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Google Play Service version NOT updated"
+                        android:textSize="16dp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-small"
+                        android:padding="8dp"
+                        android:text="For correct functionality of the Device Tracker it is mandatory to update your Google Play Service version to version 9.6.1 or higher."/>
+
+                    <TextView
+                        android:id="@+id/currentGpsVersion"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-small"
+                        android:padding="8dp"
+                        android:text=""/>
+
+
+                    <Button
+                        android:id="@+id/resolveGooglePlayVersion"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_white"
+                        android:text="@string/resolve"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
+
             <LinearLayout
+                android:id="@+id/locGpsUnavailable"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
                 android:background="@android:drawable/dialog_holo_light_frame"
                 android:elevation="4dp"
                 android:orientation="vertical"
-                android:visibility="visible">
+                android:visibility="gone">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:padding="8dp"
-                    android:text="@string/contact" />
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="8dp"
+                    android:elevation="4dp"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Google Play Service is NOT Available"
+                        android:textSize="16dp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-small"
+                        android:padding="8dp"
+                        android:text="For correct functionality of the Device Tracker it is mandatory to have Google Play Service installed and version 9.6.1 or higher. Navigate to Settings>Apps: Find Google Play Services app in the list and check its version. You may want to also try to reboot your phone."/>
+
+                </LinearLayout>
 
             </LinearLayout>
 
+            <LinearLayout
+                android:id="@+id/locationDisabled"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:background="@android:drawable/dialog_holo_light_frame"
+                android:elevation="4dp"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center_vertical"
+                    android:layout_margin="8dp"
+                    android:elevation="4dp"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="Location Settings is DISABLED"
+                        android:textSize="16dp"
+                        android:textStyle="bold"/>
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-small"
+                        android:padding="8dp"
+                        android:text="For correct functionality of the Device Tracker it is mandatory to enable global location settings. Navigate to System Settings>Location: and enable location."/>
+
+                    <Button
+                        android:id="@+id/resolveLocationDisabled"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="right"
+                        android:layout_weight="1"
+                        android:background="@drawable/button_white"
+                        android:text="@string/resolve"
+                        android:textColor="@color/colorPrimary"
+                        android:textStyle="bold"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/aboutAppText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:background="@android:drawable/dialog_holo_light_frame"
+                    android:elevation="4dp"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/about_text2"/>
+
+                </LinearLayout>
+
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:background="@android:drawable/dialog_holo_light_frame"
+                    android:elevation="4dp"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/about_text"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:background="@android:drawable/dialog_holo_light_frame"
+                    android:elevation="4dp"
+                    android:orientation="vertical"
+                    android:visibility="visible">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:padding="8dp"
+                        android:text="@string/contact"/>
+
+                </LinearLayout>
+
+            </LinearLayout>
         </LinearLayout>
-    </LinearLayout>
 
-</ScrollView>
+    </ScrollView>
+</android.support.design.widget.CoordinatorLayout>

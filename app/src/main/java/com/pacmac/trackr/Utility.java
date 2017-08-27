@@ -86,13 +86,13 @@ public class Utility {
                     public void onClick(DialogInterface dialog, int which) {
                         requestPermissions(mActivity, permission);
                     }
-                })
-                .setNegativeButton(act.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        dialog.dismiss();
-                    }
                 });
+//                .setNegativeButton(act.getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
+//                    @Override
+//                    public void onClick(DialogInterface dialog, int which) {
+//                        dialog.dismiss();
+//                    }
+//                });
         AlertDialog alertDialog = builder.create();
         alertDialog.show();
     }
@@ -307,7 +307,7 @@ public class Utility {
         toastText.setText(text);
 
         Toast toast = new Toast(context);
-        toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.TOP, 0, 0);
+        toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, 200);
         toast.setDuration(Toast.LENGTH_SHORT);
         toast.setView(view);
         toast.show();
@@ -398,7 +398,8 @@ public class Utility {
         try {
             return new LocationRecord(object.getInt("id"), object.getDouble("latitude"), object.getDouble("longitude"),
                     object.getLong("timestamp"), object.getDouble("batteryLevel"), object.getString("address"),
-                    object.getString("alias"), object.getString("recId"), object.getString("safeId"));
+                    object.getString("alias"), object.getString("recId"), object.getString("safeId"),
+                    object.getInt("profileImageId"), object.getInt("cellQuality"));
         } catch (JSONException e) {
             Log.d(Constants.TAG, "#6# Error parsing locationRecord json from file. " + e.getMessage());
         }
@@ -486,11 +487,11 @@ public class Utility {
     }
 
     public static List<LocationRecord> convertJsonStringToUserRecords(String filePath) {
+        List<LocationRecord> userRecords = new ArrayList<>();
         String jsonString = Utility.loadJsonStringFromFile(filePath);
         if (jsonString.equals("")) {
-            return null;
+            return userRecords;
         }
-        List<LocationRecord> userRecords = new ArrayList<>();
         try {
             JSONObject jsnobject = new JSONObject(jsonString);
             JSONArray jsonArray = jsnobject.getJSONArray("locrecords");
@@ -505,7 +506,7 @@ public class Utility {
         } catch (JSONException e) {
             Log.e(Constants.TAG, "#7# Error getting LocRecord JSON obj or array. " + e.getMessage());
         }
-        return null;
+        return new ArrayList<>();
     }
 
 
@@ -551,9 +552,22 @@ public class Utility {
 
     protected static void openSettings(Context context, Activity activity) {
         if (Utility.checkPlayServices(activity)) {
-            Intent intent = new Intent(context, SettingsActivity.class);
-            context.startActivity(intent);
+            Intent intent = new Intent(context, SettingsActivityV2.class);
+
+            activity.startActivityForResult(intent, Constants.SETTINGS_REQUESTCODE);
         }
+    }
+
+    protected static void openUserEditActivity(Activity activity, int position, List<LocationRecord> mDataset) {
+        Intent intent = new Intent(activity.getApplicationContext(), AddDeviceActivity.class);
+        intent.putExtra(Constants.EDIT_USER_POSITION, position);
+        if (position != -1) {
+            intent.putExtra(Constants.EDIT_USER_ALIAS, mDataset.get(position).getAlias());
+            intent.putExtra(Constants.EDIT_USER_ID, mDataset.get(position).getRecId());
+            intent.putExtra(Constants.EDIT_USER_IMG, mDataset.get(position).getProfileImageId());
+            intent.putExtra(Constants.EDIT_USER_TYPE, mDataset.get(position).getId());
+        }
+        activity.startActivityForResult(intent, Constants.EDIT_RESULT_REQUEST_CODE);
     }
 
     /**
@@ -563,6 +577,7 @@ public class Utility {
      * @return boolean
      */
     private static boolean isMyServiceRunning(Context context, Class<?> serviceClass) {
+        //TODO try catch random errors
         ActivityManager manager = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
         if (manager != null) {
             for (ActivityManager.RunningServiceInfo service : manager
