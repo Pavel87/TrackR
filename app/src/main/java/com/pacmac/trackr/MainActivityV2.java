@@ -114,15 +114,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        String itemTitle = "Device Tracker";
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
-        collapsingToolbarLayout.setTitle(itemTitle);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
                 MODE_PRIVATE);
-
-        isPermissionEnabled = Utility.checkPermission(getApplicationContext(), LOCATION_PERMISSION);
+        isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(), LOCATION_PERMISSION);
 
         if (preferences.getBoolean(Constants.FIRST_RUN, true)) {
             createDefaultIdsAndMyPhoneRow();
@@ -130,9 +127,15 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 showDialogForUserToEnableTracking();
             }
         } else {
+            // disable tracking state if permission was disabled while app was in background
+            if(!isPermissionEnabled) {
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean(Constants.TRACKING_STATE, false);
+                editor.commit();
+                Utility.showToast(getApplicationContext(), "Tracking Mode Disabled. Check your app settings.");
+            }
             loadUserRecordsFromFile();
         }
-
 
         Firebase.setAndroidContext(getApplicationContext());
 
@@ -400,7 +403,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         item.setEnabled(false);
         switch (item.getItemId()) {
             case R.id.navigation_about:
-//                Intent i = new Intent(getApplicationContext(), AboutActivity.class);
                 Intent i = new Intent(getApplicationContext(), HelpActivity.class);
                 startActivity(i);
                 break;
@@ -564,6 +566,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         firebase.goOnline();
         Log.d(TAG, "Firebase goes online");
         firebase.keepSynced(false);
+
         firebase.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {

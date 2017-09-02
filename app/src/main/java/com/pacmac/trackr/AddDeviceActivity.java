@@ -48,7 +48,7 @@ public class AddDeviceActivity extends AppCompatActivity {
         type = getIntent().getIntExtra(Constants.EDIT_USER_TYPE, 0);
         position = getIntent().getIntExtra(Constants.EDIT_USER_POSITION, -1);
         img = getIntent().getIntExtra(Constants.EDIT_USER_IMG, R.drawable.user0);
-        profileImg.setImageDrawable(getDrawable(img));
+        profileImg.setImageDrawable(getApplicationContext().getResources().getDrawable(img));
 
         if (position != -1) {
             alias = getIntent().getStringExtra(Constants.EDIT_USER_ALIAS);
@@ -136,7 +136,7 @@ public class AddDeviceActivity extends AppCompatActivity {
             if (resultCode == RESULT_OK) {
                 imgChanged = true;
                 img = data.getIntExtra(Constants.EDIT_USER_IMG, R.drawable.user1);
-                profileImg.setImageDrawable(getDrawable(img));
+                profileImg.setImageDrawable(getApplicationContext().getResources().getDrawable(img));
             }
         }
     }

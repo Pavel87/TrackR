@@ -194,7 +194,6 @@
 //            @Override
 //            public void onClick(View view) {
 //
-//                Intent i = new Intent(getApplicationContext(), AboutActivity.class);
 //                startActivity(i);
 //            }
 //        });

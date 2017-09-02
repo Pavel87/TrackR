@@ -21,7 +21,6 @@ public class IntroActivity extends AppCompatActivity {
     private boolean isPermissionEnabled = true;
     private boolean isAppScheduledForStart = false;
 
-    private SharedPreferences preferences;
     private FrameLayout background;
 
     @Override
@@ -38,10 +37,6 @@ public class IntroActivity extends AppCompatActivity {
                 }
             }
         });
-
-        preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
-                MODE_PRIVATE);
-
         checkPermission();
     }
 
@@ -49,17 +44,15 @@ public class IntroActivity extends AppCompatActivity {
     public void onRequestPermissionsResult(int requestCode, String permissions[],
                                            int[] grantResults) {
         if (requestCode == Utility.MY_PERMISSIONS_REQUEST) {
-            isPermissionEnabled = Utility.checkPermission(getApplicationContext(),
+            isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(),
                     Constants.LOCATION_PERMISSION);
         }
-
         startMainActivityWithOffset(1);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
         if (isPermissionEnabled) {
             startMainActivityWithOffset(2);
         }
@@ -67,7 +60,7 @@ public class IntroActivity extends AppCompatActivity {
 
     private void checkPermission() {
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1) {
-            isPermissionEnabled = Utility.checkPermission(getApplicationContext(),
+            isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(),
                     Constants.LOCATION_PERMISSION);
             if (!isPermissionEnabled) {
                 Utility.displayExplanationForPermission(this, Constants.LOCATION_PERMISSION);

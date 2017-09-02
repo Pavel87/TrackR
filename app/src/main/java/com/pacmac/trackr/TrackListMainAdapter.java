@@ -101,7 +101,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
                 }
             }
         });
-        ((ViewHolderForRow) holder).profileImage.setImageDrawable(context.getDrawable(mDataset.get(position).getProfileImageId()));
+        ((ViewHolderForRow) holder).profileImage.setImageDrawable(context.getResources().getDrawable(mDataset.get(position).getProfileImageId()));
     }
 
     protected class ViewHolderForRow extends RecyclerView.ViewHolder {
@@ -133,12 +133,12 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
     private void setBatteryIndicatorDrawable(ImageView batteryIndicatorView, double batteryLevel) {
         if (context != null) {
             if (batteryLevel > 75) {
-                batteryIndicatorView.setImageDrawable(context.getDrawable(R.drawable.bat1));
+                batteryIndicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.bat1));
             } else if (batteryLevel > 20) {
-                batteryIndicatorView.setImageDrawable(context.getDrawable(R.drawable.bat2));
+                batteryIndicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.bat2));
 
             } else {
-                batteryIndicatorView.setImageDrawable(context.getDrawable(R.drawable.bat3));
+                batteryIndicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.bat3));
             }
         }
     }
@@ -146,20 +146,23 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
     private String getSignalQualityText(int level, ImageView indicatorView) {
         switch (level) {
             case 0:
+                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
                 return SignalQuality.Poor.name();
             case 1:
+                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_poor));
                 return SignalQuality.Bad.name();
             case 2:
+                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_avg));
                 return SignalQuality.Average.name();
             case 3:
-                indicatorView.setImageDrawable(context.getDrawable(R.drawable.sig_good));
+                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_good));
                 return SignalQuality.Good.name();
             case 4:
-                indicatorView.setImageDrawable(context.getDrawable(R.drawable.sig_full));
+                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_full));
                 return SignalQuality.Great.name();
 
             default:
-                indicatorView.setImageDrawable(context.getDrawable(R.drawable.sig_no));
+                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
                 return SignalQuality.Unknown.name();
         }
 

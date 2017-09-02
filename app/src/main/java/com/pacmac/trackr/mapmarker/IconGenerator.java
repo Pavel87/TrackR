@@ -20,11 +20,10 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -66,7 +65,7 @@ public class IconGenerator {
         mContainer = (LinearLayout) LayoutInflater.from(mContext).inflate(R.layout.trackr_marker, null);
 
         profileImage = mContainer.findViewById(R.id.profile_image);
-        profileImage.setBackground(mContext.getDrawable(R.drawable.marker_bg));
+        profileImage.setBackground(mContext.getResources().getDrawable(R.drawable.marker_bg));
 
 //        mRotationLayout = (RotationLayout) mContainer.getChildAt(0);
 //        mContentView = mTextView = mRotationLayout.findViewById(R.id.amu_text);
@@ -86,7 +85,7 @@ public class IconGenerator {
 //    }
     public Bitmap makeIcon(int img) {
         if (profileImage != null) {
-            profileImage.setImageDrawable(mContext.getDrawable(img));
+            profileImage.setImageDrawable(mContext.getResources().getDrawable(img));
         }
 
         return makeIcon();
@@ -230,7 +229,7 @@ public class IconGenerator {
      */
     public void setColor(int color) {
         mBackground.setColor(color);
-        setBackground(mContext.getDrawable(R.drawable.marker_bg));
+        setBackground(mContext.getResources().getDrawable(R.drawable.marker_bg));
     }
 
     /**
@@ -242,7 +241,9 @@ public class IconGenerator {
     // View#setBackgroundDrawable is compatible with pre-API level 16 (Jelly Bean).
     public void setBackground(Drawable background) {
         mContainer.setBackgroundDrawable(background);
-        mContainer.setElevation(10);
+        if(Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            mContainer.setElevation(10);
+        }
 
 
 

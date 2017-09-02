@@ -11,12 +11,10 @@ public class LocationTxObject {
 
     private long timestamp = 0;
     private double longitude, latitude;
-    private int id = -1;
     private double batteryLevel = -1;
     private int cellQuality = -1;
 
-    public LocationTxObject(int id, double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality) {
-        this.id = id;
+    public LocationTxObject(double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
@@ -36,13 +34,10 @@ public class LocationTxObject {
         return timestamp;
     }
 
-    public int getId() {
-        return id;
-    }
-
     public double getBatteryLevel() {
         return batteryLevel;
     }
 
-    public int getCellQuality() { return cellQuality; }
+    public int getCellQuality() {
+        return cellQuality; }
 }

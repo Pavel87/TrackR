@@ -23,16 +23,20 @@
     <string-array name="helpHeaders">
         <item>@string/help_header_about</item>
         <item>@string/help_header_how_to</item>
+        <item>@string/help_header_what_is_collected</item>
         <item>@string/help_header_how_to_set_tracking</item>
         <item>@string/help_header_how_to_set_receiver</item>
+        <item>@string/help_header_privacy</item>
         <item>@string/help_header_contact</item>
     </string-array>
 
     <string-array name="helpChildren">
         <item>@string/help_child_about</item>
         <item>@string/help_child_how_to</item>
+        <item>@string/help_child_what_is_collected</item>
         <item>@string/help_child_how_to_set_tracking</item>
         <item>@string/help_child_how_to_set_receiver</item>
+        <item>@string/help_child_privacy</item>
         <item>@string/help_child_contact</item>
     </string-array>
 </resources>

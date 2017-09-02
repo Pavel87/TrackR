@@ -10,8 +10,8 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
+import android.os.Build;
 import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.PermissionChecker;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatCheckBox;
 import android.util.Log;
@@ -59,21 +59,24 @@ public class Utility {
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     public final static int MY_PERMISSIONS_REQUEST = 8;
 
-    /**
-     * This method will check if permission is granted at runtime
-     */
-    public static boolean checkPermission(Context context, String permission) {
-
-        int status = PermissionChecker.checkSelfPermission(context, permission);
-        if (status == PermissionChecker.PERMISSION_GRANTED) {
-            return true;
-        }
-        return false;
-    }
-
     public static void requestPermissions(Activity activity, String permission) {
         // No explanation needed, we can request the permission.
         ActivityCompat.requestPermissions(activity, new String[]{permission}, MY_PERMISSIONS_REQUEST);
+    }
+
+    /**
+     * Utility method returning whether the given permission is granted or not.
+     *
+     * @param context
+     * @param permission
+     * @return true if permission is granted.
+     */
+    protected static boolean checkSelfPermission(Context context, String permission) {
+
+        if (Build.VERSION.SDK_INT >= 23) {
+            return context.checkSelfPermission(permission) == PackageManager.PERMISSION_GRANTED;
+        }
+        return true;
     }
 
     public static void displayExplanationForPermission(Activity act, final String permission) {
@@ -539,7 +542,6 @@ public class Utility {
         sb.append("]}");
         return sb.toString();
     }
-
 
     protected static void startTrackingService(Context context, final SharedPreferences preferences) {
         boolean isTrackingOn = preferences.getBoolean(Constants.TRACKING_STATE, false);

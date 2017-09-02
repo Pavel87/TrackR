@@ -8,11 +8,12 @@
         android:id="@+id/lblListItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="22dp"
-        android:paddingLeft="48dp"
+        android:paddingBottom="16dp"
+        android:paddingLeft="52dp"
         android:paddingRight="16dp"
-        android:paddingTop="22dp"
+        android:paddingTop="8dp"
+        android:textColor="@color/textLight2"
         android:text="@string/contact"
-        android:textSize="12sp"/>
+        android:textSize="14sp"/>
 
 </LinearLayout>

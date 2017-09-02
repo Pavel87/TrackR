@@ -2,18 +2,12 @@
 <resources>
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#121212</color>
-    <color name="halfTransparent">#95121212</color>
     <color name="colorAccent">#3F51B5</color>
-    <color name="textbox_background">#19121212</color>
-    <color name="textbox_stroke">#3F464646</color>
     <color name="transparent1">#32121212</color>
     <color name="textLight">#C3C3C3</color>
+    <color name="textLight2">#707070</color>
     <color name="white">#FFFFFF</color>
-    <color name="progress_bg">#EFC3C3C3</color>
-    <color name="map_radius">#654895FF</color>
     <color name="toast_background">#CF244FA7</color>
     <color name="text_nightMode">@color/textLight</color>
-    <color name="text_critical">#FF2F2F</color>
-    <color name="marker_area">#A5618AE8</color>
     <color name="marker_stroke">#DDDDDD</color>
 </resources>

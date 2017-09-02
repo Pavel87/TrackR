@@ -51,16 +51,31 @@ public class LocationService extends Service implements LocationListener, Google
     private String child = null;
     private boolean lastBatLevel = false;
 
+    private boolean isPermissionEnabled = true;
+
     private int updateFreq = Constants.TIME_BATTERY_OK * 60 * 1000;;
     private int updateFreqLowBat = updateFreq + 25 * 60 * 1000;;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        Log.d(TAG, "onCreate");
+        isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(), Constants.LOCATION_PERMISSION);
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
+        preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+
+        if(!isPermissionEnabled) {
+            SharedPreferences.Editor editor = preferences.edit();
+            editor.putBoolean(Constants.TRACKING_STATE, false);
+            editor.commit();
+
+            stopSelf();
+            return START_NOT_STICKY;
+        }
+
         Firebase.setAndroidContext(getApplicationContext());
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
@@ -69,7 +84,6 @@ public class LocationService extends Service implements LocationListener, Google
                     .addApi(LocationServices.API)
                     .build();
         }
-        preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
         updateLocFreqTime();
         child = preferences.getString(Constants.TRACKING_ID, "Error");
         if (child.equals("Error")) stopSelf();
@@ -103,10 +117,7 @@ public class LocationService extends Service implements LocationListener, Google
     }
 
     private void startLocationUpdates() {
-        if (ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this,
-                Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+        if(!Utility.checkSelfPermission(getApplicationContext(), Constants.LOCATION_PERMISSION)) {
             return;
         }
 
@@ -153,7 +164,9 @@ public class LocationService extends Service implements LocationListener, Google
         firebase.keepSynced(false);
         firebase.goOnline();
         Log.d(TAG, "Firebase goes online - attempt to update location");
-        firebase.child(child).setValue(new LocationTxObject(0, lastLocation.getLatitude(),
+        firebase.child(child).child(String.valueOf(time)).setValue(new LocationTxObject(lastLocation.getLatitude(),
+                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
+        firebase.child(child).setValue(new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();
@@ -211,8 +224,6 @@ public class LocationService extends Service implements LocationListener, Google
             return cellQuality;
         }
 
-        boolean isPermissionEnabled = Utility.checkPermission(getApplicationContext(),
-                LOCATION_PERMISSION);
         if (!isPermissionEnabled) {
             return cellQuality;
         }

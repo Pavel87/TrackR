@@ -103,7 +103,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 // check if this triggers after automatic setting checked state on activity start
                 Log.d(TAG, "Tracking Mode enabled: " + isEnabled);
 
-                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1 && !Utility.checkPermission(getApplicationContext(),
+                if (Build.VERSION.SDK_INT > Build.VERSION_CODES.LOLLIPOP_MR1 && !Utility.checkSelfPermission(getApplicationContext(),
                         Constants.LOCATION_PERMISSION)) {
                     Utility.displayExplanationForPermission(SettingsActivityV2.this, Constants.LOCATION_PERMISSION);
                     compoundButton.setChecked(false);

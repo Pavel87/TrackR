@@ -9,9 +9,8 @@
         android:id="@+id/helpListHeader"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:padding="16dp"
+        android:padding="20dp"
         android:text="TITLE"
-        android:paddingLeft="?android:attr/expandableListPreferredItemPaddingLeft"
         android:textSize="20sp"/>
 
 </LinearLayout>

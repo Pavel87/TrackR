@@ -55,9 +55,9 @@ public class GalleryAdapter extends ArrayAdapter {
         holder.image.setImageBitmap(item.getImage());
 
         if (selectedItem == item.getId()) {
-            holder.image.setBackground(context.getDrawable(R.drawable.profile_img_selected));
+            holder.image.setBackground(context.getResources().getDrawable(R.drawable.profile_img_selected));
         } else {
-            holder.image.setBackground(context.getDrawable(R.drawable.image_button_bg));
+            holder.image.setBackground(context.getResources().getDrawable(R.drawable.image_button_bg));
         }
         return row;
     }

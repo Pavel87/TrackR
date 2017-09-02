@@ -51,7 +51,7 @@ public final class AddressResolverRunnable implements Runnable {
         Geocoder geocoder = new Geocoder(context, Locale.getDefault());
         List<Address> addresses = null;
         try {
-            addresses = geocoder.getFromLocation(latitude, longitude, 3);
+            addresses = geocoder.getFromLocation(latitude, longitude, 1);
         } catch (IOException e) {
             Log.e(TAG, "Cannot translate the location: IO Exception: "+e.getMessage());
             e.printStackTrace();
@@ -60,54 +60,11 @@ public final class AddressResolverRunnable implements Runnable {
         // If results available it will iterate through results and fill the fields
         if (addresses != null && addresses.size() > 0) {
 
-            String[] addressOutput = new String[5];
-            for (Address address : addresses) {
-                if (addressOutput[0] == null) {
-                    addressOutput[0] = address.getSubThoroughfare(); // 123 house number
-                }
-                if (addressOutput[1] == null) {
-                    addressOutput[1] = formatStreetString(address.getThoroughfare()); // Street
-                }
-                if (addressOutput[2] == null) {
-                    addressOutput[2] = address.getLocality();  // Vancouver
-                }
-                if (addressOutput[3] == null) {
-                    addressOutput[3] = address.getCountryCode(); // CA
-                }
-
-                if (addressOutput[4] == null) {
-                    addressOutput[4] = address.getPostalCode();  // 129 321
-                }
-
-//                if (addressOutput[5] == null) {
-//                    addressOutput[5] = address.getAdminArea(); // British Columbia
-//                }
-
-            }
-
-            StringBuilder result = new StringBuilder();
-            for (int i = 1; i < addressOutput.length; i++) {
-                if (addressOutput[i - 1] == null) {
-                    continue;
-                }
-                result.append(addressOutput[i - 1]).append(", ");
-            }
-            // add last element
-            if (addressOutput[addressOutput.length - 1] != null) {
-                result.append(addressOutput[addressOutput.length - 1]);
-            }
-
-            // make sure we have some address
-            if (addressOutput.length == 0) {
+            if(addresses.get(0) == null || addresses.get(0).getAddressLine(0).equals("")) {
                 return context.getResources().getString(R.string.address_not_found);
             }
-
-            // remove comma and white space before return
-            String output = result.toString().trim();
-            if (output.lastIndexOf(",") == output.length() - 1) {
-                output = output.substring(0, output.lastIndexOf(","));
-            }
-            return output;
+            String addressString = addresses.get(0).getAddressLine(0);
+            return formatStreetString(addressString);
         }
         return context.getResources().getString(R.string.address_not_found);
     }
@@ -128,13 +85,13 @@ public final class AddressResolverRunnable implements Runnable {
             } else if(input.contains("Avenue")) {
                 formatedInput = input.replace("Avenue", "Ave");
             } else if(input.contains("Drive")) {
-                formatedInput = input.replace("Avenue", "Dr");
+                formatedInput = input.replace("Drive", "Dr");
             } else if(input.contains("Place")) {
-                formatedInput = input.replace("Avenue", "Pl");
+                formatedInput = input.replace("Place", "Pl");
             } else if(input.contains("Highway")) {
-                formatedInput = input.replace("Avenue", "Hwy");
+                formatedInput = input.replace("Highway", "Hwy");
             } else if(input.contains("Parkway")) {
-                formatedInput = input.replace("Avenue", "Pwy");
+                formatedInput = input.replace("Parkway", "Pwy");
             } else {
                 formatedInput = input;
             }

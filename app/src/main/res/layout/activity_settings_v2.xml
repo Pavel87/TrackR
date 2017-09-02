@@ -34,7 +34,6 @@
             android:orientation="vertical">
 
             <LinearLayout
-                android:id="@+id/trackModeView"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/settings_item_height"
                 android:layout_marginTop="8dp"
@@ -116,7 +115,6 @@
                 android:background="#dddddd"/>
 
             <LinearLayout
-                android:id="@+id/trackFreqView"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/settings_item_height"
                 android:gravity="center_vertical"
@@ -174,7 +172,6 @@
                 android:background="#dddddd"/>
 
             <LinearLayout
-                android:id="@+id/linearLayout5"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/settings_item_height"
                 android:layout_marginTop="8dp"
@@ -213,7 +210,6 @@
                 android:background="#dddddd"/>
 
             <LinearLayout
-                android:id="@+id/linearLayout4"
                 android:layout_width="match_parent"
                 android:layout_height="@dimen/settings_item_height"
                 android:layout_marginTop="8dp"
