@@ -2,17 +2,25 @@ package com.pacmac.trackr;
 
 import android.Manifest;
 import android.app.Service;
+import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.BatteryManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoCdma;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellInfoWcdma;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.firebase.client.Firebase;
@@ -23,12 +31,17 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import java.util.List;
+
 /**
  * Created by pacmac on 28/04/16.
  */
 
 public class LocationService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener, Firebase.CompletionListener {
+
+    private static final String TAG = "LocServ";
+    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
@@ -134,12 +147,13 @@ public class LocationService extends Service implements LocationListener, Google
     public void onLocationChanged(Location lastLocation) {
         long time = lastLocation.getTime();
         double batteryLevel = Math.round(getBatteryLevel() * 100.0) / 100.0;
+        int cellQuality = getCellSignalQuality(getApplicationContext());
         firebase = new Firebase("https://trackr1.firebaseio.com");
         firebase.keepSynced(false);
         firebase.goOnline();
         Log.d(Constants.TAG, "Firebase goes online - attempt to update location");
         firebase.child(child).setValue(new LocationTxObject(0, lastLocation.getLatitude(),
-                lastLocation.getLongitude(), time, batteryLevel), this);
+                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();
             lastBatLevel = true;
@@ -184,4 +198,42 @@ public class LocationService extends Service implements LocationListener, Google
             Log.d(Constants.TAG, "Firebase goes offline");
         }
     }
+
+    private int getCellSignalQuality(Context context) {
+        int cellQuality = -1;
+        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1){
+            return cellQuality;
+        }
+
+        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
+        if (telephonyManager == null) {
+            return cellQuality;
+        }
+
+        boolean isPermissionEnabled = Utility.checkPermission(getApplicationContext(),
+                LOCATION_PERMISSION);
+        if (!isPermissionEnabled) {
+            return cellQuality;
+        }
+        List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
+        if(cellInfoList == null){
+            return cellQuality;
+        }
+        for (CellInfo cell : cellInfoList) {
+            if(cell.isRegistered()){
+                if (cell instanceof CellInfoLte) {
+                    cellQuality = ((CellInfoLte) cell).getCellSignalStrength().getLevel();
+                } else if (cell instanceof CellInfoWcdma) {
+                    cellQuality = ((CellInfoWcdma) cell).getCellSignalStrength().getLevel();
+                } else if(cell instanceof CellInfoGsm) {
+                    cellQuality = ((CellInfoGsm) cell).getCellSignalStrength().getLevel();
+                } else if (cell instanceof CellInfoCdma) {
+                    cellQuality = ((CellInfoCdma) cell).getCellSignalStrength().getLevel();
+                }
+                break;
+            }
+        }
+        return cellQuality;
+    }
+
 }

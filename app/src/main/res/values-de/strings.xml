@@ -38,7 +38,7 @@
     <string name="no_location">Keine gültige Adresse angegeben</string>
     <string name="share_header">*****************************</string>
     <string name="new_update_title">Neue Aktualisierung v</string>
-    <string name="updateMsg1">- Added new markers to map screen.</string>
+    <string name="updateMsg1">- NEW User Interface and features are coming next week.\nStay tuned!</string>
     <string name="updateMsg2">- UI - full tracked device name is now shown on main screen.</string>
     <string name="updateMsg3">- UI - some app notification messages were updated to make better sense.</string>
     <string name="updateMsg4">- Map is now supporting multiple devices.</string>

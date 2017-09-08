@@ -210,7 +210,7 @@ public class Utility {
 
         StringBuilder sb = new StringBuilder();
 
-//   sb.append(context.getString(R.string.updateMsg1));
+   sb.append(context.getString(R.string.updateMsg1));
 //        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg2));
 //        sb.append("\n");
@@ -222,7 +222,7 @@ public class Utility {
 //        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg6));
 //        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg7));
+//        sb.append(context.getString(R.string.updateMsg7));
         builder.setMessage(sb.toString());
         sb = null;
         builder.setCancelable(true);
