@@ -24,12 +24,13 @@ import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -124,14 +125,17 @@ public class Utility {
     }
 
 
-    // This is util method to delete unused ID from Firebase DB
+
+//     This is util method to delete unused ID from Firebase DB
     protected static void deleteUnusedIdFromFb() {
         final long timeThreshold = System.currentTimeMillis() - Constants.OLD_ID_THRESHOLD; // 7 days
-        final Firebase firebase = new Firebase("https://trackr1.firebaseio.com");
-        firebase.goOnline();
+
+        FirebaseDatabase database = FirebaseDatabase.getInstance();
+        final DatabaseReference dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+        dbReference.goOnline();
         Log.d(Constants.TAG, "Firebase goes online");
-        firebase.keepSynced(true);
-        firebase.addValueEventListener(new ValueEventListener() {
+//        firebase.keepSynced(true);
+        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
@@ -145,17 +149,17 @@ public class Utility {
                     String id = snapshot.getKey();
                     if (timestamp < timeThreshold) {
                         Log.d(Constants.TAG, id + " ID was not updated in last 7 days - likely not in use anymore");
-                        firebase.child(id).removeValue();
+                        dbReference.child(id).removeValue();
+//                        firebase.child(id).removeValue();
                     }
                 }
-                firebase.removeEventListener(this);
                 Log.d(Constants.TAG, "Firebase goes offline");
-                firebase.goOffline();
+                dbReference.goOffline();
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Log.d(Constants.TAG, "DELETING UNUSED IDs WAS CANCELED");
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(Constants.TAG, "DELETING UNUSED IDs WAS CANCELED");
             }
         });
     }

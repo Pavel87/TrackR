@@ -90,7 +90,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (batteryLevel == -1) {
             ((ViewHolderForRow) holder).batteryLevel.setText("NA");
         } else {
-            ((ViewHolderForRow) holder).batteryLevel.setText(String.valueOf(batteryLevel) + "%");
+            ((ViewHolderForRow) holder).batteryLevel.setText(String.format("%.0f", batteryLevel) + "%");
         }
         setBatteryIndicatorDrawable(((ViewHolderForRow) holder).batIndicator, batteryLevel);
         ((ViewHolderForRow) holder).userEdit.setOnClickListener(new View.OnClickListener() {

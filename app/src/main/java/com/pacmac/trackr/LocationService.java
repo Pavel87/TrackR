@@ -6,7 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Build;
@@ -14,8 +13,6 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
-import android.support.v4.app.ActivityCompat;
-import android.telephony.CellIdentityGsm;
 import android.telephony.CellInfo;
 import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
@@ -24,29 +21,32 @@ import android.telephony.CellInfoWcdma;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by pacmac on 28/04/16.
  */
 
 public class LocationService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener, Firebase.CompletionListener {
+        GoogleApiClient.OnConnectionFailedListener { //Firebase.CompletionListener
 
     private static final String TAG = "LocServ";
     private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private Firebase firebase;
+    private FirebaseDatabase database;
+    private DatabaseReference dbReference;
     private SharedPreferences preferences;
     private String child = null;
     private boolean lastBatLevel = false;
@@ -76,7 +76,9 @@ public class LocationService extends Service implements LocationListener, Google
             return START_NOT_STICKY;
         }
 
-        Firebase.setAndroidContext(getApplicationContext());
+        database = FirebaseDatabase.getInstance();
+        dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -160,14 +162,28 @@ public class LocationService extends Service implements LocationListener, Google
         long time = lastLocation.getTime();
         double batteryLevel = Math.round(getBatteryLevel() * 100.0) / 100.0;
         int cellQuality = getCellSignalQuality(getApplicationContext());
-        firebase = new Firebase("https://trackr1.firebaseio.com");
-        firebase.keepSynced(false);
-        firebase.goOnline();
+        dbReference.goOnline();
         Log.d(TAG, "Firebase goes online - attempt to update location");
-        firebase.child(child).child(String.valueOf(time)).setValue(new LocationTxObject(lastLocation.getLatitude(),
-                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
-        firebase.child(child).setValue(new LocationTxObject(lastLocation.getLatitude(),
-                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
+//        firebase.keepSynced(false);
+//        firebase.goOnline();
+
+        LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
+                lastLocation.getLongitude(), time, batteryLevel, cellQuality);
+        Map<String, Object> locationUpdateMap = new HashMap<>();
+
+        locationUpdateMap.put(String.valueOf(time), newLocation.createMap());
+        dbReference.child(child).updateChildren(locationUpdateMap);
+
+        dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel()+0.01);
+        dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
+        dbReference.child(child).child("longitude").setValue(newLocation.getLongitude());
+        dbReference.child(child).child("timestamp").setValue(time);
+        dbReference.child(child).child("id").setValue(1);
+
+//        firebase.child(child).child(String.valueOf(time)).setValue(new LocationTxObject(lastLocation.getLatitude(),
+//                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
+//        firebase.child(child).setValue(new LocationTxObject(lastLocation.getLatitude(),
+//                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();
             lastBatLevel = true;
@@ -181,6 +197,7 @@ public class LocationService extends Service implements LocationListener, Google
             createLocationRequest(updateFreqLowBat);
             startLocationUpdates();
         }
+        //dbReference.goOffline();
     }
 
     @Override
@@ -199,19 +216,19 @@ public class LocationService extends Service implements LocationListener, Google
         return ((float) level / (float) scale) * 100.0f;
     }
 
-    @Override
-    public void onComplete(FirebaseError firebaseError, Firebase firebase) {
-        Log.d(TAG, "TrackR finished server upload");
-
-        if(firebaseError != null) {
-            Log.d(TAG, firebaseError.getDetails() + " Message: " + firebaseError.getMessage());
-        }
-
-        if (firebase != null){
-            firebase.goOffline();
-            Log.d(TAG, "Firebase goes offline");
-        }
-    }
+//    @Override
+//    public void onComplete(FirebaseError firebaseError, Firebase firebase) {
+//        Log.d(TAG, "TrackR finished server upload");
+//
+//        if(firebaseError != null) {
+//            Log.d(TAG, firebaseError.getDetails() + " Message: " + firebaseError.getMessage());
+//        }
+//
+//        if (firebase != null){
+//            firebase.goOffline();
+//            Log.d(TAG, "Firebase goes offline");
+//        }
+//    }
 
     private int getCellSignalQuality(Context context) {
         int cellQuality = -1;

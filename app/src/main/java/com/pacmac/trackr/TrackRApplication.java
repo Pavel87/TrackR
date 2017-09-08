@@ -3,7 +3,6 @@ package com.pacmac.trackr;
 import android.app.Application;
 import android.os.Build;
 
-import com.firebase.client.Firebase;
 import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
 
 /**
@@ -24,9 +23,5 @@ public class TrackRApplication extends Application {
 //                e.printStackTrace();
 //            }
 //        }
-        Firebase.setAndroidContext(getApplicationContext());
-        Firebase.getDefaultConfig().setPersistenceEnabled(false);
-
-
     }
 }

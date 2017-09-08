@@ -31,10 +31,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.firebase.client.DataSnapshot;
-import com.firebase.client.Firebase;
-import com.firebase.client.FirebaseError;
-import com.firebase.client.ValueEventListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,6 +38,11 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 import com.pacmac.trackr.mapmarker.IconGenerator;
 
 import org.json.JSONArray;
@@ -75,7 +76,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private boolean isConnected = false;
     private boolean skipConnReceiverTrigger = true;
 
-    private Firebase firebase;
+    private FirebaseDatabase database;
+    private DatabaseReference dbReference;
     private List<LocationRecord> userRecords = new ArrayList<>();
     private int currentTracker = 0;
 
@@ -123,12 +125,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
         if (preferences.getBoolean(Constants.FIRST_RUN, true)) {
             createDefaultIdsAndMyPhoneRow();
-            if(!isPermissionEnabled) {
+            if (!isPermissionEnabled) {
                 showDialogForUserToEnableTracking();
             }
         } else {
             // disable tracking state if permission was disabled while app was in background
-            if(!isPermissionEnabled) {
+            if (!isPermissionEnabled) {
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putBoolean(Constants.TRACKING_STATE, false);
                 editor.commit();
@@ -137,7 +139,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             loadUserRecordsFromFile();
         }
 
-        Firebase.setAndroidContext(getApplicationContext());
+        database = FirebaseDatabase.getInstance();
+        dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
 
         // restore location on reconfiguration
         if (savedInstanceState != null) {
@@ -215,7 +218,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             appBarCollapsable.setExpanded(false);
         }
     }
-
 
 
     @Override
@@ -562,12 +564,13 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             skipfbCallOnReconfiguration = false;
             return;
         }
-        firebase = new Firebase("https://trackr1.firebaseio.com");
-        firebase.goOnline();
-        Log.d(TAG, "Firebase goes online");
-        firebase.keepSynced(false);
 
-        firebase.addValueEventListener(new ValueEventListener() {
+        dbReference.goOnline();
+        Log.d(TAG, "Firebase goes online");
+        //firebase.keepSynced(false);
+
+
+        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 {
@@ -581,6 +584,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                     Long idLong = ((Long) snapshot.child("id").getValue());
                                     double batteryLevel = -1;
                                     if (idLong != null) {
+//                                        batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
                                         batteryLevel = (double) snapshot.child("batteryLevel").getValue();
                                     }
                                     double latitude = (double) snapshot.child("latitude").getValue();
@@ -617,20 +621,19 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                             }
                         }
                     }
-                    firebase.removeEventListener(this);
-                    firebase.goOffline();
+                    dbReference.goOffline();
                     Log.i(Constants.TAG, "Firebase goes offline");
-
                     // Update location markers on the map.
                     showUsersLocationOnMap();
                 }
             }
 
             @Override
-            public void onCancelled(FirebaseError firebaseError) {
-                Log.i(Constants.TAG, "Update Cancelled" + firebaseError.getMessage());
-                firebase.goOffline();
-                Log.i(Constants.TAG, "Firebase goes offline");
+            public void onCancelled(DatabaseError databaseError) {
+                dbReference.goOffline();
+                Log.i(Constants.TAG, "Update Cancelled1" + databaseError.getMessage());
+                Log.i(Constants.TAG, "Update Cancelled2" + databaseError.getDetails());
+
             }
         });
     }
@@ -765,7 +768,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     }
 
 
-    private void enableButtonsInNavBar(){
+    private void enableButtonsInNavBar() {
         bottomNavigation.getMenu().getItem(0).setEnabled(true);
         bottomNavigation.getMenu().getItem(1).setEnabled(true);
         bottomNavigation.getMenu().getItem(2).setEnabled(true);
