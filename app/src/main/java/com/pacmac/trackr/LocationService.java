@@ -164,6 +164,7 @@ public class LocationService extends Service implements LocationListener, Google
         int cellQuality = getCellSignalQuality(getApplicationContext());
         dbReference.goOnline();
         Log.d(TAG, "Firebase goes online - attempt to update location");
+        dbReference.keepSynced(false);
 //        firebase.keepSynced(false);
 //        firebase.goOnline();
 
@@ -178,7 +179,7 @@ public class LocationService extends Service implements LocationListener, Google
         dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
         dbReference.child(child).child("longitude").setValue(newLocation.getLongitude());
         dbReference.child(child).child("timestamp").setValue(time);
-        dbReference.child(child).child("id").setValue(1);
+        dbReference.child(child).child("id").setValue(2);
 
 //        firebase.child(child).child(String.valueOf(time)).setValue(new LocationTxObject(lastLocation.getLatitude(),
 //                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
@@ -197,11 +198,12 @@ public class LocationService extends Service implements LocationListener, Google
             createLocationRequest(updateFreqLowBat);
             startLocationUpdates();
         }
-        //dbReference.goOffline();
+        dbReference.goOffline();
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        dbReference.goOffline();
     }
 
     public float getBatteryLevel() {

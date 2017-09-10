@@ -567,8 +567,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
         dbReference.goOnline();
         Log.d(TAG, "Firebase goes online");
-        //firebase.keepSynced(false);
-
+        dbReference.keepSynced(false);
 
         dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -581,20 +580,21 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                             if (snapshot.getKey().equals(userRecords.get(i).getSafeId())) {
                                 // Processing received data
                                 if (snapshot.hasChildren()) {
-                                    Long idLong = ((Long) snapshot.child("id").getValue());
-                                    double batteryLevel = -1;
-                                    if (idLong != null) {
+                                    Long idLong = (( 
+                                    if(idLong < 2) {
+                                        if (idLong != null) {
 //                                        batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
-                                        batteryLevel = (double) snapshot.child("batteryLevel").getValue();
-                                    }
-                                    double latitude = (double) snapshot.child("latitude").getValue();
-                                    double longitude = (double) snapshot.child("longitude").getValue();
-                                    long timeStamp = (long) snapshot.child("timestamp").getValue();
-                                    int cellQuality = -1;
-                                    // cellQuality will be null on older app versions
-                                    Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
-                                    if (cellQualityLong != null) {
-                                        cellQuality = cellQualityLong.intValue();
+                                            batteryLevel = (double) snapshot.child("batteryLevel").getValue();
+                                        }
+                                        latitude = (double) snapshot.child("latitude").getValue();
+                                        longitude = (double) snapshot.child("longitude").getValue();
+                                        timeStamp = (long) snapshot.child("timestamp").getValue();
+
+                                        // cellQuality will be null on older app versions
+                                        Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
+                                        if (cellQualityLong != null) {
+                                            cellQuality = cellQualityLong.intValue();
+                                        }
                                     }
                                     Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + userRecords.get(i).getAlias());
 
