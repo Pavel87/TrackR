@@ -562,7 +562,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                 }
                             }
                         }
-                        if(settingsObject.getSafeId().equals(trackIDRaw) && trackingState) {
+                        if(settingsObject.getId().equals(trackIDRaw) && trackingState) {
                             userRecords.add(new LocationRecord(-10, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
                             isMyPhoneFound = true;
                             continue;
@@ -573,7 +573,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             }
             if(!isMyPhoneFound) {
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean(Constants.MY_PHONE_IN_LIST, isMyPhoneFound);
+                editor.putBoolean(Constants.MY_PHONE_IN_LIST, false);
                 editor.commit();
             }
             File obsoleteFile = new File(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
