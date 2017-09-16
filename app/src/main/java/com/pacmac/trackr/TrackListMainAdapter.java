@@ -169,7 +169,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
 
             default:
                 indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
-                return SignalQuality.Unknown.name();
+                return SignalQuality.NA.name();
         }
 
     }
@@ -186,7 +186,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         Average,
         Bad,
         Poor,
-        Unknown
+        NA
     }
 
 }

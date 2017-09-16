@@ -538,6 +538,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             JSONArray jsonArray = jsnobject.getJSONArray("receiverids");
             String trackIDRaw = preferences.getString(Constants.TRACKING_ID_RAW, "Error #5#");
             boolean trackingState = preferences.getBoolean(Constants.TRACKING_STATE, false);
+            boolean isMyPhoneFound = false;
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 SettingsObject settingsObject = Utility.createSettingsObjectFromJson((JSONObject) jsonArray.get(i));
@@ -563,11 +564,17 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                         }
                         if(settingsObject.getSafeId().equals(trackIDRaw) && trackingState) {
                             userRecords.add(new LocationRecord(-10, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
+                            isMyPhoneFound = true;
                             continue;
                         }
                         userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
                     }
                 }
+            }
+            if(!isMyPhoneFound) {
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean(Constants.MY_PHONE_IN_LIST, isMyPhoneFound);
+                editor.commit();
             }
             File obsoleteFile = new File(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
             obsoleteFile.delete();
