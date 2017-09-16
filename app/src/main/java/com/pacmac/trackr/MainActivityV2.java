@@ -99,8 +99,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private boolean skipfbCallOnReconfiguration = false;
     private boolean isAddressResolverRegistred = false;
 
-    private int REFRESH_DELAY = 60*1000;
-    private int REFRESH_DELAY_SHORT = 20*1000;
+    private int REFRESH_DELAY = 60 * 1000;
+    private int REFRESH_DELAY_SHORT = 20 * 1000;
     private boolean isRefreshListHandlerRegistred = false;
 
     private TypedArray stockImages;
@@ -239,18 +239,17 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         }
 
 
-
         appBarCollapsable.addOnOffsetChangedListener(new AppBarStateChangeListener() {
             @Override
             public void onStateChanged(AppBarLayout appBarLayout, State state, int alpha) {
-                if(state == State.EXPANDED) {
+                if (state == State.EXPANDED) {
                     fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.fab)));
-                } else if(state == State.COLLAPSED) {
+                } else if (state == State.COLLAPSED) {
                     fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
                 } else {
 
                     String alphaString = Integer.toHexString(alpha);
-                    if(alphaString.length() == 1){
+                    if (alphaString.length() == 1) {
                         alphaString = "0" + alphaString;
                     }
                     String colorString = "#" + alphaString + "6A1B9A";
@@ -275,7 +274,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             Utility.startTrackingService(getApplicationContext(), preferences);
         }
         showUsersLocationOnMap();
-        if(userRecords.size()>0 && checkIfshouldTryRetrieveDevicePosition()) {
+        if (userRecords.size() > 0 && checkIfshouldTryRetrieveDevicePosition()) {
             startRefreshListTimer(REFRESH_DELAY_SHORT);
         } else {
             startRefreshListTimer(REFRESH_DELAY);
@@ -291,7 +290,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         // save loc collection before exit
         Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
                 Utility.createJsonArrayStringFromUserRecords(userRecords));
-        if(isRefreshListHandlerRegistred) {
+        if (isRefreshListHandlerRegistred) {
             stopRefreshListTimer();
         }
     }
@@ -507,11 +506,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         // To support deprecated code I need to use the rest of this method.
         String recIdsJsonString = Utility.loadJsonStringFromFile(getFilesDir() + Constants.JSON_REC_IDS_FILE_NAME);
 
+        String recId = preferences.getString(Constants.RECEIVING_ID, "");
+        String safeId = preferences.getString(Constants.RECEIVING_ID_RAW, "");
+
         if (recIdsJsonString.equals("")) {
             // file doesn't exist
             //backward compatibility
-            String recId = preferences.getString(Constants.RECEIVING_ID, "");
-            String safeId = preferences.getString(Constants.RECEIVING_ID_RAW, "");
 
             // TODO this piece might be removed later as it is only for pre v2 upgrades
             if (!recId.equals("")) {
@@ -536,6 +536,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         try {
             JSONObject jsnobject = new JSONObject(recIdsJsonString);
             JSONArray jsonArray = jsnobject.getJSONArray("receiverids");
+            String trackIDRaw = preferences.getString(Constants.TRACKING_ID_RAW, "Error #5#");
+            boolean trackingState = preferences.getBoolean(Constants.TRACKING_STATE, false);
 
             for (int i = 0; i < jsonArray.length(); i++) {
                 SettingsObject settingsObject = Utility.createSettingsObjectFromJson((JSONObject) jsonArray.get(i));
@@ -558,6 +560,10 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                     continue;
                                 }
                             }
+                        }
+                        if(settingsObject.getSafeId().equals(trackIDRaw) && trackingState) {
+                            userRecords.add(new LocationRecord(-10, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
+                            continue;
                         }
                         userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
                     }
@@ -707,9 +713,9 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "2.0.15").equals(appVersion)) {
+        if (!preferences.getString(Constants.NEW_UPDATE, "3.0.0").equals(appVersion)) {
             //TODO uncomment this
-            // Utility.createAlertDialog(MainActivity.this);
+            Utility.createAlertDialog(MainActivityV2.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
             editor.commit();
@@ -855,7 +861,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             mAdapter.notifyDataSetChanged();
 
             int delay = REFRESH_DELAY;
-            if(checkIfshouldTryRetrieveDevicePosition()) {
+            if (checkIfshouldTryRetrieveDevicePosition()) {
                 delay = REFRESH_DELAY_SHORT;
             }
             startRefreshListTimer(delay);
@@ -866,6 +872,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         isRefreshListHandlerRegistred = true;
         refreshListHandler.postDelayed(refreshListRunnable, delay);
     }
+
     private void stopRefreshListTimer() {
         isRefreshListHandlerRegistred = false;
         refreshListHandler.removeCallbacks(refreshListRunnable);

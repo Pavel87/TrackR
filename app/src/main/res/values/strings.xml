@@ -19,7 +19,11 @@
     <string name="request_perm">Request</string>
     <string name="share_header">*****************************</string>
     <string name="new_update_title">New TrackR Update v</string>
-    <string name="updateMsg7">- Crash fixes.</string>
+    <string name="updateMsg1">- NEW User Interface!</string>
+    <string name="updateMsg2">- Added Help menu.</string>
+    <string name="updateMsg3">- Improved Settings.</string>
+    <string name="updateMsg4">- NEW Added signal strength indicator.</string>
+    <string name="updateMsg5">- User/Device Icons.</string>
     <string name="rateApp">How do you like TrackR?</string>
     <string name="rta_dialog_message">TrackR development team is honoured by You using this app. Please take a few seconds and rate this app in Google Store. Also any kind of feedback or feature request is much appreciated.</string>
     <string name="no_thanks">Later</string>
