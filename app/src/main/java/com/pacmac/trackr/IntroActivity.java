@@ -32,25 +32,25 @@ public class IntroActivity extends AppCompatActivity {
         background.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!isGPSUpToDate) {
-                    if(Utility.checkPlayServices(IntroActivity.this)) {
+                if (!isGPSUpToDate) {
+                    if (Utility.checkPlayServices(IntroActivity.this)) {
                         isGPSUpToDate = true;
                         checkPermission();
                     }
-                } else {
-                    if (!isPermissionEnabled) {
-                        checkPermission();
-                    }
+                }
+
+                if (!isPermissionEnabled) {
+                    checkPermission();
                 }
             }
         });
 
-        if(Utility.checkPlayServices(this)) {
+        if (Utility.checkPlayServices(this)) {
             isGPSUpToDate = true;
-            checkPermission();
         } else {
             isGPSUpToDate = false;
         }
+        checkPermission();
     }
 
     @Override

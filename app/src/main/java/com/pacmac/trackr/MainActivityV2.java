@@ -544,6 +544,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 SettingsObject settingsObject = Utility.createSettingsObjectFromJson((JSONObject) jsonArray.get(i));
                 if (settingsObject != null) {
                     if (userRecords.size() == 0) {
+
+                        if(settingsObject.getId().equals(trackIDRaw) && trackingState) {
+                            userRecords.add(new LocationRecord(-10, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
+                            isMyPhoneFound = true;
+                            continue;
+                        }
                         userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(),
                                 settingsObject.getAlias(), -1));
                     } else {
@@ -561,11 +567,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                     continue;
                                 }
                             }
-                        }
-                        if(settingsObject.getId().equals(trackIDRaw) && trackingState) {
-                            userRecords.add(new LocationRecord(-10, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
-                            isMyPhoneFound = true;
-                            continue;
                         }
                         userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
                     }
