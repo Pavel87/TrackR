@@ -11,6 +11,7 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -164,49 +165,49 @@ public class Utility {
         });
     }
 
+//TODO re-add this
+//    public static Intent createShareIntent(StringBuilder sb) {
+//        Intent shareIntent = new Intent(Intent.ACTION_SEND);
+//        shareIntent.setType("text/plain");
+//        shareIntent.putExtra(Intent.EXTRA_TEXT, sb.toString());
+//        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "TrackR - Device Location");
+//        return shareIntent;
+//    }
 
-    public static Intent createShareIntent(StringBuilder sb) {
-        Intent shareIntent = new Intent(Intent.ACTION_SEND);
-        shareIntent.setType("text/plain");
-        shareIntent.putExtra(Intent.EXTRA_TEXT, sb.toString());
-        shareIntent.putExtra(Intent.EXTRA_SUBJECT, "TrackR - Device Location");
-        return shareIntent;
-    }
 
-
-    public static StringBuilder updateShareIntent(Context context, String deviceName, double latitude, double longitude, long timestamp, String address, double batteryLevel) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(context.getResources().getString(R.string.share_header));
-        sb.append("\n");
-        sb.append("TrackR Export");
-        sb.append("\n");
-        sb.append(context.getResources().getString(R.string.share_header));
-        sb.append("\n\n");
-        //body
-        // TODO add ID & NAME
-
-        sb.append("Device: " + deviceName);
-        sb.append("\n");
-        sb.append("Coordinates");
-        sb.append("\n");
-        sb.append("Latitude: " + latitude);
-        sb.append("\n");
-        sb.append("Longitude: " + longitude);
-        sb.append("\n");
-        sb.append("Last Seen At: " + new Date(timestamp).toString());
-        sb.append("\n");
-        sb.append("Address:");
-        sb.append("\n");
-        sb.append("" + address);
-        sb.append("\n");
-        sb.append("Battery Level: " + String.format("%.0f", batteryLevel) + " %");
-        sb.append("\n");
-        sb.append(context.getResources().getString(R.string.share_header));
-        sb.append("\n\n");
-        sb.append("Thank you for using TrackR. If you like TrackR please give it a rating and submit a feedback at Google Play Store:\n");
-        sb.append("https://play.google.com/store/apps/details?id=com.pacmac.trackr");
-        return sb;
-    }
+//    public static StringBuilder updateShareIntent(Context context, String deviceName, double latitude, double longitude, long timestamp, String address, double batteryLevel) {
+//        StringBuilder sb = new StringBuilder();
+//        sb.append(context.getResources().getString(R.string.share_header));
+//        sb.append("\n");
+//        sb.append("TrackR Export");
+//        sb.append("\n");
+//        sb.append(context.getResources().getString(R.string.share_header));
+//        sb.append("\n\n");
+//        //body
+//        // TODO add ID & NAME
+//
+//        sb.append("Device: " + deviceName);
+//        sb.append("\n");
+//        sb.append("Coordinates");
+//        sb.append("\n");
+//        sb.append("Latitude: " + latitude);
+//        sb.append("\n");
+//        sb.append("Longitude: " + longitude);
+//        sb.append("\n");
+//        sb.append("Last Seen At: " + new Date(timestamp).toString());
+//        sb.append("\n");
+//        sb.append("Address:");
+//        sb.append("\n");
+//        sb.append("" + address);
+//        sb.append("\n");
+//        sb.append("Battery Level: " + String.format("%.0f", batteryLevel) + " %");
+//        sb.append("\n");
+//        sb.append(context.getResources().getString(R.string.share_header));
+//        sb.append("\n\n");
+//        sb.append("Thank you for using TrackR. If you like TrackR please give it a rating and submit a feedback at Google Play Store:\n");
+//        sb.append("https://play.google.com/store/apps/details?id=com.pacmac.trackr");
+//        return sb;
+//    }
 
 
     public static void createAlertDialog(Context context) {
@@ -656,6 +657,8 @@ public class Utility {
         sb.append("ago.");
         return sb.toString();
     }
+
+
 
 
 }

@@ -1,6 +1,7 @@
 package com.pacmac.trackr;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -82,8 +83,11 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         ((ViewHolderForRow) holder).alias.setText(mDataset.get(position).getAlias());
         ((ViewHolderForRow) holder).lastUpdateTime.setText(Utility.getLastUpdateString(mDataset.get(position).getTimestamp()));
         ((ViewHolderForRow) holder).address.setText(mDataset.get(position).getAddress());
-        ((ViewHolderForRow) holder).cellQualityText.setText(getSignalQualityText(mDataset.get(position).getCellQuality(),
-                ((ViewHolderForRow) holder).cellQualityIndicator));
+        ((ViewHolderForRow) holder).cellQualityText.setText(getSignalQualityText(mDataset.get(position).getCellQuality(), ((ViewHolderForRow) holder).cellQualityIndicator));
+        // if small density (< xhdpi) then hide cell quality text
+        if(context.getResources().getConfiguration().densityDpi < 260) {
+            ((ViewHolderForRow) holder).cellQualityText.setVisibility(View.GONE);
+        }
 
         // set battery % and indicator
         double batteryLevel = mDataset.get(position).getBatteryLevel();
@@ -101,7 +105,9 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
                 }
             }
         });
-        ((ViewHolderForRow) holder).profileImage.setImageDrawable(context.getResources().getDrawable(mDataset.get(position).getProfileImageId()));
+        TypedArray stockImages = context.getResources().obtainTypedArray(R.array.stockImages);
+        ((ViewHolderForRow) holder).profileImage.setImageDrawable(context.getResources().getDrawable(stockImages
+                .getResourceId(mDataset.get(position).getProfileImageId(), 0)));
     }
 
     protected class ViewHolderForRow extends RecyclerView.ViewHolder {
@@ -180,7 +186,6 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         Average,
         Bad,
         Poor,
-        None,
         Unknown
     }
 

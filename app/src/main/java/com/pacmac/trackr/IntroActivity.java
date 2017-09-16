@@ -1,11 +1,10 @@
 package com.pacmac.trackr;
 
-import android.Manifest;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.FrameLayout;
@@ -37,7 +36,10 @@ public class IntroActivity extends AppCompatActivity {
                 }
             }
         });
-        checkPermission();
+
+        if(Utility.checkPlayServices(this)) {
+            checkPermission();
+        }
     }
 
     @Override
@@ -53,6 +55,7 @@ public class IntroActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
+//        checkPermission();
         if (isPermissionEnabled) {
             startMainActivityWithOffset(2);
         }
@@ -75,8 +78,10 @@ public class IntroActivity extends AppCompatActivity {
             handler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
+
                     Intent intent = new Intent(getApplicationContext(), MainActivityV2.class);
                     startActivity(intent);
+                    ActivityCompat.finishAffinity(IntroActivity.this);
                 }
             }, delay * 1000);
         }

@@ -28,7 +28,7 @@ public final class ImageGallery extends AppCompatActivity {
     private GalleryAdapter galleryAdapter;
     private ArrayList<ImageItem> imageDataSet = new ArrayList<>();
     int origImg = 0;
-    int resultImg = 0;
+    int resultImg = -1;
     View view = null;
 
     @Override
@@ -40,7 +40,7 @@ public final class ImageGallery extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
 
-        origImg = getIntent().getIntExtra(Constants.EDIT_USER_IMG, R.drawable.user0);
+        origImg = getIntent().getIntExtra(Constants.EDIT_USER_IMG, 0);
 
         imageDataSet = getData();
         galleryView = (GridView) findViewById(R.id.gridView);
@@ -74,7 +74,7 @@ public final class ImageGallery extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                if (resultImg == 0 || resultImg == origImg) {
+                if (resultImg == -1 || resultImg == origImg) {
                     setResult(RESULT_CANCELED);
                     onBackPressed();
                     return true;
@@ -94,11 +94,14 @@ public final class ImageGallery extends AppCompatActivity {
     private ArrayList<ImageItem> getData() {
         final ArrayList<ImageItem> imageItems = new ArrayList<>();
         TypedArray stockImages = getResources().obtainTypedArray(R.array.stockImages);
-
         for (int i = 0; i < stockImages.length(); i++) {
             Bitmap bitmap = BitmapFactory.decodeResource(getResources(), stockImages.getResourceId(i, 0));
-            imageItems.add(new ImageItem(bitmap, stockImages.getResourceId(i, 0)));
+            imageItems.add(new ImageItem(bitmap, i));
         }
         return imageItems;
     }
+
+
+
+
 }

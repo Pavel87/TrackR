@@ -2,6 +2,8 @@ package com.pacmac.trackr;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -52,7 +54,8 @@ public class GalleryAdapter extends ArrayAdapter {
         }
 
         ImageItem item = (ImageItem) data.get(position);
-        holder.image.setImageBitmap(item.getImage());
+       // holder.image.setImageBitmap(item.getImage());
+        loadImageIntoGridItem(holder, position);
 
         if (selectedItem == item.getId()) {
             holder.image.setBackground(context.getResources().getDrawable(R.drawable.profile_img_selected));
@@ -65,4 +68,34 @@ public class GalleryAdapter extends ArrayAdapter {
     static class ViewHolder {
         ImageView image;
     }
+
+    // Using an AsyncTask to load the slow images in a background thread
+
+    private void loadImageIntoGridItem(ViewHolder viewHolder, final int position) {
+        new AsyncTask<ViewHolder, Void, Bitmap>() {
+            private ViewHolder v;
+
+            @Override
+            protected Bitmap doInBackground(ViewHolder... params) {
+                v = params[0];
+                return ((ImageItem) data.get(position)).getImage();
+            }
+
+            @Override
+            protected void onPostExecute(Bitmap result) {
+                super.onPostExecute(result);
+
+                v.image.setImageBitmap(result);
+//                if (v.position == position) {
+//                    // If this item hasn't been recycled already, hide the
+//                    // progress and set and show the image
+//                    v.progress.setVisibility(View.GONE);
+//                    v.icon.setVisibility(View.VISIBLE);
+//                    v.icon.setImageBitmap(result);
+//                }
+            }
+        }.execute(viewHolder);
+
+    }
+
 }

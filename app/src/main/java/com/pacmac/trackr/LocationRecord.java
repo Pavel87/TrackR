@@ -1,5 +1,8 @@
 package com.pacmac.trackr;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Created by pacmac on 26/04/16.
  */
@@ -9,14 +12,14 @@ public class LocationRecord {
     private long timestamp = 0;
     private double longitude, latitude;
     private int id = -1;
-    //TODO replace default drawable
-    private int profileImageId = R.drawable.user0;
+    private int profileImageId = 0;
     private double batteryLevel = -1;
     private String address = "";
     private String alias = "TrackR";
     private String recId = "";
     private String safeId = "ID-safe";
     private int cellQuality = -1;
+    private List<LocationHistoryRecord> historyRecords = new ArrayList<>();
 
     public LocationRecord(int id, String recId, String safeId, String alias, int profileImageId) {
         this.id = id;
@@ -37,12 +40,13 @@ public class LocationRecord {
         batteryLevel = -1;
     }
 
-    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality) {
+    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality, List<LocationHistoryRecord> historyRecords) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
         this.batteryLevel = batteryLevel;
         this.cellQuality = cellQuality;
+        this.historyRecords = historyRecords;
     }
 
 //    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, String address) {
@@ -176,6 +180,10 @@ public class LocationRecord {
 
     public void setCellQuality(int cellQuality) {
         this.cellQuality = cellQuality;
+    }
+
+    public List<LocationHistoryRecord> getHistoryRecords() {
+        return historyRecords;
     }
 
     @Override

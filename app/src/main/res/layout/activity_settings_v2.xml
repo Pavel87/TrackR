@@ -229,7 +229,7 @@
                     android:layout_weight="3.5"
                     android:fontFamily="sans-serif-light"
                     android:gravity="left"
-                    android:text="Lock Settings"
+                    android:text="Enable Guard"
                     android:textColor="@android:color/black"
                     android:textSize="22sp"/>
 

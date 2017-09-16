@@ -26,10 +26,15 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -53,8 +58,10 @@ public class LocationService extends Service implements LocationListener, Google
 
     private boolean isPermissionEnabled = true;
 
-    private int updateFreq = Constants.TIME_BATTERY_OK * 60 * 1000;;
-    private int updateFreqLowBat = updateFreq + 25 * 60 * 1000;;
+    private int updateFreq = Constants.TIME_BATTERY_OK * 60 * 1000;
+    ;
+    private int updateFreqLowBat = updateFreq + 25 * 60 * 1000;
+    ;
 
     @Override
     public void onCreate() {
@@ -67,10 +74,10 @@ public class LocationService extends Service implements LocationListener, Google
     public int onStartCommand(Intent intent, int flags, int startId) {
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
 
-        if(!isPermissionEnabled) {
-            SharedPreferences.Editor editor = preferences.edit();
-            editor.putBoolean(Constants.TRACKING_STATE, false);
-            editor.commit();
+        if (!isPermissionEnabled) {
+//            SharedPreferences.Editor editor = preferences.edit();
+//            editor.putBoolean(Constants.TRACKING_STATE, false);
+//            editor.commit();
 
             stopSelf();
             return START_NOT_STICKY;
@@ -119,7 +126,7 @@ public class LocationService extends Service implements LocationListener, Google
     }
 
     private void startLocationUpdates() {
-        if(!Utility.checkSelfPermission(getApplicationContext(), Constants.LOCATION_PERMISSION)) {
+        if (!Utility.checkSelfPermission(getApplicationContext(), Constants.LOCATION_PERMISSION)) {
             return;
         }
 
@@ -132,9 +139,9 @@ public class LocationService extends Service implements LocationListener, Google
                 mGoogleApiClient, this);
     }
 
-    private void updateLocFreqTime(){
+    private void updateLocFreqTime() {
         updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
-        updateFreqLowBat = updateFreq +25 * 60 * 1000; // low bat is + 25 minutes
+        updateFreqLowBat = updateFreq + 25 * 60 * 1000; // low bat is + 25 minutes
     }
 
     @Override
@@ -165,26 +172,23 @@ public class LocationService extends Service implements LocationListener, Google
         dbReference.goOnline();
         Log.d(TAG, "Firebase goes online - attempt to update location");
         dbReference.keepSynced(false);
-//        firebase.keepSynced(false);
-//        firebase.goOnline();
 
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
         Map<String, Object> locationUpdateMap = new HashMap<>();
 
         locationUpdateMap.put(String.valueOf(time), newLocation.createMap());
-        dbReference.child(child).updateChildren(locationUpdateMap);
+        dbReference.child(child).child("loc").updateChildren(locationUpdateMap);
 
-        dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel()+0.01);
+        dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel() + 0.01);
         dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
         dbReference.child(child).child("longitude").setValue(newLocation.getLongitude());
         dbReference.child(child).child("timestamp").setValue(time);
+        dbReference.child(child).child("cellQuality").setValue(cellQuality);
         dbReference.child(child).child("id").setValue(2);
 
-//        firebase.child(child).child(String.valueOf(time)).setValue(new LocationTxObject(lastLocation.getLatitude(),
-//                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
-//        firebase.child(child).setValue(new LocationTxObject(lastLocation.getLatitude(),
-//                lastLocation.getLongitude(), time, batteryLevel, cellQuality), this);
+        deleteObsoleteLocationUpdate();
+
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();
             lastBatLevel = true;
@@ -218,6 +222,58 @@ public class LocationService extends Service implements LocationListener, Google
         return ((float) level / (float) scale) * 100.0f;
     }
 
+
+    private void deleteObsoleteLocationUpdate() {
+        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                {
+                    boolean shouldExit = false;
+                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+
+                        if (snapshot.getKey().equals(child)) {
+                            // Processing received data
+                            if (snapshot.hasChildren()) {
+
+                                Map<String, Object> toDelete = new HashMap<>();
+                                Long idLong = ((Long) snapshot.child("id").getValue());
+
+                                if (idLong != null && idLong == 2 && snapshot.child("loc").hasChildren()) {
+                                    int ONE_DAY = 1 * 24 * 60 * 60 * 1000;
+                                    long oneDayTimeInterval = System.currentTimeMillis() - ONE_DAY;
+                                    Iterator<DataSnapshot> iterator = snapshot.child("loc").getChildren().iterator();
+                                    while (iterator.hasNext()) {
+                                        DataSnapshot record = iterator.next();
+
+                                        long timestamp = Long.parseLong(record.getKey());
+                                        if (timestamp < oneDayTimeInterval) {
+                                            toDelete.put(record.getKey(), null);
+                                        } else {
+                                            shouldExit = true;
+                                            break;
+                                        }
+
+                                    }
+                                    if (toDelete.size() > 0) {
+                                        dbReference.child(child).child("loc").updateChildren(toDelete);
+                                    }
+                                }
+                            }
+                        }
+                        if(shouldExit) {
+                            break;
+                        }
+                    }
+                }
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // no worries will try again later.
+            }
+        });
+    }
+
+
 //    @Override
 //    public void onComplete(FirebaseError firebaseError, Firebase firebase) {
 //        Log.d(TAG, "TrackR finished server upload");
@@ -234,7 +290,7 @@ public class LocationService extends Service implements LocationListener, Google
 
     private int getCellSignalQuality(Context context) {
         int cellQuality = -1;
-        if(Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1){
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             return cellQuality;
         }
 
@@ -247,16 +303,16 @@ public class LocationService extends Service implements LocationListener, Google
             return cellQuality;
         }
         List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
-        if(cellInfoList == null){
+        if (cellInfoList == null) {
             return cellQuality;
         }
         for (CellInfo cell : cellInfoList) {
-            if(cell.isRegistered()){
+            if (cell.isRegistered()) {
                 if (cell instanceof CellInfoLte) {
                     cellQuality = ((CellInfoLte) cell).getCellSignalStrength().getLevel();
                 } else if (cell instanceof CellInfoWcdma) {
                     cellQuality = ((CellInfoWcdma) cell).getCellSignalStrength().getLevel();
-                } else if(cell instanceof CellInfoGsm) {
+                } else if (cell instanceof CellInfoGsm) {
                     cellQuality = ((CellInfoGsm) cell).getCellSignalStrength().getLevel();
                 } else if (cell instanceof CellInfoCdma) {
                     cellQuality = ((CellInfoCdma) cell).getCellSignalStrength().getLevel();

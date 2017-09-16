@@ -83,9 +83,9 @@ public class IconGenerator {
 //
 //        return makeIcon();
 //    }
-    public Bitmap makeIcon(int img) {
+    public Bitmap makeIcon(int imgId) {
         if (profileImage != null) {
-            profileImage.setImageDrawable(mContext.getResources().getDrawable(img));
+            profileImage.setImageDrawable(mContext.getResources().getDrawable(imgId));
         }
 
         return makeIcon();

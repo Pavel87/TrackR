@@ -18,6 +18,8 @@ import com.google.android.gms.common.ConnectionResult;
 public final class HelpActivity extends AppCompatActivity {
 
 
+    private final int HEADERS_COUNT = 9;
+
     private HelpExpandableListAdapter listAdapter;
     private ExpandableListView listView;
     private int expandedGroupId = -1;
@@ -27,7 +29,7 @@ public final class HelpActivity extends AppCompatActivity {
     private boolean isGooglePlayVersionHigher = false;
     private boolean isLocationingEnabled = false;
     private int[] googleVersion = new int[]{-1, -1};
-    private static final int[] GOOGLE_CLIENT_VERSION = new int[]{15, 6};
+    private static final int[] GOOGLE_CLIENT_VERSION = new int[]{11, 0};
 
 
     @Override
@@ -77,12 +79,12 @@ public final class HelpActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         if (isFunctionalityLimited()) {
-            if (listAdapter.getGroupCount() < 8) {
+            if (listAdapter.getGroupCount() < HEADERS_COUNT) {
                 listAdapter.addTroubleshootingRow();
             }
             listAdapter.updateErrors(HelpActivity.this, isPermissionEnabled, isGooglePlayAvailable,
                     isGooglePlayVersionHigher, isLocationingEnabled, googleVersion);
-        } else if (listAdapter.getGroupCount() == 8) {
+        } else if (listAdapter.getGroupCount() == HEADERS_COUNT) {
             listAdapter.removeTroubleshootingRow();
         }
     }

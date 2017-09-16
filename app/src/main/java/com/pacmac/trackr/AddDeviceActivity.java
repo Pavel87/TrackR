@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -23,6 +24,8 @@ public class AddDeviceActivity extends AppCompatActivity {
     private Button saveBtn;
     private ImageView profileImg;
 
+    private TypedArray stockImages;
+
     private int position;
     private String alias;
     private String id;
@@ -39,6 +42,7 @@ public class AddDeviceActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
+        stockImages = getResources().obtainTypedArray(R.array.stockImages);
 
         aliasTxt = (EditText) findViewById(R.id.devNameInput);
         trackIdTxt = (EditText) findViewById(R.id.devIdInput);
@@ -47,8 +51,10 @@ public class AddDeviceActivity extends AppCompatActivity {
 
         type = getIntent().getIntExtra(Constants.EDIT_USER_TYPE, 0);
         position = getIntent().getIntExtra(Constants.EDIT_USER_POSITION, -1);
-        img = getIntent().getIntExtra(Constants.EDIT_USER_IMG, R.drawable.user0);
-        profileImg.setImageDrawable(getApplicationContext().getResources().getDrawable(img));
+        img = getIntent().getIntExtra(Constants.EDIT_USER_IMG, 0);
+
+        profileImg.setImageDrawable(getApplicationContext().getResources().getDrawable(stockImages
+                .getResourceId(img, 0)));
 
         if (position != -1) {
             alias = getIntent().getStringExtra(Constants.EDIT_USER_ALIAS);
@@ -135,8 +141,11 @@ public class AddDeviceActivity extends AppCompatActivity {
         if (requestCode == Constants.EDIT_IMAGE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
                 imgChanged = true;
-                img = data.getIntExtra(Constants.EDIT_USER_IMG, R.drawable.user1);
-                profileImg.setImageDrawable(getApplicationContext().getResources().getDrawable(img));
+                img = data.getIntExtra(Constants.EDIT_USER_IMG, 0);
+                if(img != -1) {
+                    profileImg.setImageDrawable(getApplicationContext().getResources().getDrawable(stockImages
+                            .getResourceId(img, 0)));
+                }
             }
         }
     }

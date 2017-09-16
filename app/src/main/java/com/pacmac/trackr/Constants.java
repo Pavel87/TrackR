@@ -10,11 +10,7 @@ public class Constants {
     public static final String TAG = "TrackR";
     public static final String RATING_POPUP_COUNTER = "rating_popup_counter";
     public static final String RATING_POPUP_ENABLED = "rating_popup_enabled";
-    public static final String KEY_LATITUDE = "latitude_key";
-    public static final String KEY_LONGITUDE = "longitude_key";
     public static final String KEY_ITEM_ORDER = "rec_id_order";
-    public static final String KEY_POSIION = "position_of_selected_device";
-    public static final String KEY_ALIAS_ARRAY = "alias_array_for_map";
     public static final String PREF_TRACKR = "-tracker_PREF";
     public static final String NEW_UPDATE = "TrackR_Update";
     public static final String MY_PHONE_IN_LIST = "trackr_show_this_phone_in_list";
@@ -24,10 +20,7 @@ public class Constants {
     public static final String TRACKING_ID_RAW = "trackr_gps_ID_raw";
     public static final String RECEIVING_ID_RAW = "receiver_gps_ID_raw";
     public static final String RECEIVING_ID = "receiver_gps_ID";
-    public static final String RECEIVING_ID_CHANGE = "receiver_gps_ID_changed";
     public static final String PACKAGE_NAME = "com.pacmac.trackr";
-    public static final String RECEIVER = PACKAGE_NAME + ".RECEIVER";
-    public static final String RESULT_DATA_KEY = PACKAGE_NAME + ".RESULT_DATA_KEY";
     public static final String FIRST_RUN = "firstRUN";
     public static final String PADLOCK_ACTIVE = "padlock_active";
     public static final String PADLOCK_PASS = "padlock_pass";
@@ -66,7 +59,6 @@ public class Constants {
     public static final String MY_PHONE_ALIAS = "TRACKR_MY_PHONE_ALIAS";
     public static final String MY_PHONE_IMG = "TRACKR_MY_PHONE_IMG";
 
-    public static final String PERMISSION_ENABLED = "TRACKR_PERMISSION_ENABLED";
     public static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
 

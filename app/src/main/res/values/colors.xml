@@ -1,8 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
+    <!--<color name="colorPrimary">#3F51B5</color>-->
     <color name="colorPrimaryDark">#121212</color>
-    <color name="colorAccent">#3F51B5</color>
+    <!--<color name="colorAccent">#3F51B5</color>-->
+
+    <color name="colorPrimary">#29B6F6</color>
+    <!--<color name="colorPrimaryDark">#C8C8A9</color>-->
+    <color name="colorAccent">@color/fab</color>
+
+    <color name="colorBottomBar">#FFCA28</color>
+    <color name="fab_transparent">#A6EC407A</color>
+    <color name="fab">#6A1B9A</color>
+
     <color name="transparent1">#32121212</color>
     <color name="textLight">#C3C3C3</color>
     <color name="textLight2">#707070</color>
@@ -10,4 +19,6 @@
     <color name="toast_background">#CF244FA7</color>
     <color name="text_nightMode">@color/textLight</color>
     <color name="marker_stroke">#DDDDDD</color>
+    <color name="text_group_title">#070815</color>
+
 </resources>

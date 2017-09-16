@@ -8,11 +8,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.PersistableBundle;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
@@ -31,6 +36,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -42,6 +48,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.pacmac.trackr.mapmarker.IconGenerator;
 
@@ -51,7 +58,11 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Created by pacmac on 2017-08-05.
@@ -71,6 +82,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private CollapsingToolbarLayout collapsingToolbarLayout;
     private BottomNavigationView bottomNavigation;
     private LinearLayout noDeviceView;
+    private FloatingActionButton fab;
 
     private NetworkStateChangedReceiver connReceiver = null;
     private boolean isConnected = false;
@@ -86,6 +98,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
     private boolean skipfbCallOnReconfiguration = false;
     private boolean isAddressResolverRegistred = false;
+
+    private int REFRESH_DELAY = 60*1000;
+    private int REFRESH_DELAY_SHORT = 20*1000;
+    private boolean isRefreshListHandlerRegistred = false;
+
+    private TypedArray stockImages;
 
     /**
      * Adress resolver Receiver
@@ -118,6 +136,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         setSupportActionBar(toolbar);
         collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
+
+        stockImages = getResources().obtainTypedArray(R.array.stockImages);
 
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
                 MODE_PRIVATE);
@@ -192,7 +212,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         getSupportFragmentManager().beginTransaction().add(R.id.map_container, mapFragment).commit();
         mapFragment.getMapAsync(this);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -217,6 +237,27 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             noDeviceView.setVisibility(View.VISIBLE);
             appBarCollapsable.setExpanded(false);
         }
+
+
+
+        appBarCollapsable.addOnOffsetChangedListener(new AppBarStateChangeListener() {
+            @Override
+            public void onStateChanged(AppBarLayout appBarLayout, State state, int alpha) {
+                if(state == State.EXPANDED) {
+                    fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.fab)));
+                } else if(state == State.COLLAPSED) {
+                    fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
+                } else {
+
+                    String alphaString = Integer.toHexString(alpha);
+                    if(alphaString.length() == 1){
+                        alphaString = "0" + alphaString;
+                    }
+                    String colorString = "#" + alphaString + "6A1B9A";
+                    fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorString)));
+                }
+            }
+        });
     }
 
 
@@ -234,8 +275,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             Utility.startTrackingService(getApplicationContext(), preferences);
         }
         showUsersLocationOnMap();
-        checkIfshouldTryRetrieveDevicePosition();
-
+        if(userRecords.size()>0 && checkIfshouldTryRetrieveDevicePosition()) {
+            startRefreshListTimer(REFRESH_DELAY_SHORT);
+        } else {
+            startRefreshListTimer(REFRESH_DELAY);
+        }
     }
 
     @Override
@@ -247,6 +291,9 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         // save loc collection before exit
         Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
                 Utility.createJsonArrayStringFromUserRecords(userRecords));
+        if(isRefreshListHandlerRegistred) {
+            stopRefreshListTimer();
+        }
     }
 
     @Override
@@ -270,19 +317,10 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
-        mMap.getUiSettings().setAllGesturesEnabled(false);
+        mMap.getUiSettings().setZoomControlsEnabled(false);
+        mMap.getUiSettings().setScrollGesturesEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
 
-//        mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
-//            @Override
-//            public boolean onMarkerClick(Marker marker) {
-//                CircleOptions cOptions = new CircleOptions();
-//                cOptions.center(marker.getPosition()).fillColor(getResources().getColor(R.color.marker_area))
-//                        .strokeColor(getResources().getColor(R.color.map_radius)).radius(15).strokeWidth(0.6f).visible(true);
-//                mMap.addCircle(cOptions);
-//                return false;
-//            }
-//        });
 
         showUsersLocationOnMap();
 
@@ -340,7 +378,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
                 String alias = resultIntent.getStringExtra(Constants.EDIT_USER_ALIAS);
                 String id = resultIntent.getStringExtra(Constants.EDIT_USER_ID);
-                int profileImageId = resultIntent.getIntExtra(Constants.EDIT_USER_IMG, R.drawable.user0);
+                int profileImageId = resultIntent.getIntExtra(Constants.EDIT_USER_IMG, 0);
 //                  int img = resultIntent.getIntExtra(Constants.EDIT_USER_IMG, -1);
                 // if position is = -1 then it is very new record
                 if (position == -1) {
@@ -409,13 +447,23 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 startActivity(i);
                 break;
             case R.id.navigation_share:
-                Utility.showToast(getApplicationContext(), "Share function not yet implemented.");
-                item.setEnabled(true);
+                onInviteClicked();
+//                Utility.showToast(getApplicationContext(), "Share function not yet implemented.");
+                //item.setEnabled(true);
                 break;
             case R.id.navigation_settings:
                 Utility.openSettings(getApplicationContext(), MainActivityV2.this);
                 break;
         }
+    }
+
+    private void onInviteClicked() {
+        Intent intent = new AppInviteInvitation.IntentBuilder("Android TrackeR")
+                .setMessage("Try this NEW Android TrackeR app!")
+                .setDeepLink(Uri.parse("https://play.google.com/store/apps/details?id=com.pacmac.trackr"))
+                .setCallToActionText("Install App")
+                .build();
+        startActivityForResult(intent, 8213);
     }
 
     private void checkConnectivity() {
@@ -576,26 +624,40 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                     for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
 
                         for (int i = 0; i < userRecords.size(); i++) {
-
                             if (snapshot.getKey().equals(userRecords.get(i).getSafeId())) {
                                 // Processing received data
                                 if (snapshot.hasChildren()) {
-                                    Long idLong = (( 
-                                    if(idLong < 2) {
-                                        if (idLong != null) {
-//                                        batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
-                                            batteryLevel = (double) snapshot.child("batteryLevel").getValue();
-                                        }
-                                        latitude = (double) snapshot.child("latitude").getValue();
-                                        longitude = (double) snapshot.child("longitude").getValue();
-                                        timeStamp = (long) snapshot.child("timestamp").getValue();
 
-                                        // cellQuality will be null on older app versions
-                                        Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
-                                        if (cellQualityLong != null) {
-                                            cellQuality = cellQualityLong.intValue();
+                                    Map<String, Object> toDelete = new HashMap<>();
+                                    List<LocationHistoryRecord> historyRecords = new ArrayList<>();
+
+                                    Long idLong = ((Long) snapshot.child("id").getValue());
+                                    double batteryLevel = -1;
+                                    if (idLong != null) {
+                                        // batteryLevelShould be sent if id is not nutll
+                                        batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
+                                    }
+                                    double latitude = (double) snapshot.child("latitude").getValue();
+                                    double longitude = (double) snapshot.child("longitude").getValue();
+                                    long timeStamp = (long) snapshot.child("timestamp").getValue();
+
+                                    // cellQuality will be null on older app versions
+                                    Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
+                                    int cellQuality = 0;
+                                    if (cellQualityLong != null) {
+                                        cellQuality = cellQualityLong.intValue();
+                                    }
+
+
+                                    if (idLong == 2 && snapshot.child("loc").hasChildren()) {
+                                        Iterator<DataSnapshot> iterator = snapshot.child("loc").getChildren().iterator();
+                                        while (iterator.hasNext()) {
+                                            DataSnapshot record = iterator.next();
+                                            long timestamp = Long.parseLong(record.getKey());
+                                            historyRecords.add(new LocationHistoryRecord(timestamp, (Map<String, Object>) record.getValue()));
                                         }
                                     }
+
                                     Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + userRecords.get(i).getAlias());
 
                                     // check if timestamps are same and if yes then don't
@@ -609,13 +671,17 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                         }
                                         continue;
                                     }
-
                                     // Store location and request addres translation
-                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality);
+                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality, historyRecords);
                                     mAdapter.notifyItemChanged(i);
                                     getAddress(i);
                                     Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
                                             Utility.createJsonArrayStringFromUserRecords(userRecords));
+
+                                    // delete historical location updates
+                                    if (toDelete.size() > 0) {
+                                        dbReference.child(userRecords.get(i).getSafeId()).child("loc").updateChildren(toDelete);
+                                    }
                                 }
 
                             }
@@ -707,7 +773,10 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 IconGenerator iconGenerator = new IconGenerator(getApplicationContext());
                 iconGenerator.setStyle(i + 3);
 //                iconGenerator.setBackground();
-                Bitmap bitmapMarker = iconGenerator.makeIcon(userRecords.get(i).getProfileImageId());
+
+//                Bitmap bitmapMarker = iconGenerator.makeIcon(userRecords.get(i).getProfileImageId());
+                Bitmap bitmapMarker = iconGenerator.makeIcon(stockImages
+                        .getResourceId(userRecords.get(i).getProfileImageId(), 0));
 
 
                 MarkerOptions markerOptions = new MarkerOptions()
@@ -726,11 +795,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         }
         if (userRecords.get(currentTracker).getLatitude() != 0 || userRecords.get(currentTracker).getLongitude() != 0) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userRecords.get(currentTracker).getLatitude(),
-                    userRecords.get(currentTracker).getLongitude()), 16f));
-        } else {
-            Utility.showToast(getApplicationContext(), "Ups nothing to show for " + userRecords.get(currentTracker).getAlias());
+                    userRecords.get(currentTracker).getLongitude()), 14f));
         }
-
+//        else {
+//            Utility.showToast(getApplicationContext(), "Ups nothing to show for " + userRecords.get(currentTracker).getAlias());
+//        }
     }
 
 
@@ -772,6 +841,34 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         bottomNavigation.getMenu().getItem(0).setEnabled(true);
         bottomNavigation.getMenu().getItem(1).setEnabled(true);
         bottomNavigation.getMenu().getItem(2).setEnabled(true);
+    }
+
+
+    /**
+     * Refreshing the List View to make sure the time in view is updated and will attempt to poll new data as well
+     */
+    private Handler refreshListHandler = new Handler();
+    private Runnable refreshListRunnable = new Runnable() {
+        @Override
+        public void run() {
+            Log.d(TAG, "refreshing LIST");
+            mAdapter.notifyDataSetChanged();
+
+            int delay = REFRESH_DELAY;
+            if(checkIfshouldTryRetrieveDevicePosition()) {
+                delay = REFRESH_DELAY_SHORT;
+            }
+            startRefreshListTimer(delay);
+        }
+    };
+
+    private void startRefreshListTimer(int delay) {
+        isRefreshListHandlerRegistred = true;
+        refreshListHandler.postDelayed(refreshListRunnable, delay);
+    }
+    private void stopRefreshListTimer() {
+        isRefreshListHandlerRegistred = false;
+        refreshListHandler.removeCallbacks(refreshListRunnable);
     }
 
 }

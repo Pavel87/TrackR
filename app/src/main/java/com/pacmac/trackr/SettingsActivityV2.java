@@ -273,7 +273,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                         editor.putString(Constants.TRACKING_ID_RAW, id);  // id to show in UI
                         editor.commit();
                         if (ifTrackingOnRestart()) {
-                            updateMyPhoneInUserList(trackId);
+                            updateMyPhoneInUserList(id);
                         }
                         // set new id into global variable
                         trackId = id;
@@ -366,11 +366,11 @@ public class SettingsActivityV2 extends AppCompatActivity {
         }
     }
 
-    private void updateMyPhoneInUserList(String oldTrackId) {
+    private void updateMyPhoneInUserList(String newID) {
         if (userRecords.size() > 0) {
             for (int i = 0; i < userRecords.size(); i++) {
-                if (userRecords.get(i).getRecId().equals(oldTrackId)) {
-                    userRecords.get(i).setRecId(trackId);
+                if (userRecords.get(i).getRecId().equals(trackId)) {
+                    userRecords.get(i).setRecId(newID);
                     userRecords.get(i).setSafeId(Utility.checkAndReplaceForbiddenChars(trackId));
                     Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
                             Utility.createJsonArrayStringFromUserRecords(userRecords));

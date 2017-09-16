@@ -15,8 +15,8 @@ android {
         applicationId "com.pacmac.trackr"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 25
-        versionName "2.99"
+        versionCode 30
+        versionName "3.0.0"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -38,20 +38,17 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    // TODO I should update to new Firebase version soon
     //    compile 'com.google.firebase:firebase-database:9.6.1'
     compile files('libs/Android_Tutela_SDK.jar')
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
-    compile 'com.google.android.gms:play-services-maps:11.2.0'
-    compile 'com.google.android.gms:play-services-location:11.2.0'
-    compile "com.google.firebase:firebase-database:11.2.0"
-//    compile 'com.firebase:firebase-client-android:2.5.2'
+    compile 'com.google.android.gms:play-services-maps:11.0.0'
+    compile 'com.google.android.gms:play-services-location:11.0.0'
+    compile "com.google.firebase:firebase-database:11.0.0"
+    compile 'com.google.firebase:firebase-invites:11.0.0'
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:support-vector-drawable:26.+'
     testCompile 'junit:junit:4.12'
 }
 
 apply plugin: 'com.google.gms.google-services'
-
-//apply plugin: 'com.google.gms.google-services'
