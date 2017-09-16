@@ -18,6 +18,7 @@ import android.widget.FrameLayout;
 public class IntroActivity extends AppCompatActivity {
 
     private boolean isPermissionEnabled = true;
+    private boolean isGPSUpToDate = true;
     private boolean isAppScheduledForStart = false;
 
     private FrameLayout background;
@@ -31,14 +32,24 @@ public class IntroActivity extends AppCompatActivity {
         background.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (!isPermissionEnabled) {
-                    checkPermission();
+                if(!isGPSUpToDate) {
+                    if(Utility.checkPlayServices(IntroActivity.this)) {
+                        isGPSUpToDate = true;
+                        checkPermission();
+                    }
+                } else {
+                    if (!isPermissionEnabled) {
+                        checkPermission();
+                    }
                 }
             }
         });
 
         if(Utility.checkPlayServices(this)) {
+            isGPSUpToDate = true;
             checkPermission();
+        } else {
+            isGPSUpToDate = false;
         }
     }
 
@@ -56,7 +67,7 @@ public class IntroActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
 //        checkPermission();
-        if (isPermissionEnabled) {
+        if (isPermissionEnabled && isGPSUpToDate) {
             startMainActivityWithOffset(2);
         }
     }

@@ -263,7 +263,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     @Override
     protected void onResume() {
         super.onResume();
-        if (userRecords.size() > 0) {
+        if (userRecords.size() > 0 && Utility.checkPlayServices(this)) {
             appBarCollapsable.setExpanded(true);
         }
         enableButtonsInNavBar();
