@@ -19,9 +19,11 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.AppBarLayout;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.CollapsingToolbarLayout;
+import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
@@ -48,7 +50,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 import com.pacmac.trackr.mapmarker.IconGenerator;
 
@@ -58,9 +59,7 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -98,7 +97,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
     private boolean skipfbCallOnReconfiguration = false;
     private boolean isAddressResolverRegistred = false;
+    /**
+     * show title must be true during initialization so it can be handled properly during collapse
+     */
+    private boolean showTitle = true;
 
+    private int refreshCounter = 0;
     private int REFRESH_DELAY = 60 * 1000;
     private int REFRESH_DELAY_SHORT = 20 * 1000;
     private boolean isRefreshListHandlerRegistred = false;
@@ -132,9 +136,9 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_v2);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        collapsingToolbarLayout = (CollapsingToolbarLayout) findViewById(R.id.collapsing_toolbar);
+        collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
         collapsingToolbarLayout.setExpandedTitleColor(getResources().getColor(android.R.color.transparent));
 
         stockImages = getResources().obtainTypedArray(R.array.stockImages);
@@ -172,8 +176,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         connReceiver = new NetworkStateChangedReceiver();
         connReceiver.setConnectionListener(this);
 
-        noDeviceView = (LinearLayout) findViewById(R.id.emptyListView);
-        mRecyclerView = (RecyclerView) findViewById(R.id.trackList);
+        noDeviceView = findViewById(R.id.emptyListView);
+        mRecyclerView = findViewById(R.id.trackList);
         mRecyclerView.setHasFixedSize(true);
 
         // use a linear layout manager
@@ -196,7 +200,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         ((TrackListMainAdapter) mAdapter).setItemSelectedListener(this);
 
 
-        appBarCollapsable = (AppBarLayout) findViewById(R.id.appBarCollapsable);
+        appBarCollapsable = findViewById(R.id.appBarCollapsable);
 
         checkConnectivity();
         Utility.startTrackingService(getApplicationContext(), preferences);
@@ -205,14 +209,10 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = SupportMapFragment.newInstance();
-
-//        FragmentManager fragmentManager = getFragmentManager();
-//        fragmentManager.beginTransaction().add(R.id.map_container, new MapFragment(), "TrackRMapFragment").commit();
-
         getSupportFragmentManager().beginTransaction().add(R.id.map_container, mapFragment).commit();
         mapFragment.getMapAsync(this);
 
-        fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -220,7 +220,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             }
         });
 
-        bottomNavigation = (BottomNavigationView) findViewById(R.id.navigation);
+        bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
@@ -243,26 +243,55 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             @Override
             public void onStateChanged(AppBarLayout appBarLayout, State state, int alpha) {
                 if (state == State.EXPANDED) {
+                    //hide title
+                    showTitle = false;
+                    collapsingToolbarLayout.setTitle("");
                     fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.fab)));
                 } else if (state == State.COLLAPSED) {
+                    //show title
+                    showTitle = true;
+                    collapsingToolbarLayout.setTitle(getString(R.string.app_name));
                     fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
                 } else {
-
+                    //hide title
+                    if(showTitle) {
+                        collapsingToolbarLayout.setTitle("");
+                        showTitle = false;
+                    }
                     String alphaString = Integer.toHexString(alpha);
                     if (alphaString.length() == 1) {
                         alphaString = "0" + alphaString;
                     }
                     String colorString = "#" + alphaString + "6A1B9A";
-                    fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorString)));
+                    try {
+                        fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorString)));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }
         });
+
+
+        // Disable "Drag" for AppBarLayout (i.e. User can't scroll appBarLayout by directly touching appBarLayout - User can only scroll appBarLayout by only using scrollContent)
+        if (appBarCollapsable.getLayoutParams() != null) {
+            CoordinatorLayout.LayoutParams layoutParams = (CoordinatorLayout.LayoutParams) appBarCollapsable.getLayoutParams();
+            AppBarLayout.Behavior appBarLayoutBehaviour = new AppBarLayout.Behavior();
+            appBarLayoutBehaviour.setDragCallback(new AppBarLayout.Behavior.DragCallback() {
+                @Override
+                public boolean canDrag(@NonNull AppBarLayout appBarLayout) {
+                    return false;
+                }
+            });
+            layoutParams.setBehavior(appBarLayoutBehaviour);
+        }
     }
 
 
     @Override
     protected void onResume() {
         super.onResume();
+        refreshCounter = 0;
         if (userRecords.size() > 0 && Utility.checkPlayServices(this)) {
             appBarCollapsable.setExpanded(true);
         }
@@ -316,13 +345,9 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.getUiSettings().setMyLocationButtonEnabled(false);
         mMap.getUiSettings().setCompassEnabled(false);
-        mMap.getUiSettings().setZoomControlsEnabled(false);
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
-
-
         showUsersLocationOnMap();
-
     }
 
 
@@ -522,8 +547,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 //TODO may want to clear other preferences as well as those are deprecated
                 editor.commit();
 
-                LocationRecord record = userRecords.get(0);
-                if (record == null || !record.getRecId().equals(recId)) {
+                if (userRecords.size() == 0 || userRecords.get(0) == null || !userRecords.get(0).getRecId().equals(recId)) {
                     userRecords.add(new LocationRecord(0, recId, safeId, "TrackR1", -1));
                     // Save upgraded REC IDs into file
                     Utility.saveJsonStringToFile(getFilesDir() +
@@ -545,11 +569,13 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 if (settingsObject != null) {
                     if (userRecords.size() == 0) {
 
-                        if(settingsObject.getId().equals(trackIDRaw) && trackingState) {
+                        if (settingsObject.getId().equals(trackIDRaw) && trackingState) {
+                            Log.d(TAG, "Adding user1: " + settingsObject.getAlias());
                             userRecords.add(new LocationRecord(-10, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
                             isMyPhoneFound = true;
                             continue;
                         }
+                        Log.d(TAG, "Adding user2: " + settingsObject.getAlias());
                         userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(),
                                 settingsObject.getAlias(), -1));
                     } else {
@@ -568,11 +594,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                 }
                             }
                         }
+                        Log.d(TAG, "Adding user3: " + settingsObject.getAlias());
                         userRecords.add(new LocationRecord(i, settingsObject.getId(), settingsObject.getSafeId(), settingsObject.getAlias(), -1));
                     }
                 }
             }
-            if(!isMyPhoneFound) {
+            if (!isMyPhoneFound) {
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putBoolean(Constants.MY_PHONE_IN_LIST, false);
                 editor.commit();
@@ -643,12 +670,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                 if (snapshot.hasChildren()) {
 
                                     Map<String, Object> toDelete = new HashMap<>();
-                                    List<LocationHistoryRecord> historyRecords = new ArrayList<>();
 
                                     Long idLong = ((Long) snapshot.child("id").getValue());
                                     double batteryLevel = -1;
                                     if (idLong != null) {
-                                        // batteryLevelShould be sent if id is not nutll
+                                        // batteryLevelShould be sent if id is not null
                                         batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
                                     }
                                     double latitude = (double) snapshot.child("latitude").getValue();
@@ -662,15 +688,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                         cellQuality = cellQualityLong.intValue();
                                     }
 
-
-                                    if (idLong == 2 && snapshot.child("loc").hasChildren()) {
-                                        Iterator<DataSnapshot> iterator = snapshot.child("loc").getChildren().iterator();
-                                        while (iterator.hasNext()) {
-                                            DataSnapshot record = iterator.next();
-                                            long timestamp = Long.parseLong(record.getKey());
-                                            historyRecords.add(new LocationHistoryRecord(timestamp, (Map<String, Object>) record.getValue()));
-                                        }
-                                    }
 
                                     Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + userRecords.get(i).getAlias());
 
@@ -686,16 +703,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                                         continue;
                                     }
                                     // Store location and request addres translation
-                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality, historyRecords);
+                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality);
                                     mAdapter.notifyItemChanged(i);
                                     getAddress(i);
                                     Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
                                             Utility.createJsonArrayStringFromUserRecords(userRecords));
 
-                                    // delete historical location updates
-                                    if (toDelete.size() > 0) {
-                                        dbReference.child(userRecords.get(i).getSafeId()).child("loc").updateChildren(toDelete);
-                                    }
                                 }
 
                             }
@@ -721,8 +734,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "3.0.0").equals(appVersion)) {
-            //TODO uncomment this
+        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.0").equals(appVersion)) {
             Utility.createAlertDialog(MainActivityV2.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
@@ -788,7 +800,10 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 iconGenerator.setStyle(i + 3);
 //                iconGenerator.setBackground();
 
-//                Bitmap bitmapMarker = iconGenerator.makeIcon(userRecords.get(i).getProfileImageId());
+                if(stockImages.length() > userRecords.get(i).getProfileImageId()) {
+                    // if image list was modified then set it to 0
+                    userRecords.get(i).setProfileImageId(0);
+                }
                 Bitmap bitmapMarker = iconGenerator.makeIcon(stockImages
                         .getResourceId(userRecords.get(i).getProfileImageId(), 0));
 
@@ -869,9 +884,14 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             mAdapter.notifyDataSetChanged();
 
             int delay = REFRESH_DELAY;
-            if (checkIfshouldTryRetrieveDevicePosition()) {
-                delay = REFRESH_DELAY_SHORT;
+
+            // Only reach firebase 2 times after resume
+            if (refreshCounter < 2) {
+                if (checkIfshouldTryRetrieveDevicePosition()) {
+                    delay = REFRESH_DELAY_SHORT;
+                }
             }
+            refreshCounter++;
             startRefreshListTimer(delay);
         }
     };

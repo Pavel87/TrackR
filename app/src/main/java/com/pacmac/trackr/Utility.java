@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatCheckBox;
@@ -45,7 +44,6 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -135,7 +133,6 @@ public class Utility {
         final DatabaseReference dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
         dbReference.goOnline();
         Log.d(Constants.TAG, "Firebase goes online");
-//        firebase.keepSynced(true);
         dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -218,14 +215,14 @@ public class Utility {
         StringBuilder sb = new StringBuilder();
 
         sb.append(context.getString(R.string.updateMsg1));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg2));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg2));
         sb.append("\n");
         sb.append(context.getString(R.string.updateMsg3));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg4));
-        sb.append("\n");
-        sb.append(context.getString(R.string.updateMsg5));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg4));
+//        sb.append("\n");
+//        sb.append(context.getString(R.string.updateMsg5));
 //        sb.append("\n");
 //        sb.append(context.getString(R.string.updateMsg6));
 //        sb.append("\n");

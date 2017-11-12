@@ -1,8 +1,5 @@
 package com.pacmac.trackr;
 
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by pacmac on 26/04/16.
  */
@@ -19,7 +16,6 @@ public class LocationRecord {
     private String recId = "";
     private String safeId = "ID-safe";
     private int cellQuality = -1;
-    private List<LocationHistoryRecord> historyRecords = new ArrayList<>();
 
     public LocationRecord(int id, String recId, String safeId, String alias, int profileImageId) {
         this.id = id;
@@ -40,43 +36,14 @@ public class LocationRecord {
         batteryLevel = -1;
     }
 
-    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality, List<LocationHistoryRecord> historyRecords) {
+    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
         this.batteryLevel = batteryLevel;
         this.cellQuality = cellQuality;
-        this.historyRecords = historyRecords;
     }
 
-//    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, String address) {
-//        this.latitude = latitude;
-//        this.longitude = longitude;
-//        this.timestamp = timestamp;
-//        this.batteryLevel = batteryLevel;
-//        this.address = address;
-//    }
-
-
-    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, String alias, int cellQuality) {
-        this.id = id;
-        this.latitude = latitude;
-        this.longitude = longitude;
-        this.timestamp = timestamp;
-        this.batteryLevel = batteryLevel;
-        this.alias = alias;
-        this.cellQuality = cellQuality;
-    }
-
-//    public LocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, String address, String alias) {
-//        this.id = id;
-//        this.latitude = latitude;
-//        this.longitude = longitude;
-//        this.timestamp = timestamp;
-//        this.batteryLevel = batteryLevel;
-//        this.address = address;
-//        this.alias = alias;
-//    }
 
     public LocationRecord(int id, double latitude, double longitude, long timestamp,
                           double batteryLevel, String address, String alias,
@@ -180,10 +147,6 @@ public class LocationRecord {
 
     public void setCellQuality(int cellQuality) {
         this.cellQuality = cellQuality;
-    }
-
-    public List<LocationHistoryRecord> getHistoryRecords() {
-        return historyRecords;
     }
 
     @Override

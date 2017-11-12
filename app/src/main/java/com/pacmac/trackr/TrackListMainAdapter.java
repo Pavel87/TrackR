@@ -106,6 +106,12 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
             }
         });
         TypedArray stockImages = context.getResources().obtainTypedArray(R.array.stockImages);
+
+        // Set image to default if some error happened
+        if(stockImages.length() > mDataset.get(position).getProfileImageId()) {
+            // if image list was modified then set it to 0
+            mDataset.get(position).setProfileImageId(0);
+        }
         ((ViewHolderForRow) holder).profileImage.setImageDrawable(context.getResources().getDrawable(stockImages
                 .getResourceId(mDataset.get(position).getProfileImageId(), 0)));
     }

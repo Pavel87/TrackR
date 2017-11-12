@@ -28,7 +28,7 @@ public class IntroActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_intro);
 
-        background = (FrameLayout) findViewById(R.id.introImg);
+        background = findViewById(R.id.introImg);
         background.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -44,13 +44,6 @@ public class IntroActivity extends AppCompatActivity {
                 }
             }
         });
-
-        if (Utility.checkPlayServices(this)) {
-            isGPSUpToDate = true;
-        } else {
-            isGPSUpToDate = false;
-        }
-        checkPermission();
     }
 
     @Override
@@ -60,13 +53,23 @@ public class IntroActivity extends AppCompatActivity {
             isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(),
                     Constants.LOCATION_PERMISSION);
         }
-        startMainActivityWithOffset(1);
+        if(isGPSUpToDate) {
+            startMainActivityWithOffset(1);
+        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
 //        checkPermission();
+
+        if (Utility.checkPlayServices(this)) {
+            isGPSUpToDate = true;
+        } else {
+            isGPSUpToDate = false;
+        }
+        checkPermission();
+
         if (isPermissionEnabled && isGPSUpToDate) {
             startMainActivityWithOffset(2);
         }
@@ -92,7 +95,11 @@ public class IntroActivity extends AppCompatActivity {
 
                     Intent intent = new Intent(getApplicationContext(), MainActivityV2.class);
                     startActivity(intent);
-                    ActivityCompat.finishAffinity(IntroActivity.this);
+                    try {
+                        ActivityCompat.finishAffinity(IntroActivity.this);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             }, delay * 1000);
         }

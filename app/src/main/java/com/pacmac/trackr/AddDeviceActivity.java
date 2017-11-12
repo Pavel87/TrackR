@@ -53,6 +53,12 @@ public class AddDeviceActivity extends AppCompatActivity {
         position = getIntent().getIntExtra(Constants.EDIT_USER_POSITION, -1);
         img = getIntent().getIntExtra(Constants.EDIT_USER_IMG, 0);
 
+        // Set image to default if some error happened
+        if(stockImages.length() > img) {
+            // if image list was modified then set it to 0
+            img = 0;
+        }
+
         profileImg.setImageDrawable(getApplicationContext().getResources().getDrawable(stockImages
                 .getResourceId(img, 0)));
 

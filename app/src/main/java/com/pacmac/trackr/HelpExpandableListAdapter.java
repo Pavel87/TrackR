@@ -248,7 +248,12 @@ public final class HelpExpandableListAdapter extends BaseExpandableListAdapter {
             @Override
             public void onClick(View view) {
                 Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                context.startActivity(myIntent);
+                try {
+                    context.startActivity(myIntent);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    Utility.showToast(context, "Navigate to Device Settings and enable Location feature.");
+                }
                 dialog.dismiss();
             }
         });

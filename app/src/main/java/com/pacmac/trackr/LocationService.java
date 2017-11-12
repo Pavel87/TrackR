@@ -32,7 +32,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -83,7 +82,13 @@ public class LocationService extends Service implements LocationListener, Google
             return START_NOT_STICKY;
         }
 
-        database = FirebaseDatabase.getInstance();
+        try {
+            database = FirebaseDatabase.getInstance();
+        } catch (IllegalStateException e) {
+            e.printStackTrace();
+            stopSelf();
+            return START_NOT_STICKY;
+        }
         dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
 
         if (mGoogleApiClient == null) {
@@ -175,10 +180,10 @@ public class LocationService extends Service implements LocationListener, Google
 
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
-        Map<String, Object> locationUpdateMap = new HashMap<>();
-
-        locationUpdateMap.put(String.valueOf(time), newLocation.createMap());
-        dbReference.child(child).child("loc").updateChildren(locationUpdateMap);
+//        Map<String, Object> locationUpdateMap = new HashMap<>();
+//
+//        locationUpdateMap.put(String.valueOf(time), newLocation.createMap());
+//        dbReference.child(child).child("loc").updateChildren(locationUpdateMap);
 
         dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel() + 0.01);
         dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
@@ -187,7 +192,7 @@ public class LocationService extends Service implements LocationListener, Google
         dbReference.child(child).child("cellQuality").setValue(cellQuality);
         dbReference.child(child).child("id").setValue(2);
 
-        deleteObsoleteLocationUpdate();
+        //deleteObsoleteLocationUpdate();
 
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();
@@ -212,13 +217,19 @@ public class LocationService extends Service implements LocationListener, Google
 
     public float getBatteryLevel() {
         Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+
+        if(batteryIntent == null) {
+            return -1;
+        }
+
         int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
         // Error checking that probably isn't needed but I added just in case.
         if (level == -1 || scale == -1) {
-            return 51.0f;
+            return -1;
         }
+
         return ((float) level / (float) scale) * 100.0f;
     }
 

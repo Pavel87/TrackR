@@ -15,8 +15,8 @@ android {
         applicationId "com.pacmac.trackr"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 30
-        versionName "3.0.0"
+        versionCode 32
+        versionName "3.1.0"
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {
@@ -38,8 +38,7 @@ dependencies {
         exclude group: 'com.android.support', module: 'support-annotations'
     })
 
-    //    compile 'com.google.firebase:firebase-database:9.6.1'
-    compile files('libs/Android_Tutela_SDK.jar')
+    compile files('libs/Android_NAT_SDK.jar')
     compile 'com.android.support:appcompat-v7:26.+'
     compile 'com.android.support:design:26.+'
     compile 'com.google.android.gms:play-services-maps:11.0.0'

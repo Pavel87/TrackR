@@ -134,13 +134,13 @@ public class IconGenerator {
     /**
      * Sets the child view for the icon.
      */
-    public void setContentView(View contentView) {
-        mRotationLayout.removeAllViews();
-        mRotationLayout.addView(contentView);
-        mContentView = contentView;
-        final View view = mRotationLayout.findViewById(R.id.amu_text);
-        mTextView = view instanceof TextView ? (TextView) view : null;
-    }
+//    public void setContentView(View contentView) {
+//        mRotationLayout.removeAllViews();
+//        mRotationLayout.addView(contentView);
+//        mContentView = contentView;
+//        final View view = mRotationLayout.findViewById(R.id.amu_text);
+//        mTextView = view instanceof TextView ? (TextView) view : null;
+//    }
 
     /**
      * Rotates the contents of the icon.

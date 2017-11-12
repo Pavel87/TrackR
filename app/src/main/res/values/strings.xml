@@ -18,10 +18,10 @@
     <string name="location_message">Location Permission is required for correct application functionality.</string>
     <string name="request_perm">Request</string>
     <string name="share_header">*****************************</string>
-    <string name="new_update_title">New TrackR Update v</string>
-    <string name="updateMsg1">- NEW User Interface!</string>
-    <string name="updateMsg2">- Added Help menu.</string>
-    <string name="updateMsg3">- Improved Settings.</string>
+    <string name="new_update_title">New App Update v</string>
+    <string name="updateMsg1">- Map interaction issue fixed!</string>
+    <string name="updateMsg2">- </string>
+    <string name="updateMsg3">- Crash Fixes.</string>
     <string name="updateMsg4">- NEW Added signal strength indicator.</string>
     <string name="updateMsg5">- User/Device Icons.</string>
     <string name="rateApp">How do you like TrackR?</string>
