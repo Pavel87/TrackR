@@ -514,7 +514,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                     Utility.createJsonArrayStringFromUserRecords(userRecords));
         }
     }
-
     private void loadUserRecordsFromFile() {
         userRecords = Utility.convertJsonStringToUserRecords(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
         Log.d(TAG, "userRecords.size: " + userRecords.size());

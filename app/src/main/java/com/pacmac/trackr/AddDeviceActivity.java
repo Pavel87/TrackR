@@ -33,6 +33,7 @@ public class AddDeviceActivity extends AppCompatActivity {
     private int type;
 
     private boolean imgChanged = false;
+    private SharedPreferences preferences;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +44,9 @@ public class AddDeviceActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
         stockImages = getResources().obtainTypedArray(R.array.stockImages);
+
+        preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
+                MODE_PRIVATE);
 
         aliasTxt = (EditText) findViewById(R.id.devNameInput);
         trackIdTxt = (EditText) findViewById(R.id.devIdInput);
@@ -75,7 +79,11 @@ public class AddDeviceActivity extends AppCompatActivity {
 
         // -10 means My Phone record only Alias and Img can be changed here
         if (type == -10) {
-            trackIdTxt.setEnabled(false);
+            if(!id.equals(preferences.getString(Constants.TRACKING_ID_RAW, "not found"))) {
+                type = -11;
+            } else {
+                trackIdTxt.setEnabled(false);
+            }
         }
 
 
@@ -112,7 +120,7 @@ public class AddDeviceActivity extends AppCompatActivity {
 
                         // if default my phone alias or img is changed then stored this in preference
                         if(type == -10) {
-                            SharedPreferences preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
+                            preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR,
                                     MODE_PRIVATE);
                             SharedPreferences.Editor editor = preferences.edit();
                             editor.putInt(Constants.MY_PHONE_IMG, img);

@@ -3,7 +3,7 @@ package com.pacmac.trackr;
 import android.app.Application;
 import android.os.Build;
 
-import com.tutelatechnologies.tapcore.sdk.framework.TutelaSDKFactory;
+import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
 
 
 /**
@@ -19,7 +19,7 @@ public class TrackRApplication extends Application {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             try {
-                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this, true);
+                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this);
 //                FirebaseDatabase.getInstance().setLogLevel(Logger.Level.valueOf("DEBUG"));
             } catch (Exception e) {
                 e.printStackTrace();

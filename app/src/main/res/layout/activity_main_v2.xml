@@ -34,6 +34,7 @@
                 app:layout_collapseMode="parallax"
                 app:layout_collapseParallaxMultiplier="0.9"/>
 
+
             <android.support.v7.widget.Toolbar
                 android:id="@+id/toolbar"
                 android:layout_width="match_parent"
@@ -74,8 +75,6 @@
             android:text="No devices in the list."
             />
     </LinearLayout>
-
-
 
     <android.support.design.widget.FloatingActionButton
         android:id="@+id/fab"
