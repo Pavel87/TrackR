@@ -54,7 +54,7 @@ public class AddDeviceActivity extends AppCompatActivity {
         img = getIntent().getIntExtra(Constants.EDIT_USER_IMG, 0);
 
         // Set image to default if some error happened
-        if(stockImages.length() > img) {
+        if(img  >= stockImages.length()) {
             // if image list was modified then set it to 0
             img = 0;
         }

@@ -18,7 +18,7 @@ import com.google.android.gms.common.ConnectionResult;
 public final class HelpActivity extends AppCompatActivity {
 
 
-    private final int HEADERS_COUNT = 9;
+    protected static final int HEADERS_COUNT = 8;
 
     private HelpExpandableListAdapter listAdapter;
     private ExpandableListView listView;

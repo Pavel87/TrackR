@@ -8,10 +8,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
-import android.graphics.Color;
+import android.graphics.Point;
 import android.location.Geocoder;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -31,6 +30,7 @@ import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
+import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
@@ -239,34 +239,23 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         }
 
 
+        //hide show title text
         appBarCollapsable.addOnOffsetChangedListener(new AppBarStateChangeListener() {
             @Override
             public void onStateChanged(AppBarLayout appBarLayout, State state, int alpha) {
                 if (state == State.EXPANDED) {
                     //hide title
-                    showTitle = false;
+                    showTitle = true;
                     collapsingToolbarLayout.setTitle("");
-                    fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.fab)));
                 } else if (state == State.COLLAPSED) {
                     //show title
                     showTitle = true;
                     collapsingToolbarLayout.setTitle(getString(R.string.app_name));
-                    fab.setBackgroundTintList(ColorStateList.valueOf(getResources().getColor(R.color.colorPrimary)));
                 } else {
                     //hide title
                     if(showTitle) {
                         collapsingToolbarLayout.setTitle("");
                         showTitle = false;
-                    }
-                    String alphaString = Integer.toHexString(alpha);
-                    if (alphaString.length() == 1) {
-                        alphaString = "0" + alphaString;
-                    }
-                    String colorString = "#" + alphaString + "6A1B9A";
-                    try {
-                        fab.setBackgroundTintList(ColorStateList.valueOf(Color.parseColor(colorString)));
-                    } catch (Exception e) {
-                        e.printStackTrace();
                     }
                 }
             }
@@ -284,6 +273,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 }
             });
             layoutParams.setBehavior(appBarLayoutBehaviour);
+            //SET MAP to 3/5 of screen if expanded
+            Display display = getWindowManager().getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+            layoutParams.height = 3*size.y/5;
         }
     }
 
@@ -800,7 +794,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 iconGenerator.setStyle(i + 3);
 //                iconGenerator.setBackground();
 
-                if(stockImages.length() > userRecords.get(i).getProfileImageId()) {
+                if (userRecords.get(i).getProfileImageId() >= stockImages.length()) {
                     // if image list was modified then set it to 0
                     userRecords.get(i).setProfileImageId(0);
                 }

@@ -108,7 +108,7 @@ public final class HelpExpandableListAdapter extends BaseExpandableListAdapter {
     public View getChildView(int groupPosition, final int childPosition,
                              boolean isLastChild, View convertView, ViewGroup parent) {
 
-        if (groupPosition == 8) {
+        if (groupPosition == HelpActivity.HEADERS_COUNT-1) {
 
             LayoutInflater infalInflater = (LayoutInflater) this.context
                     .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
@@ -124,7 +124,7 @@ public final class HelpExpandableListAdapter extends BaseExpandableListAdapter {
             final String childText = getChild(groupPosition, childPosition) + version;
 
 
-            if (convertView == null || getGroupCount() == 9 || isTroubleshootingDisabled) {
+            if (convertView == null || getGroupCount() == HelpActivity.HEADERS_COUNT || isTroubleshootingDisabled) {
                 isTroubleshootingDisabled = false;
                 LayoutInflater infalInflater = (LayoutInflater) this.context
                         .getSystemService(Context.LAYOUT_INFLATER_SERVICE);

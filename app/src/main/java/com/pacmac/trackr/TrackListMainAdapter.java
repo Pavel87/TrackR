@@ -108,7 +108,8 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         TypedArray stockImages = context.getResources().obtainTypedArray(R.array.stockImages);
 
         // Set image to default if some error happened
-        if(stockImages.length() > mDataset.get(position).getProfileImageId()) {
+
+        if(mDataset.get(position).getProfileImageId() >= stockImages.length()) {
             // if image list was modified then set it to 0
             mDataset.get(position).setProfileImageId(0);
         }

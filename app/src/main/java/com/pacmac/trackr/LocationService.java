@@ -180,10 +180,6 @@ public class LocationService extends Service implements LocationListener, Google
 
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
-//        Map<String, Object> locationUpdateMap = new HashMap<>();
-//
-//        locationUpdateMap.put(String.valueOf(time), newLocation.createMap());
-//        dbReference.child(child).child("loc").updateChildren(locationUpdateMap);
 
         dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel() + 0.01);
         dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
@@ -191,8 +187,6 @@ public class LocationService extends Service implements LocationListener, Google
         dbReference.child(child).child("timestamp").setValue(time);
         dbReference.child(child).child("cellQuality").setValue(cellQuality);
         dbReference.child(child).child("id").setValue(2);
-
-        //deleteObsoleteLocationUpdate();
 
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();
@@ -233,71 +227,6 @@ public class LocationService extends Service implements LocationListener, Google
         return ((float) level / (float) scale) * 100.0f;
     }
 
-
-    private void deleteObsoleteLocationUpdate() {
-        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                {
-                    boolean shouldExit = false;
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                        if (snapshot.getKey().equals(child)) {
-                            // Processing received data
-                            if (snapshot.hasChildren()) {
-
-                                Map<String, Object> toDelete = new HashMap<>();
-                                Long idLong = ((Long) snapshot.child("id").getValue());
-
-                                if (idLong != null && idLong == 2 && snapshot.child("loc").hasChildren()) {
-                                    int ONE_DAY = 1 * 24 * 60 * 60 * 1000;
-                                    long oneDayTimeInterval = System.currentTimeMillis() - ONE_DAY;
-                                    Iterator<DataSnapshot> iterator = snapshot.child("loc").getChildren().iterator();
-                                    while (iterator.hasNext()) {
-                                        DataSnapshot record = iterator.next();
-
-                                        long timestamp = Long.parseLong(record.getKey());
-                                        if (timestamp < oneDayTimeInterval) {
-                                            toDelete.put(record.getKey(), null);
-                                        } else {
-                                            shouldExit = true;
-                                            break;
-                                        }
-
-                                    }
-                                    if (toDelete.size() > 0) {
-                                        dbReference.child(child).child("loc").updateChildren(toDelete);
-                                    }
-                                }
-                            }
-                        }
-                        if(shouldExit) {
-                            break;
-                        }
-                    }
-                }
-            }
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                // no worries will try again later.
-            }
-        });
-    }
-
-
-//    @Override
-//    public void onComplete(FirebaseError firebaseError, Firebase firebase) {
-//        Log.d(TAG, "TrackR finished server upload");
-//
-//        if(firebaseError != null) {
-//            Log.d(TAG, firebaseError.getDetails() + " Message: " + firebaseError.getMessage());
-//        }
-//
-//        if (firebase != null){
-//            firebase.goOffline();
-//            Log.d(TAG, "Firebase goes offline");
-//        }
-//    }
 
     private int getCellSignalQuality(Context context) {
         int cellQuality = -1;
