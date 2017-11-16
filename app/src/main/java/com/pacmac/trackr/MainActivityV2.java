@@ -66,7 +66,7 @@ import java.util.Map;
 /**
  * Created by pacmac on 2017-08-05.
  */
-public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallback,
+public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
         NetworkStateListener, TrackListMainAdapter.TrackListItemSelectedListener {
 
     private static final String TAG = "TrackRMain";
@@ -74,6 +74,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     SharedPreferences preferences = null;
 
     private GoogleMap mMap;
+    private NetworkStateChangedReceiver connReceiver = null;
+    private FirebaseDatabase database;
+    private DatabaseReference dbReference;
+    private List<LocationRecord> userRecords = new ArrayList<>();
+
     private RecyclerView mRecyclerView;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView.LayoutManager mLayoutManager;
@@ -82,32 +87,26 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private BottomNavigationView bottomNavigation;
     private LinearLayout noDeviceView;
     private FloatingActionButton fab;
+    private TypedArray stockImages;
 
-    private NetworkStateChangedReceiver connReceiver = null;
-    private boolean isConnected = false;
-    private boolean skipConnReceiverTrigger = true;
-
-    private FirebaseDatabase database;
-    private DatabaseReference dbReference;
-    private List<LocationRecord> userRecords = new ArrayList<>();
-    private int currentTracker = 0;
-
-    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
-    private boolean isPermissionEnabled = true;
-
-    private boolean skipfbCallOnReconfiguration = false;
-    private boolean isAddressResolverRegistred = false;
     /**
      * show title must be true during initialization so it can be handled properly during collapse
      */
     private boolean showTitle = true;
+    private boolean isConnected = false;
+    private boolean skipConnReceiverTrigger = true;
+    private boolean shouldAnimateMap = true;
+    private boolean isPermissionEnabled = true;
+    private boolean skipfbCallOnReconfiguration = false;
+    private boolean isAddressResolverRegistred = false;
+    private boolean isRefreshListHandlerRegistred = false;
 
+    private int currentTracker = 0;
     private int refreshCounter = 0;
     private int REFRESH_DELAY = 60 * 1000;
     private int REFRESH_DELAY_SHORT = 20 * 1000;
-    private boolean isRefreshListHandlerRegistred = false;
 
-    private TypedArray stockImages;
+    private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
     /**
      * Adress resolver Receiver
@@ -285,6 +284,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     @Override
     protected void onResume() {
         super.onResume();
+        shouldAnimateMap = true;
         refreshCounter = 0;
         if (userRecords.size() > 0 && Utility.checkPlayServices(this)) {
             appBarCollapsable.setExpanded(true);
@@ -296,11 +296,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         if (isPermissionEnabled) {
             Utility.startTrackingService(getApplicationContext(), preferences);
         }
-        showUsersLocationOnMap();
+        showUsersLocationOnMap(shouldAnimateMap);
         if (userRecords.size() > 0 && checkIfshouldTryRetrieveDevicePosition()) {
-            startRefreshListTimer(REFRESH_DELAY_SHORT);
-        } else {
             startRefreshListTimer(REFRESH_DELAY);
+        } else {
+            startRefreshListTimer(REFRESH_DELAY_SHORT);
         }
     }
 
@@ -341,7 +341,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         mMap.getUiSettings().setCompassEnabled(false);
         mMap.getUiSettings().setScrollGesturesEnabled(true);
         mMap.getUiSettings().setZoomGesturesEnabled(true);
-        showUsersLocationOnMap();
+        showUsersLocationOnMap(true);
     }
 
 
@@ -710,7 +710,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                     dbReference.goOffline();
                     Log.i(Constants.TAG, "Firebase goes offline");
                     // Update location markers on the map.
-                    showUsersLocationOnMap();
+                    showUsersLocationOnMap(shouldAnimateMap);
                 }
             }
 
@@ -727,7 +727,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.0").equals(appVersion)) {
+        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.4").equals(appVersion)) {
             Utility.createAlertDialog(MainActivityV2.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
@@ -778,7 +778,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         }
     }
 
-    private void showUsersLocationOnMap() {
+    private void showUsersLocationOnMap(boolean showUserOnMap) {
         if (mMap == null) {
             return;
         }
@@ -815,13 +815,20 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         if (currentTracker >= userRecords.size()) {
             currentTracker = 0;
         }
-        if (userRecords.get(currentTracker).getLatitude() != 0 || userRecords.get(currentTracker).getLongitude() != 0) {
+        if (showUserOnMap && (userRecords.get(currentTracker).getLatitude() != 0 || userRecords.get(currentTracker).getLongitude() != 0)) {
             mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userRecords.get(currentTracker).getLatitude(),
                     userRecords.get(currentTracker).getLongitude()), 14f));
         }
-//        else {
-//            Utility.showToast(getApplicationContext(), "Ups nothing to show for " + userRecords.get(currentTracker).getAlias());
-//        }
+    }
+
+    /**
+     * This call back only sets boolean flag that user interacted with Map
+     * fragment and will turn off animation of marker position on each refresh.
+     * @param latLng
+     */
+    @Override
+    public void onMapClick(LatLng latLng) {
+        shouldAnimateMap = false;
     }
 
 
@@ -879,7 +886,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             int delay = REFRESH_DELAY;
 
             // Only reach firebase 2 times after resume
-            if (refreshCounter < 2) {
+            if (refreshCounter%2 == 0) {
                 if (checkIfshouldTryRetrieveDevicePosition()) {
                     delay = REFRESH_DELAY_SHORT;
                 }
@@ -898,6 +905,5 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         isRefreshListHandlerRegistred = false;
         refreshListHandler.removeCallbacks(refreshListRunnable);
     }
-
 }
 
