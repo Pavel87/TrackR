@@ -1,0 +1,85 @@
+<resources>
+    <string name="app_name">TrackR</string>
+    <string name="last_location">Poslední známá poloha</string>
+    <string name="coord">Souřadnice</string>
+    <string name="local_time">Viděn v:</string>
+    <string name="address">Adresa</string>
+    <string name="batlevel">Stav baterie</string>
+    <string name="not_available">Není dostupná</string>
+    <string name="search">Hledej</string>
+    <string name="show_map">Ukaž na mapě</string>
+    <string name="title_activity_map_detail">Mapa</string>
+    <string name="no_connection">Zkontrolujte připojení k internetu.</string>
+    <string name="last_seen">Naposled viděn v: </string>
+    <string name="action_settings">Nastavení</string>
+    <string name="title_activity_settings">Nastavení</string>
+    <string name="trackingOn">Tracking Mód</string>
+    <string name="trackingID">ID Vysílače</string>
+    <string name="receivingID">ID Přijímače</string>
+    <string name="turning_on">Zapínám Tracking</string>
+    <string name="turning_off">Vypínám Tracking</string>
+    <string name="cancel">Zpět</string>
+    <string name="save">Uložit</string>
+    <string name="unlock">Odemknout</string>
+    <string name="enter_id">Vlož Unikátní ID</string>
+    <string name="id_entry_error">ID musí mít 8 nebo více znaků</string>
+    <string name="id_char_error">ID nesmí obsahovat znak "\" nebo "/".</string>
+    <string name="pass_entry_error">Zadali jste chybné heslo</string>
+    <string name="password_dialog">Rodičovský zámek</string>
+    <string name="show_password">Ukaž heslo</string>
+    <string name="type_password">Vytvoř nové heslo</string>
+    <string name="loading">Hledám ...</string>
+    <string name="address_na">Adresa není dosupná</string>
+    <string name="address_loc_error">Chyba v souřadnicích: Restartujte TrackR</string>
+    <string name="address_not_found">Adresa nenalezena</string>
+    <string name="location_message">Přístup k GPS je nutný pro správnou funkci aplikace.</string>
+    <string name="request_perm">Žádej</string>
+    <string name="no_location">Poloha sledovaného zařízení je v tento moment neznámá.</string>
+    <string name="share_header">*****************************</string>
+    <string name="new_update_title">Nová aktualizace pro TrackR v</string>
+    <string name="updateMsg1">- NEW User Interface and features are coming next week.\nStay tuned!</string>
+    <string name="updateMsg2">- UI - celý alias sledovaného telefonu je nyní zobrazen.</string>
+    <string name="updateMsg3">- UI - některé dialogy byly aktualizovány.</string>
+    <string name="updateMsg4">- Mapa nyní zobrazuje všechny sledované telefony.</string>
+    <string name="updateMsg5">- Německá lokalizace.</string>
+    <string name="updateMsg6">- Přidána kontrola GooglePlay Services verze.</string>
+    <string name="updateMsg7">- Opravy chyb.</string>
+    <string name="rateApp">Jak se vám líbí TrackR?</string>
+    <string name="rta_dialog_message"> TrackR team je poctěn každým, kdo aplikaci používá a
+        neustále se jej snažíme vylepšovat k vaší spokojenosti. Pokud jste spokojeni zanechte
+        nám prosím hodnocení, či poznámku, jaká funkce vám v TrackR chybí.</string>
+    <string name="no_thanks">Někdy Jindy</string>
+    <string name="rateit">Hodnotit</string>
+    <string name="neveragain">Toto již nechci vidět</string>
+    <string name="last_location_fresh">Poslední známá poloha je již zobrazena.</string>
+    <string name="rec_id_wrong">Přijímací ID zřejmě neexistuje. Zkontrolujte zadané ID v obou zařízeních.</string>
+    <string name="progress_searching">Hledám...</string>
+    <string name="extract_data">Sdílej GPS polohu s:</string>
+    <string name="conn_error">Chyba spojení. Zkontrolujte zda vám funguje připojení do internetu</string>
+    <string name="device_didnot_report_location">Poslední známá GPS poloha je již zobrazena.</string>
+    <string name="friendly_name">Jméno:</string>
+    <string name="rec_id">ID:</string>
+    <string name="rec_id_list_title">Seznam sledovaných zařízení</string>
+    <string name="friendlyName">Alias</string>
+    <string name="deviceId">Sledovací ID</string>
+    <string name="enter_rec_id">Přidej nové zařízení</string>
+    <string name="alias_required">Alias je poviné pole.</string>
+    <string name="password_length_wrong">Tvoje délka hesla není podporována.</string>
+    <string name="google_play_services_outdated">TrackR vyžaduje Google Play Services aktualizaci pro správnou funkci.</string>
+    <string name="rec_id_not_found">TrackR nenašel polohu zařízení:</string>
+    <string name="location">polohu</string>
+    <string name="no_new_updates">neaktualizoval svoji polohu.</string>
+    <string name="not_working_button">Oprav mě</string>
+    <string name="resolve">Vyřeš</string>
+    <string name="about_text">1) Launch the app and go to Settings\n\n2) Set the unique tracking ID in "remote" device.\n\n3) Switch ON tracking mode Note: You can enable parental lock by taping on padlock icon in bottom right corner.
+        Device starts transmitting its location once the tracking mode is ON every 20 minutes or 45 minutes on lower battery levels if there is live connection to internet\n\n4) Set up the second device which will act as a receiver - Launch TrackR and go to Settings\n\n5) Configure Tracked Device in "List of Tracked Devices" which corresponds to Tracking ID from step 2) and fill the friendly name for the tracked device\n\n6) Now you are all set and if you go back to main screen you should receive remote device location shortly. If not press refresh button\n\n
+        Note: You can configure up to 5 devices in "List of Tracked Devices".\n\nTo delete row in List of Tracked Devices you have to swipe right on the specific row</string>
+    <string name="about_text2">Application offers location tracking functionality between two android devices. App can run in two modes:\n\n-Location Transmitter\n\n-Location Receiver (of one or more devices)</string>
+    <string name="contact">Pro technickou podporu, či jinými žádostmi zašlete email na pacmac.dev@gmail.com\n\nDěkujeme za používání Device Tracker, p@cmac.</string>
+    <string name="something_wrong">Něco je špatně!</string>
+    <string name="update_freq_label">Frekvence zasílání polohy</string>
+    <string name="no_rec_id">Jedná se o první start. Je třeba nastavit sledované zařízení v Nastavení.</string>
+    <string name="no_rec_id_found">GPS poloha nedostupná.</string>
+    <string name="rec_id_list_error">Sdílení vybraného zařízení je nedostupné.</string>
+
+</resources>
