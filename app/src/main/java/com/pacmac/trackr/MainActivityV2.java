@@ -101,6 +101,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private boolean isAddressResolverRegistred = false;
     private boolean isRefreshListHandlerRegistred = false;
 
+    private int bottomBarheight = 0;
     private int currentTracker = 0;
     private int refreshCounter = 0;
     private int REFRESH_DELAY = 60 * 1000;
@@ -157,7 +158,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putBoolean(Constants.TRACKING_STATE, false);
                 editor.commit();
-                Utility.showToast(getApplicationContext(), "Tracking Mode Disabled. Check your app settings.");
+                Utility.showToast(getApplicationContext(), "Tracking Mode Disabled. Check your app settings.",
+                        ((View) bottomNavigation).getHeight());
             }
             loadUserRecordsFromFile();
         }
@@ -372,7 +374,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(userRecords.get(currentTracker).getLatitude(),
                         userRecords.get(currentTracker).getLongitude()), 16f));
             } else {
-                Utility.showToast(getApplicationContext(), "Ups nothing to show for " + userRecords.get(currentTracker).getAlias());
+                Utility.showToast(getApplicationContext(), "Ups nothing to show for " +
+                        userRecords.get(currentTracker).getAlias(),((View) bottomNavigation).getHeight());
             }
         }
     }
@@ -466,7 +469,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 break;
             case R.id.navigation_share:
                 onInviteClicked();
-//                Utility.showToast(getApplicationContext(), "Share function not yet implemented.");
                 //item.setEnabled(true);
                 break;
             case R.id.navigation_settings:
@@ -636,7 +638,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             // retrieve Location from FB for currently selected ID
             retrieveLocation();
         } else {
-            Utility.showToast(getApplicationContext(), getString(R.string.no_connection));
+            Utility.showToast(getApplicationContext(), getString(R.string.no_connection),
+                    ((View) bottomNavigation).getHeight());
             //enableSearchButton();
         }
     }
@@ -727,8 +730,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.4").equals(appVersion)) {
-            Utility.createAlertDialog(MainActivityV2.this);
+        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.7").equals(appVersion)) {
+//            Utility.createAlertDialog(MainActivityV2.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
             editor.commit();

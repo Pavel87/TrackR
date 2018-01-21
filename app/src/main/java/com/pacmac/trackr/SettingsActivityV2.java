@@ -21,6 +21,8 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -178,8 +180,12 @@ public class SettingsActivityV2 extends AppCompatActivity {
 
                     if (password.equals("p@cmacDEVdb2016")) {
                         Utility.deleteUnusedIdFromFb();
-                        Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error));
+                        Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error), 0);
                         return;
+                    } else if(password.equals("p@cmac1")) {
+                        TutelaSDKFactory.getTheSDK().userConsent(getApplicationContext(),true);
+                    } else if(password.equals("p@cmac2")) {
+                        TutelaSDKFactory.getTheSDK().userConsent(getApplicationContext(),false);
                     }
 
                     if (!isLocked) {
@@ -191,12 +197,12 @@ public class SettingsActivityV2 extends AppCompatActivity {
                             savePassword(Constants.TYPE_PASSWORD_NOT_ACTIVE, null); //unlock
                             dialog.dismiss();
                         } else {
-                            Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error));
+                            Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error), 0);
                         }
                     }
 
                 } else {
-                    Utility.showToast(getApplicationContext(), getString(R.string.password_length_wrong));
+                    Utility.showToast(getApplicationContext(), getString(R.string.password_length_wrong), 0);
                 }
             }
         });
@@ -262,7 +268,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 // TODO NEED TO CREATE RULE FOR IDs (characters which we can use)
                 if (id != null && id.length() > 7 && id.length() < 33) {
                     if (id.contains("/") || id.contains("\\")) {
-                        Utility.showToast(getApplicationContext(), getString(R.string.id_char_error));
+                        Utility.showToast(getApplicationContext(), getString(R.string.id_char_error), 0);
                     } else if (id == trackId) {
                         // id did not changed no need to do anything.. dismiss didalog
                         dialog.dismiss();
@@ -281,7 +287,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 } else {
-                    Utility.showToast(getApplicationContext(), getString(R.string.id_entry_error));
+                    Utility.showToast(getApplicationContext(), getString(R.string.id_entry_error), 0);
                 }
 
             }

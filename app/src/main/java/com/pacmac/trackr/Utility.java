@@ -305,14 +305,14 @@ public class Utility {
         }
     }
 
-    public static void showToast(Context context, CharSequence text) {
+    public static void showToast(Context context, CharSequence text, int yOffset) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.trackr_notification_top, null);
         TextView toastText = (TextView) view.findViewById(R.id.toastText);
         toastText.setText(text);
 
         Toast toast = new Toast(context);
-        toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, 200);
+        toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, yOffset);
         toast.setDuration(Toast.LENGTH_SHORT);
         toast.setView(view);
         toast.show();
@@ -436,7 +436,7 @@ public class Utility {
             if (googleAPI.isUserResolvableError(result)) {
                 googleAPI.getErrorDialog(activity, result,
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
-                showToast(activity.getApplicationContext(), activity.getString(R.string.google_play_services_outdated));
+                showToast(activity.getApplicationContext(), activity.getString(R.string.google_play_services_outdated), 0);
             }
             return false;
         }
