@@ -265,8 +265,10 @@ public class AddDeviceActivity extends AppCompatActivity {
 
         String newAlias = aliasTxt.getText().toString();
         String newId = trackIdTxt.getText().toString();
-
-        if (origImg == img && origAlias.equals(newAlias) && origId.equals(newId)) {
+        
+        if (origAlias!= null && origId!= null && origImg == img && origAlias.equals(newAlias) && origId.equals(newId)) {
+            this.finish();
+        } else if(newAlias.length() == 0 && newId.length() == 0 && origImg == img) {
             this.finish();
         } else {
             //show Dialog
