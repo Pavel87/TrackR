@@ -16,6 +16,7 @@ import android.view.Window;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 public class AddDeviceActivity extends AppCompatActivity {
 
@@ -58,7 +59,7 @@ public class AddDeviceActivity extends AppCompatActivity {
         img = getIntent().getIntExtra(Constants.EDIT_USER_IMG, 0);
 
         // Set image to default if some error happened
-        if(img  >= stockImages.length()) {
+        if(img  >= stockImages.length() || img < 0) {
             // if image list was modified then set it to 0
             img = 0;
         }
@@ -223,4 +224,53 @@ public class AddDeviceActivity extends AppCompatActivity {
         dialog.show();
     }
 
+    private void showExitConfirmationDialog(final Activity activity) {
+
+        final Dialog dialog = new Dialog(AddDeviceActivity.this);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.dialog_default);
+        TextView title = dialog.findViewById(R.id.title);
+        TextView content = dialog.findViewById(R.id.content);
+        title.setText(getString(R.string.dialog_title_exit_activity));
+        content.setText(getString(R.string.dialog_content_exit_activity));
+        dialog.setCancelable(false);
+
+        Button yesButton = dialog.findViewById(R.id.dialogYes);
+        yesButton.setText(getString(R.string.dialog_positive_btn_exit_activity));
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+                activity.finish();
+            }
+        });
+
+        Button noButton = dialog.findViewById(R.id.dialogCancel);
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                dialog.dismiss();
+            }
+        });
+
+        dialog.show();
+    }
+
+    @Override
+    public void onBackPressed() {
+        //orig
+        int origImg = getIntent().getIntExtra(Constants.EDIT_USER_IMG, 0);
+        String origAlias = getIntent().getStringExtra(Constants.EDIT_USER_ALIAS);
+        String origId = getIntent().getStringExtra(Constants.EDIT_USER_ID);
+
+        String newAlias = aliasTxt.getText().toString();
+        String newId = trackIdTxt.getText().toString();
+
+        if (origImg == img && origAlias.equals(newAlias) && origId.equals(newId)) {
+            this.finish();
+        } else {
+            //show Dialog
+            showExitConfirmationDialog(AddDeviceActivity.this);
+        }
+    }
 }

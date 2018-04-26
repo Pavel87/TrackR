@@ -25,8 +25,14 @@ public class Constants {
     public static final String PADLOCK_ACTIVE = "padlock_active";
     public static final String PADLOCK_PASS = "padlock_pass";
 
+    public static final String WORK_LOC = "work_location";
+    public static final String HOME_LOC = "home_location";
+    public static final int[] NIGHT_TIME_INTERVAL = {23, 5};
+    public static final int[] DAY_TIME_INTERVAL = {10, 14};
+
     public static final String JSON_REC_IDS_FILE_NAME = "/recIdsJson";
     public static final String JSON_LOC_FILE_NAME = "/locRecsJson";
+    public static final String NIGHT_LOC_FILE_NAME = "/commonLocJson";
 
     public final static String REG_KEY = "ieg9ioa9qhlbnff2714e6s1a8n";
 

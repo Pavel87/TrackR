@@ -109,7 +109,8 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         // Set image to default if some error happened
 
-        if(mDataset.get(position).getProfileImageId() >= stockImages.length()) {
+        if(mDataset.get(position).getProfileImageId() >= stockImages.length()
+                || mDataset.get(position).getProfileImageId() < 0) {
             // if image list was modified then set it to 0
             mDataset.get(position).setProfileImageId(0);
         }

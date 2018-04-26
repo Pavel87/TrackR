@@ -136,6 +136,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_v2);
 
+        bottomNavigation = findViewById(R.id.navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         collapsingToolbarLayout = findViewById(R.id.collapsing_toolbar);
@@ -221,7 +222,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             }
         });
 
-        bottomNavigation = findViewById(R.id.navigation);
         bottomNavigation.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(MenuItem item) {
@@ -730,7 +730,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.8").equals(appVersion)) {
+        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.11").equals(appVersion)) {
 //            Utility.createAlertDialog(MainActivityV2.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
@@ -796,13 +796,18 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 iconGenerator.setStyle(i + 3);
 //                iconGenerator.setBackground();
 
-                if (userRecords.get(i).getProfileImageId() >= stockImages.length()) {
-                    // if image list was modified then set it to 0
+                if(userRecords.get(i).getProfileImageId() >= stockImages.length()
+                        || userRecords.get(i).getProfileImageId() < 0) {
                     userRecords.get(i).setProfileImageId(0);
                 }
-                Bitmap bitmapMarker = iconGenerator.makeIcon(stockImages
-                        .getResourceId(userRecords.get(i).getProfileImageId(), 0));
-
+                Bitmap bitmapMarker;
+                try {
+                    bitmapMarker = iconGenerator.makeIcon(stockImages
+                            .getResourceId(userRecords.get(i).getProfileImageId(), 0));
+                } catch (Exception e) {
+                    bitmapMarker = iconGenerator.makeIcon(stockImages
+                            .getResourceId(0, 0));
+                }
 
                 MarkerOptions markerOptions = new MarkerOptions()
                         .position(location)

@@ -384,6 +384,39 @@ public class Utility {
         return readOutput.toString();
     }
 
+    public static String loadCSVFile(String path) {
+
+        File file = new File(path);
+        if (!file.exists()) {
+            return null;
+        }
+
+        BufferedReader reader = null;
+        StringBuilder readOutput = new StringBuilder();
+
+        try {
+            reader = new BufferedReader(new FileReader(file));
+            String line;
+            readOutput.append("");
+            while ((line = reader.readLine()) != null) {
+                readOutput.append(line);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            Log.e(Constants.TAG, "Failed to read CSV: " + e.getMessage());
+            return null;
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        return readOutput.toString();
+    }
+
 
     public static String generateUniqueID() {
         return UUID.randomUUID().toString();

@@ -36,6 +36,13 @@
     <string name="title_activity_add_device">Add New Device</string>
     <string name="title_activity_help">Help</string>
     <string name="title_activity_settings_v2">Settings</string>
+
+    <string name="dialog_title_exit_activity">Warning</string>
+    <string name="dialog_content_exit_activity">Are you sure you want to proceed with unsaved changes?</string>
+    <string name="dialog_positive_btn_exit_activity">Yes</string>
+    <string name="dialog_title_delete_user">Delete Device profile</string>
+    <string name="dialog_content_delete_user">You will permanently remove tracked device from your watch list.</string>
+    <string name="dialog_positive_btn_delete_user">Delete</string>
     <string name="dialog_title_track_enable">Setup Tracking</string>
     <string name="dialog_content_track_enable">If you want to enable tracking of this device click YES. Otherwise this device will be only capable to receive other device locations.</string>
     <string name="dialog_setup">Setup</string>

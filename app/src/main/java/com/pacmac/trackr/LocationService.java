@@ -1,6 +1,7 @@
 package com.pacmac.trackr;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -18,6 +19,7 @@ import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
+import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
@@ -126,7 +128,7 @@ public class LocationService extends Service implements LocationListener, Google
     private void createLocationRequest(long time) {
         mLocationRequest = new LocationRequest().create();
         mLocationRequest.setInterval(time);
-        mLocationRequest.setFastestInterval(time);
+        mLocationRequest.setFastestInterval(time/5);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
@@ -227,40 +229,45 @@ public class LocationService extends Service implements LocationListener, Google
         return ((float) level / (float) scale) * 100.0f;
     }
 
-
+    @SuppressLint("MissingPermission")
     private int getCellSignalQuality(Context context) {
         int cellQuality = -1;
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-            return cellQuality;
-        }
-
-        TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
-        if (telephonyManager == null) {
-            return cellQuality;
-        }
-
-        if (!isPermissionEnabled) {
-            return cellQuality;
-        }
-        List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
-        if (cellInfoList == null) {
-            return cellQuality;
-        }
-        for (CellInfo cell : cellInfoList) {
-            if (cell.isRegistered()) {
-                if (cell instanceof CellInfoLte) {
-                    cellQuality = ((CellInfoLte) cell).getCellSignalStrength().getLevel();
-                } else if (cell instanceof CellInfoWcdma) {
-                    cellQuality = ((CellInfoWcdma) cell).getCellSignalStrength().getLevel();
-                } else if (cell instanceof CellInfoGsm) {
-                    cellQuality = ((CellInfoGsm) cell).getCellSignalStrength().getLevel();
-                } else if (cell instanceof CellInfoCdma) {
-                    cellQuality = ((CellInfoCdma) cell).getCellSignalStrength().getLevel();
-                }
-                break;
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                return cellQuality;
             }
+
+            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
+            if (telephonyManager == null) {
+                return cellQuality;
+            }
+
+            if (!isPermissionEnabled) {
+                return cellQuality;
+            }
+            List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
+            if (cellInfoList == null) {
+                return cellQuality;
+            }
+            for (CellInfo cell : cellInfoList) {
+                if (cell.isRegistered()) {
+                    if (cell instanceof CellInfoLte) {
+                        cellQuality = ((CellInfoLte) cell).getCellSignalStrength().getLevel();
+                    } else if (cell instanceof CellInfoWcdma) {
+                        cellQuality = ((CellInfoWcdma) cell).getCellSignalStrength().getLevel();
+                    } else if (cell instanceof CellInfoGsm) {
+                        cellQuality = ((CellInfoGsm) cell).getCellSignalStrength().getLevel();
+                    } else if (cell instanceof CellInfoCdma) {
+                        cellQuality = ((CellInfoCdma) cell).getCellSignalStrength().getLevel();
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e){
+            e.printStackTrace();
         }
         return cellQuality;
+
     }
 
 }
