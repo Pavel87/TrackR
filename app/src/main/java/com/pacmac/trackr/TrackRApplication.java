@@ -17,7 +17,7 @@ public class TrackRApplication extends Application {
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             try {
-                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this, true);
+                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this, false);
 //                FirebaseDatabase.getInstance().setLogLevel(Logger.Level.valueOf("DEBUG"));
             } catch (Exception e) {
                 e.printStackTrace();
