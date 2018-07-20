@@ -15,8 +15,8 @@ android {
         applicationId "com.pacmac.trackr"
         minSdkVersion 16
         targetSdkVersion 25
-        versionCode 44
-        versionName "3.1.14 "
+        versionCode 45
+        versionName "3.1.15 "
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {

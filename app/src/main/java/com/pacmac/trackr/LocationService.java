@@ -86,12 +86,12 @@ public class LocationService extends Service implements LocationListener, Google
 
         try {
             database = FirebaseDatabase.getInstance();
+            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
         } catch (IllegalStateException e) {
             e.printStackTrace();
             stopSelf();
             return START_NOT_STICKY;
         }
-        dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
 
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
