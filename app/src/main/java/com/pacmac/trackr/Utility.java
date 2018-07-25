@@ -609,6 +609,17 @@ public class Utility {
             }
         }
     }
+    protected static void stopFetchingService(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O && isMyServiceRunning(context, FetchFirebaseData.class)) {
+            Intent intentService = new Intent(context, FetchFirebaseData.class);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                context.stopService(intentService);
+            } else {
+                // TODO add job for this.
+                // JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
+            }
+        }
+    }
 
 
     protected static void openSettings(Context context, Activity activity) {

@@ -105,6 +105,12 @@ public class FetchFirebaseData extends Service {
             return;
         }
 
+        userRecords = Utility.convertJsonStringToUserRecords(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+        if(userRecords.size() == 0) {
+            stopSelf();
+            return;
+        }
+
         lastFirebaseFetchTimestamp = System.currentTimeMillis();
         FirebaseDatabase database = FirebaseDatabase.getInstance();
         dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");

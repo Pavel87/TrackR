@@ -319,6 +319,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         }
         if (userRecords.size() > 0) {
             Utility.startFetchingService(getApplicationContext());
+        } else {
+            Utility.stopFetchingService(getApplicationContext());
         }
     }
 
