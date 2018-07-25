@@ -5,7 +5,7 @@ android {
     signingConfigs {
     }
     compileSdkVersion 27
-    buildToolsVersion '27.0.3'
+    buildToolsVersion '28.0.1'
     packagingOptions {
         exclude 'META-INF/LICENSE'
         exclude 'META-INF/LICENSE-FIREBASE.txt'
@@ -14,9 +14,9 @@ android {
     defaultConfig {
         applicationId "com.pacmac.trackr"
         minSdkVersion 16
-        targetSdkVersion 25
-        versionCode 45
-        versionName "3.1.15 "
+        targetSdkVersion 27
+        versionCode 46
+        versionName "3.2.0 "
         vectorDrawables.useSupportLibrary = true
     }
     buildTypes {

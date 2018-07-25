@@ -730,7 +730,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.13").equals(appVersion)) {
+        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.16").equals(appVersion)) {
 //            Utility.createAlertDialog(MainActivityV2.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
@@ -739,7 +739,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void showRateMyAppDialog() {
-
         if (preferences.getBoolean(Constants.RATING_POPUP_ENABLED, true)) {
 
             int counter = preferences.getInt(Constants.RATING_POPUP_COUNTER, 0);
@@ -912,6 +911,10 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private void stopRefreshListTimer() {
         isRefreshListHandlerRegistred = false;
         refreshListHandler.removeCallbacks(refreshListRunnable);
+    }
+
+    public boolean isConnected() {
+        return isConnected;
     }
 }
 

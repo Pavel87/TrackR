@@ -580,9 +580,20 @@ public class Utility {
 
     protected static void startTrackingService(Context context, final SharedPreferences preferences) {
         boolean isTrackingOn = preferences.getBoolean(Constants.TRACKING_STATE, false);
-        if (isTrackingOn && !isMyServiceRunning(context, LocationService.class)) {
+        long updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
+        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 && updateFreq < 15*60*1000L) {
+            updateFreq = 15*60*1000L;
+        }
+        if (isTrackingOn && (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1
+                || !isMyServiceRunning(context, LocationService.class))) {
+
             Intent intentService = new Intent(context, LocationService.class);
-            context.startService(intentService);
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                context.startService(intentService);
+            } else {
+                JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
+            }
         }
     }
 

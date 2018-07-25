@@ -67,7 +67,7 @@
     <string name="help_header_how_to_set_receiver">How To Add Tracked Device</string>
     <string name="help_header_troubleshooting">Something Is Wrong</string>
 
-     <string name="help_child_about">Android Device Tracker 2016-2017\nDeveloped by p@cmac\nVersion:</string>
+     <string name="help_child_about">Android Device Tracker 2016-2018\nDeveloped by p@cmac\nVersion:</string>
     <string name="help_child_contact">If you require any technical support or you want to provide feedback please email:\npacmac.dev@gmail.com\n\nFor feature request please use same email address.</string>
     <string name="help_child_privacy">Information sent between devices based on unique IDs are NOT collected and provided to any 3rd party companies.\nFrom time to time Android Device Tracker may collect network quality data(for instance signal strength) which is further anonymized to prevent any reference to specific user phone. Such network quality data might be forwarded to 3rd parties which are involved in mobile network improvements across the globe.</string>
     <string name="help_child_what_is_collected">Information sent between phones:\nPhone Location\nTime of location update\nBattery State\nMobile Signal Strength</string>

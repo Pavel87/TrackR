@@ -31,6 +31,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
     private final String TAG = "SettingsActivityV2";
 
     private final int SEEKBAR_OFFSET = 5;
+    private final int SEEKBAR_OFFSET_JOB = 15;
 
     private SharedPreferences preferences = null;
 
@@ -75,7 +76,8 @@ public class SettingsActivityV2 extends AppCompatActivity {
         locUpdateFreqSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                locReqFrequency.setText(String.valueOf(progress + SEEKBAR_OFFSET) + " min");
+                int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+                locReqFrequency.setText(String.valueOf(progress + offset) + " min");
             }
 
             @Override
@@ -85,7 +87,8 @@ public class SettingsActivityV2 extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 SharedPreferences.Editor editor = preferences.edit();
-                editor.putInt(Constants.TRACKING_FREQ, seekBar.getProgress() + SEEKBAR_OFFSET);
+                int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+                editor.putInt(Constants.TRACKING_FREQ, seekBar.getProgress() + offset);
                 editor.commit();
                 ifTrackingOnRestart();
             }
@@ -135,7 +138,8 @@ public class SettingsActivityV2 extends AppCompatActivity {
 
         trackingID.setText(trackId);
         txSwitch.setChecked(isTrackingEnabled);
-        locUpdateFreqSeekbar.setProgress(freq - SEEKBAR_OFFSET);
+        int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+        locUpdateFreqSeekbar.setProgress(freq - offset);
         locReqFrequency.setText(freq + " min");
 
         // Load preferences
@@ -311,12 +315,20 @@ public class SettingsActivityV2 extends AppCompatActivity {
         if (isTrackingOn) {
             Intent intentService = new Intent(getApplicationContext(), LocationService.class);
             try {
-                stopService(intentService);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    stopService(intentService);
+                } else {
+                    JobSchedulerHelper.cancelLocationUpdateJOB(getApplicationContext());
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Error during service shutdown:" + e.getMessage());
             }
             try {
-                startService(intentService);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    startService(intentService);
+                } else {
+                    JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
+                }
             } catch (Exception e) {
                 Log.e(TAG, "Error during service restart:" + e.getMessage());
             }
@@ -334,6 +346,9 @@ public class SettingsActivityV2 extends AppCompatActivity {
         isTrackingEnabled = preferences.getBoolean(Constants.TRACKING_STATE, false);
         trackId = preferences.getString(Constants.TRACKING_ID_RAW, "Error #5#");
         freq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK);
+        if(Build.VERSION.SDK_INT >Build.VERSION_CODES.N_MR1 && freq < 15) {
+            freq =15;
+        }
         isMyPhoneEnabled = preferences.getBoolean(Constants.MY_PHONE_IN_LIST, true);
     }
 
@@ -410,11 +425,19 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 addMyPhoneToUserList();
             }
             Intent intentService = new Intent(getApplicationContext(), LocationService.class);
-            startService(intentService);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                startService(intentService);
+            } else {
+                JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
+            }
         } else {
             removeMyPhoneFromUserList();
             Intent intentService = new Intent(getApplicationContext(), LocationService.class);
-            stopService(intentService);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                stopService(intentService);
+            } else {
+                JobSchedulerHelper.cancelLocationUpdateJOB(getApplicationContext());
+            }
         }
     }
 

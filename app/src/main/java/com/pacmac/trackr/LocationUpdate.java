@@ -1,8 +1,6 @@
 package com.pacmac.trackr;
 
-import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -11,7 +9,6 @@ import android.location.Location;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.telephony.CellInfo;
@@ -19,160 +16,121 @@ import android.telephony.CellInfoCdma;
 import android.telephony.CellInfoGsm;
 import android.telephony.CellInfoLte;
 import android.telephony.CellInfoWcdma;
-import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
-import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
+
+import static android.content.Context.TELEPHONY_SERVICE;
 
 /**
- * Created by pacmac on 28/04/16.
+ * Created by pacmac on 2018-07-24.
  */
 
-public class LocationService extends Service implements LocationListener, GoogleApiClient.ConnectionCallbacks,
-        GoogleApiClient.OnConnectionFailedListener { //Firebase.CompletionListener
+public class LocationUpdate implements LocationListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
-    private static final String TAG = "LocServ";
+    private static final String TAG = "LocationUpdate";
+    private static final long DELAY_LOCATION = 60*1000L;
 
+    protected static LocationUpdate sInstance = null;
+
+    private Context context = null;
     private GoogleApiClient mGoogleApiClient;
-    private LocationRequest mLocationRequest;
     private FirebaseDatabase database;
     private DatabaseReference dbReference;
     private SharedPreferences preferences;
     private String child = null;
-    private boolean lastBatLevel = false;
 
+    private static TrackLocationUpdateListener listener = null;
     private boolean isPermissionEnabled = true;
 
-    private int updateFreq = Constants.TIME_BATTERY_OK * 60 * 1000;
-    private int updateFreqLowBat = updateFreq + 25 * 60 * 1000;
+    private long lastLocationTime = 0L;
+    private int updateFreq;
 
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        Log.d(TAG, "onCreate");
-        isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(), Constants.LOCATION_PERMISSION);
+
+    public static LocationUpdate getLocationUpdateInstance(Context context, TrackLocationUpdateListener listener) {
+        LocationUpdate.listener = listener;
+        if(sInstance == null) {
+            sInstance = new LocationUpdate(context);
+        }
+        return sInstance;
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+    private LocationUpdate(Context context) {
+        this.context = context;
+        preferences = context.getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, Context.MODE_PRIVATE);
+        updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
+        initializeGPSandFirebase();
+    }
 
-        if (!isPermissionEnabled) {
-//            SharedPreferences.Editor editor = preferences.edit();
-//            editor.putBoolean(Constants.TRACKING_STATE, false);
-//            editor.commit();
-
-            stopSelf();
-            return START_NOT_STICKY;
-        }
-
+    private void initializeGPSandFirebase() {
         try {
             database = FirebaseDatabase.getInstance();
             dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
         } catch (IllegalStateException e) {
             e.printStackTrace();
-            stopSelf();
-            return START_NOT_STICKY;
+            return;
         }
 
         if (mGoogleApiClient == null) {
-            mGoogleApiClient = new GoogleApiClient.Builder(this)
+            mGoogleApiClient = new GoogleApiClient.Builder(context)
                     .addConnectionCallbacks(this)
                     .addOnConnectionFailedListener(this)
                     .addApi(LocationServices.API)
                     .build();
         }
-        updateLocFreqTime();
         child = preferences.getString(Constants.TRACKING_ID, "Error");
-        if (child.equals("Error")) stopSelf();
-
+        if (child.equals("Error")) return;
         mGoogleApiClient.connect();
-        Log.d(TAG, "LocationService Started");
-        return START_STICKY;
     }
 
-
-    @Override
-    public void onDestroy() {
-        if (mGoogleApiClient != null && mGoogleApiClient.isConnected()) {
-            stopLocationUpdates();
-            mGoogleApiClient.disconnect();
+    protected void getLocation() {
+        if(mGoogleApiClient.isConnected() && System.currentTimeMillis() > lastLocationTime + DELAY_LOCATION) {
+            newLocation(getLastKnownLocation());
         }
-        Log.d(TAG, "LocationService is destroying");
     }
 
-    @Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return null;
+    @SuppressLint("MissingPermission")
+    private Location getLastKnownLocation() {
+        return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
-    private void createLocationRequest(long time) {
-        mLocationRequest = new LocationRequest().create();
-        mLocationRequest.setInterval(time);
-        mLocationRequest.setFastestInterval(time/5);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
-    }
-
-    private void startLocationUpdates() {
-        if (!Utility.checkSelfPermission(getApplicationContext(), Constants.LOCATION_PERMISSION)) {
-            return;
-        }
-
-        LocationServices.FusedLocationApi.requestLocationUpdates(
-                mGoogleApiClient, mLocationRequest, this);
-    }
-
-    private void stopLocationUpdates() {
-        LocationServices.FusedLocationApi.removeLocationUpdates(
-                mGoogleApiClient, this);
-    }
-
-    private void updateLocFreqTime() {
-        updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
-        updateFreqLowBat = updateFreq + 25 * 60 * 1000; // low bat is + 25 minutes
-    }
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        float level = getBatteryLevel();
-        if (level >= 25) {
-            createLocationRequest(updateFreq);
-            Log.d(TAG, "Battery OK: " + level);
-            lastBatLevel = true;
-        } else {
-            createLocationRequest(updateFreqLowBat);
-            Log.d(TAG, "Battery LOW: " + level);
-            lastBatLevel = false;
-        }
-        startLocationUpdates();
+        newLocation(getLastKnownLocation());
     }
 
     @Override
     public void onConnectionSuspended(int i) {
+    }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        dbReference.goOffline();
     }
 
     @Override
     public void onLocationChanged(Location lastLocation) {
+    }
+
+    private void newLocation(Location lastLocation) {
+        if (lastLocation == null) {
+            Log.e(TAG, "No Location retrieved from Google Play Services.");
+            return;
+        }
         long time = lastLocation.getTime();
+        lastLocationTime = time;
         double batteryLevel = Math.round(getBatteryLevel() * 100.0) / 100.0;
-        int cellQuality = getCellSignalQuality(getApplicationContext());
+        int cellQuality = getCellSignalQuality(context);
         dbReference.goOnline();
         Log.d(TAG, "Firebase goes online - attempt to update location");
         dbReference.keepSynced(false);
@@ -186,35 +144,20 @@ public class LocationService extends Service implements LocationListener, Google
         dbReference.child(child).child("timestamp").setValue(time);
         dbReference.child(child).child("cellQuality").setValue(cellQuality);
         dbReference.child(child).child("id").setValue(2);
+        dbReference.goOffline();
 
-        if (batteryLevel >= 25 && !lastBatLevel) {
-            updateLocFreqTime();
-            lastBatLevel = true;
-            stopLocationUpdates();
-            createLocationRequest(updateFreq);
-            startLocationUpdates();
-        } else if (batteryLevel < 25 && lastBatLevel) {
-            updateLocFreqTime();
-            lastBatLevel = false;
-            stopLocationUpdates();
-            createLocationRequest(updateFreqLowBat);
-            startLocationUpdates();
+        if(listener != null) {
+            listener.newLocationUploadFinished();
         }
-        dbReference.goOffline();
     }
 
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        dbReference.goOffline();
-    }
 
-    public float getBatteryLevel() {
-        Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+    private float getBatteryLevel() {
+        Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
         if(batteryIntent == null) {
             return -1;
         }
-
         int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
         int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
 
@@ -266,5 +209,4 @@ public class LocationService extends Service implements LocationListener, Google
         return cellQuality;
 
     }
-
 }
