@@ -57,7 +57,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings_v2);
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
@@ -66,17 +66,18 @@ public class SettingsActivityV2 extends AppCompatActivity {
         userRecords = Utility.convertJsonStringToUserRecords(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
 
         // Init views:
-        padlock = (SwitchCompat) findViewById(R.id.switchLock);
+        padlock = findViewById(R.id.switchLock);
         trackIdView = findViewById(R.id.trackIdView);
-        trackingID = (TextView) findViewById(R.id.trackingID);
-        txSwitch = (SwitchCompat) findViewById(R.id.switchTracking);
-        showMyPhoneCheckbox = (AppCompatCheckBox) findViewById(R.id.displayMyPhoneOption);
-        locReqFrequency = (TextView) findViewById(R.id.updateFreqText);
-        locUpdateFreqSeekbar = (SeekBar) findViewById(R.id.locUpdateFreq);
+        trackingID = findViewById(R.id.trackingID);
+        txSwitch = findViewById(R.id.switchTracking);
+        showMyPhoneCheckbox = findViewById(R.id.displayMyPhoneOption);
+        locReqFrequency = findViewById(R.id.updateFreqText);
+        locUpdateFreqSeekbar = findViewById(R.id.locUpdateFreq);
         locUpdateFreqSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
                 int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+
                 locReqFrequency.setText(String.valueOf(progress + offset) + " min");
             }
 
@@ -88,7 +89,8 @@ public class SettingsActivityV2 extends AppCompatActivity {
             public void onStopTrackingTouch(SeekBar seekBar) {
                 SharedPreferences.Editor editor = preferences.edit();
                 int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
-                editor.putInt(Constants.TRACKING_FREQ, seekBar.getProgress() + offset);
+                freq = seekBar.getProgress() + offset;
+                editor.putInt(Constants.TRACKING_FREQ, freq);
                 editor.commit();
                 ifTrackingOnRestart();
             }

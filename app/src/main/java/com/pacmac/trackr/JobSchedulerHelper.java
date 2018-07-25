@@ -4,6 +4,8 @@ import android.app.job.JobInfo;
 import android.app.job.JobScheduler;
 import android.content.ComponentName;
 import android.content.Context;
+import android.os.Build;
+import android.support.annotation.RequiresApi;
 
 /**
  * Created by pacmac on 2018-07-24.
@@ -13,6 +15,7 @@ public final class JobSchedulerHelper {
 
     private static final int LOCATION_JOB_ID = 4553;
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static final void scheduleLocationUpdateJOB(Context context, long period) {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.cancel(LOCATION_JOB_ID);
@@ -24,6 +27,7 @@ public final class JobSchedulerHelper {
         jobScheduler.schedule(jobInfo);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public static final void cancelLocationUpdateJOB(Context context) {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.cancel(LOCATION_JOB_ID);

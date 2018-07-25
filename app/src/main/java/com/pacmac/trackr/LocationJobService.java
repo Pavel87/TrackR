@@ -2,13 +2,16 @@ package com.pacmac.trackr;
 
 import android.app.job.JobParameters;
 import android.app.job.JobService;
+import android.os.Build;
 import android.os.Handler;
+import android.support.annotation.RequiresApi;
 import android.util.Log;
 
 
 /**
  * Created by pacmac on 2018-07-24.
  */
+@RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 public final class LocationJobService extends JobService implements TrackLocationUpdateListener {
 
     private static final String TAG = "LocationJobService";

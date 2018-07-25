@@ -73,10 +73,6 @@ public class LocationService extends Service implements LocationListener, Google
         preferences = getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
 
         if (!isPermissionEnabled) {
-//            SharedPreferences.Editor editor = preferences.edit();
-//            editor.putBoolean(Constants.TRACKING_STATE, false);
-//            editor.commit();
-
             stopSelf();
             return START_NOT_STICKY;
         }
@@ -125,7 +121,7 @@ public class LocationService extends Service implements LocationListener, Google
     private void createLocationRequest(long time) {
         mLocationRequest = new LocationRequest().create();
         mLocationRequest.setInterval(time);
-        mLocationRequest.setFastestInterval(time/5);
+        mLocationRequest.setFastestInterval(time / 5);
         mLocationRequest.setPriority(LocationRequest.PRIORITY_BALANCED_POWER_ACCURACY);
     }
 
@@ -211,7 +207,7 @@ public class LocationService extends Service implements LocationListener, Google
     public float getBatteryLevel() {
         Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
 
-        if(batteryIntent == null) {
+        if (batteryIntent == null) {
             return -1;
         }
 
@@ -260,7 +256,7 @@ public class LocationService extends Service implements LocationListener, Google
                     break;
                 }
             }
-        } catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return cellQuality;

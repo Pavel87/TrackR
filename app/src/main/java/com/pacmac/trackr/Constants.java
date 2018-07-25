@@ -16,6 +16,7 @@ public class Constants {
     public static final String MY_PHONE_IN_LIST = "trackr_show_this_phone_in_list";
     public static final String TRACKING_STATE = "trackr_gps_state";
     public static final String TRACKING_FREQ = "trackr_update_freq";
+    public static final String LAST_APP_OPEN_TS = "trackr_last_opened";
     public static final String TRACKING_ID = "trackr_gps_ID";
     public static final String TRACKING_ID_RAW = "trackr_gps_ID_raw";
     public static final String RECEIVING_ID_RAW = "receiver_gps_ID_raw";
@@ -39,8 +40,8 @@ public class Constants {
     public static final int TYPE_PASSWORD_ACTIVE = 2;
     public static final int TYPE_PASSWORD_NOT_ACTIVE = 3;
     public final static int TIME_BATTERY_OK = 20; // 20 * 60 * 1000;
-    public final static int FB_REQUEST_TIMEOUT = 5*60*1000; // 5 minutes
-    public final static int OLD_ID_THRESHOLD = 7*24 * 60 * 60 * 1000; // 7 days
+    public final static int FB_REQUEST_TIMEOUT = 5 * 60 * 1000; // 5 minutes
+    public final static int OLD_ID_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 days
     public final static int RATING_POPUP_ATTEMPTS = 7; // popup will show after user open the app 8 times
 
     public static final int TYPE_NORMAL = 0;
@@ -66,7 +67,6 @@ public class Constants {
     public static final String MY_PHONE_IMG = "TRACKR_MY_PHONE_IMG";
 
     public static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
-
 
 
 }

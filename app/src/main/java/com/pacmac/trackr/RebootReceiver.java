@@ -5,6 +5,9 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
+import android.util.Log;
+
+import java.util.List;
 
 /**
  * Created by pacmac on 28/04/16.
@@ -13,20 +16,13 @@ import android.os.Build;
 public class RebootReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-
         SharedPreferences preferences = context.getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, context.MODE_PRIVATE);
-        boolean isTrackingOn = preferences.getBoolean(Constants.TRACKING_STATE, false);
-        long updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 && updateFreq < 15*60*1000L) {
-            updateFreq = 15*60*1000L;
-        }
+        Utility.startTrackingService(context, preferences);
 
-        if (isTrackingOn) {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                Intent intentService = new Intent(context, LocationService.class);
-                context.startService(intentService);
-            } else {
-                JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+            List<LocationRecord> userRecords = Utility.convertJsonStringToUserRecords(context.getFilesDir() + Constants.JSON_LOC_FILE_NAME);
+            if (userRecords.size() > 0 && !userRecords.get(0).getRecId().equals("")) {
+                Utility.startFetchingService(context);
             }
         }
     }

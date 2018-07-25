@@ -9,6 +9,8 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
@@ -124,8 +126,7 @@ public class Utility {
     }
 
 
-
-//     This is util method to delete unused ID from Firebase DB
+    //     This is util method to delete unused ID from Firebase DB
     protected static void deleteUnusedIdFromFb() {
         final long timeThreshold = System.currentTimeMillis() - Constants.OLD_ID_THRESHOLD; // 7 days
 
@@ -581,8 +582,8 @@ public class Utility {
     protected static void startTrackingService(Context context, final SharedPreferences preferences) {
         boolean isTrackingOn = preferences.getBoolean(Constants.TRACKING_STATE, false);
         long updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
-        if(Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 && updateFreq < 15*60*1000L) {
-            updateFreq = 15*60*1000L;
+        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 && updateFreq < 15 * 60 * 1000L) {
+            updateFreq = 15 * 60 * 1000L;
         }
         if (isTrackingOn && (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1
                 || !isMyServiceRunning(context, LocationService.class))) {
@@ -593,6 +594,18 @@ public class Utility {
                 context.startService(intentService);
             } else {
                 JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
+            }
+        }
+    }
+
+    protected static void startFetchingService(Context context) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O && !isMyServiceRunning(context, FetchFirebaseData.class)) {
+            Intent intentService = new Intent(context, FetchFirebaseData.class);
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                context.startService(intentService);
+            } else {
+                // TODO add job for this.
+                // JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
             }
         }
     }
@@ -699,7 +712,21 @@ public class Utility {
         return sb.toString();
     }
 
-
+    protected static boolean checkConnectivity(Context context) {
+        try {
+            ConnectivityManager conn = (ConnectivityManager) context
+                    .getSystemService(Context.CONNECTIVITY_SERVICE);
+            NetworkInfo activeNetwork = conn.getActiveNetworkInfo();
+            if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
+                return true;
+            } else {
+                return false;
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
 
 
 }

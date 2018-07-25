@@ -101,7 +101,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private boolean isAddressResolverRegistred = false;
     private boolean isRefreshListHandlerRegistred = false;
 
-    private int bottomBarheight = 0;
     private int currentTracker = 0;
     private int refreshCounter = 0;
     private int REFRESH_DELAY = 60 * 1000;
@@ -204,7 +203,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
         appBarCollapsable = findViewById(R.id.appBarCollapsable);
 
-        checkConnectivity();
+        isConnected = Utility.checkConnectivity(getApplicationContext());
         Utility.startTrackingService(getApplicationContext(), preferences);
         showUpdateDialog();
         showRateMyAppDialog();
@@ -317,6 +316,9 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 Utility.createJsonArrayStringFromUserRecords(userRecords));
         if (isRefreshListHandlerRegistred) {
             stopRefreshListTimer();
+        }
+        if (userRecords.size() > 0) {
+            Utility.startFetchingService(getApplicationContext());
         }
     }
 
@@ -485,18 +487,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 .build();
         startActivityForResult(intent, 8213);
     }
-
-    private void checkConnectivity() {
-        ConnectivityManager conn = (ConnectivityManager) this
-                .getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo activeNetwork = conn.getActiveNetworkInfo();
-        if (activeNetwork != null && activeNetwork.isConnectedOrConnecting()) {
-            isConnected = true;
-        } else {
-            isConnected = false;
-        }
-    }
-
 
     private void createDefaultIdsAndMyPhoneRow() {
 
