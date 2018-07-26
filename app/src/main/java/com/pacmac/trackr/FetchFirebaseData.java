@@ -53,8 +53,8 @@ public class FetchFirebaseData extends Service {
                 handler.postDelayed(this, 10 * 60 * 1000L);
                 return;
             }
-            retrieveLocation();
             handler.postDelayed(this, 20 * 60 * 1000L);
+            retrieveLocation();
         }
     };
 

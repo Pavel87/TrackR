@@ -100,9 +100,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private boolean skipfbCallOnReconfiguration = false;
     private boolean isAddressResolverRegistred = false;
     private boolean isRefreshListHandlerRegistred = false;
+    private boolean isFirstAppRun = false;
 
     private int currentTracker = 0;
     private int refreshCounter = 0;
+    private int FIRST_RUN_FETCH_DELAY = 5 * 1000;
     private int REFRESH_DELAY = 60 * 1000;
     private int REFRESH_DELAY_SHORT = 20 * 1000;
 
@@ -147,7 +149,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 MODE_PRIVATE);
         isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(), LOCATION_PERMISSION);
 
-        if (preferences.getBoolean(Constants.FIRST_RUN, true)) {
+        isFirstAppRun = preferences.getBoolean(Constants.FIRST_RUN, true);
+        if (isFirstAppRun) {
             createDefaultIdsAndMyPhoneRow();
             if (!isPermissionEnabled) {
                 showDialogForUserToEnableTracking();
@@ -299,7 +302,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         }
         showUsersLocationOnMap(shouldAnimateMap);
         if (userRecords.size() > 0 && checkIfshouldTryRetrieveDevicePosition()) {
-            startRefreshListTimer(REFRESH_DELAY);
+            if(isFirstAppRun) {
+                isFirstAppRun = false;
+                startRefreshListTimer(FIRST_RUN_FETCH_DELAY);
+            } else {
+                startRefreshListTimer(REFRESH_DELAY);
+            }
         } else {
             startRefreshListTimer(REFRESH_DELAY_SHORT);
         }
@@ -483,9 +491,9 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
     private void onInviteClicked() {
         Intent intent = new AppInviteInvitation.IntentBuilder("Android TrackeR")
-                .setMessage("Try this NEW Android TrackeR app!")
+                .setMessage(getApplicationContext().getString(R.string.invite_subject))
                 .setDeepLink(Uri.parse("https://play.google.com/store/apps/details?id=com.pacmac.trackr"))
-                .setCallToActionText("Install App")
+                .setCallToActionText(getApplicationContext().getString(R.string.invite_action))
                 .build();
         startActivityForResult(intent, 8213);
     }

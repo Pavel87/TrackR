@@ -81,7 +81,7 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         });
 
         ((ViewHolderForRow) holder).alias.setText(mDataset.get(position).getAlias());
-        ((ViewHolderForRow) holder).lastUpdateTime.setText(Utility.getLastUpdateString(mDataset.get(position).getTimestamp()));
+        ((ViewHolderForRow) holder).lastUpdateTime.setText(Utility.getLastUpdateString(context, mDataset.get(position).getTimestamp()));
         ((ViewHolderForRow) holder).address.setText(mDataset.get(position).getAddress());
         ((ViewHolderForRow) holder).cellQualityText.setText(getSignalQualityText(mDataset.get(position).getCellQuality(), ((ViewHolderForRow) holder).cellQualityIndicator));
         // if small density (< xhdpi) then hide cell quality text
@@ -161,40 +161,29 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         switch (level) {
             case 0:
                 indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
-                return SignalQuality.Poor.name();
+                return context.getResources().getString(R.string.sig_poor);
             case 1:
                 indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_poor));
-                return SignalQuality.Bad.name();
+                return context.getResources().getString(R.string.sig_bad);
             case 2:
                 indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_avg));
-                return SignalQuality.Average.name();
+                return context.getResources().getString(R.string.sig_average);
             case 3:
                 indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_good));
-                return SignalQuality.Good.name();
+                return context.getResources().getString(R.string.sig_good);
             case 4:
                 indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_full));
-                return SignalQuality.Great.name();
-
+                return context.getResources().getString(R.string.sig_great);
             default:
                 indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
-                return SignalQuality.NA.name();
+                return "";
         }
-
     }
 
     protected interface TrackListItemSelectedListener {
         void OnItemSelected(int position);
 
         void OnItemEditClicked(int position);
-    }
-
-    private enum SignalQuality {
-        Great,
-        Good,
-        Average,
-        Bad,
-        Poor,
-        NA
     }
 
 }

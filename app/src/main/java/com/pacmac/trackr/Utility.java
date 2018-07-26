@@ -85,7 +85,8 @@ public class Utility {
 
         final Activity mActivity = act;
         AlertDialog.Builder builder = new AlertDialog.Builder(act, 0)
-                .setCancelable(true).setMessage(act.getString(R.string.location_message)).setTitle("Missing Permission")
+                .setCancelable(true).setMessage(act.getString(R.string.location_message))
+                .setTitle(act.getApplicationContext().getResources().getString(R.string.dialog_title_missing_permission))
                 .setPositiveButton((act.getResources().getString(R.string.request_perm)), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -685,7 +686,7 @@ public class Utility {
     private static int HOUR_LENGTH = 60 * 60;
     private static int MINUTE_LENGTH = 60;
 
-    protected static String getLastUpdateString(long lastSeen) {
+    protected static String getLastUpdateString(Context context, long lastSeen) {
 
         if (lastSeen == 0) {
             return "Pending location update.";
@@ -706,10 +707,10 @@ public class Utility {
         long mins = diffSec % DAY_LENGTH % HOUR_LENGTH / MINUTE_LENGTH;
 
         if (days < 1 && hours < 1 && mins < 1) {
-            return "Just Now.";
+            return context.getResources().getString(R.string.just_now);
         }
         StringBuilder sb = new StringBuilder();
-        sb.append("Last seen ");
+        sb.append(context.getResources().getString(R.string.last_seen));
         if (days > 0) {
             sb.append(String.valueOf(days) + "d ");
         }
@@ -719,7 +720,7 @@ public class Utility {
         if (mins > 0) {
             sb.append(String.valueOf(mins) + "min ");
         }
-        sb.append("ago.");
+        sb.append(context.getResources().getString(R.string.ago));
         return sb.toString();
     }
 

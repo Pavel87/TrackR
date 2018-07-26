@@ -191,7 +191,7 @@
                     android:layout_weight="3.5"
                     android:fontFamily="sans-serif-light"
                     android:gravity="left"
-                    android:text="Display this device in list"
+                    android:text="@string/show_dev_inlist"
                     android:textColor="@android:color/black"
                     android:textSize="22sp"/>
 
@@ -229,7 +229,7 @@
                     android:layout_weight="3.5"
                     android:fontFamily="sans-serif-light"
                     android:gravity="left"
-                    android:text="Enable Guard"
+                    android:text="@string/lock_settings"
                     android:textColor="@android:color/black"
                     android:textSize="22sp"/>
 
