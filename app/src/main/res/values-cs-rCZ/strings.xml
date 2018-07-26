@@ -55,7 +55,7 @@
     <string name="rta_dialog_message">Budeme poctěni pokud můžete obětovat pár vteřin hodnocením této aplikace na Google Play Store. Také budeme velmi rádi za jakékoliv připomínky a náměty na nové funkce.</string>
     <string name="request_perm">Pokračovat</string>
     <string name="rateit">HODNOTIT</string>
-    <string name="last_seen">"Viděn před "</string>
+    <string name="last_seen">"Naposled před "</string>
     <string name="just_now">Právě teď</string>
     <string name="ago">" "</string>
     <string name="sig_good">Dobrý</string>
