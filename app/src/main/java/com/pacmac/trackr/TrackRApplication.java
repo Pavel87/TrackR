@@ -2,6 +2,7 @@ package com.pacmac.trackr;
 
 import android.app.Application;
 import android.os.Build;
+import android.util.Log;
 
 import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
 
@@ -11,17 +12,30 @@ import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
  */
 public class TrackRApplication extends Application {
 
+    private static boolean useAltDatabase = true;
+
     @Override
     public void onCreate() {
         super.onCreate();
 
+
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
             try {
-                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this, false);
+//                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this, false);
 //                FirebaseDatabase.getInstance().setLogLevel(Logger.Level.valueOf("DEBUG"));
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
+    }
+
+    public static boolean isUseAltDatabase() {
+        return useAltDatabase;
+    }
+
+    public static void setUseAltDatabase(boolean useAltDatabase) {
+        TrackRApplication.useAltDatabase = useAltDatabase;
+        Log.d("PACMAC", "USE ALT DB: " + useAltDatabase);
     }
 }

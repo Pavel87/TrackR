@@ -167,8 +167,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             loadUserRecordsFromFile();
         }
 
-        database = FirebaseDatabase.getInstance();
-        dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+//            database = FirebaseDatabase.getInstance();
+//            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+        database = FirebaseSetup.initializeDB(getApplicationContext(), TrackRApplication.isUseAltDatabase());
+        dbReference = database.getReference();
+
 
         // restore location on reconfiguration
         if (savedInstanceState != null) {
@@ -490,12 +493,13 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void onInviteClicked() {
-        Intent intent = new AppInviteInvitation.IntentBuilder("Android TrackeR")
-                .setMessage(getApplicationContext().getString(R.string.invite_subject))
-                .setDeepLink(Uri.parse("https://play.google.com/store/apps/details?id=com.pacmac.trackr"))
-                .setCallToActionText(getApplicationContext().getString(R.string.invite_action))
-                .build();
-        startActivityForResult(intent, 8213);
+        TrackRApplication.setUseAltDatabase(false);
+//        Intent intent = new AppInviteInvitation.IntentBuilder("Android TrackeR")
+//                .setMessage(getApplicationContext().getString(R.string.invite_subject))
+//                .setDeepLink(Uri.parse("https://play.google.com/store/apps/details?id=com.pacmac.trackr"))
+//                .setCallToActionText(getApplicationContext().getString(R.string.invite_action))
+//                .build();
+//        startActivityForResult(intent, 8213);
     }
 
     private void createDefaultIdsAndMyPhoneRow() {

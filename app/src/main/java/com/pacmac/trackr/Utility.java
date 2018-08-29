@@ -128,11 +128,14 @@ public class Utility {
 
 
     //     This is util method to delete unused ID from Firebase DB
-    protected static void deleteUnusedIdFromFb() {
+    protected static void deleteUnusedIdFromFb(Context context) {
         final long timeThreshold = System.currentTimeMillis() - Constants.OLD_ID_THRESHOLD; // 7 days
 
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        final DatabaseReference dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        final DatabaseReference dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+        FirebaseDatabase database = FirebaseSetup.initializeDB(context, TrackRApplication.isUseAltDatabase());
+        final DatabaseReference dbReference = database.getReference();
+
         dbReference.goOnline();
         Log.d(Constants.TAG, "Firebase goes online");
         dbReference.addListenerForSingleValueEvent(new ValueEventListener() {

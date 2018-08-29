@@ -185,7 +185,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 if (password.length() > 0 && password.length() < 33) {
 
                     if (password.equals("p@cmacDEVdb2016")) {
-                        Utility.deleteUnusedIdFromFb();
+                        Utility.deleteUnusedIdFromFb(getApplicationContext());
                         Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error), 0);
                         return;
                     } else if(password.equals("p@cmac1")) {

@@ -68,14 +68,16 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
         this.context = context;
         preferences = context.getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, Context.MODE_PRIVATE);
         updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
-        initializeGPSandFirebase();
+        initializeGPSandFirebase(context);
     }
 
-    private void initializeGPSandFirebase() {
+    private void initializeGPSandFirebase(Context context) {
         try {
-            database = FirebaseDatabase.getInstance();
-            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
-        } catch (IllegalStateException e) {
+//            database = FirebaseDatabase.getInstance();
+//            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+            database = FirebaseSetup.initializeDB(context, TrackRApplication.isUseAltDatabase());
+            dbReference = database.getReference();
+        } catch (Exception e) {
             e.printStackTrace();
             return;
         }
@@ -93,7 +95,7 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
     }
 
     protected void getLocation() {
-        if(mGoogleApiClient.isConnected() && System.currentTimeMillis() > lastLocationTime + DELAY_LOCATION) {
+        if(mGoogleApiClient != null && mGoogleApiClient.isConnected() && System.currentTimeMillis() > lastLocationTime + DELAY_LOCATION) {
             newLocation(getLastKnownLocation());
         }
     }

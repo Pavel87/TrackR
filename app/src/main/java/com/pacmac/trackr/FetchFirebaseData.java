@@ -112,8 +112,10 @@ public class FetchFirebaseData extends Service {
         }
 
         lastFirebaseFetchTimestamp = System.currentTimeMillis();
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+//        FirebaseDatabase database = FirebaseDatabase.getInstance();
+//        dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
+        FirebaseDatabase database = FirebaseSetup.initializeDB(getApplicationContext(), TrackRApplication.isUseAltDatabase());
+        dbReference = database.getReference();
 
         dbReference.goOnline();
         Log.d(TAG, "Firebase goes online");
