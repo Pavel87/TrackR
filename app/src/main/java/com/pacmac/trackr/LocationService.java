@@ -183,7 +183,7 @@ public class LocationService extends Service implements LocationListener, Google
         dbReference.child(child).child("longitude").setValue(newLocation.getLongitude());
         dbReference.child(child).child("timestamp").setValue(time);
         dbReference.child(child).child("cellQuality").setValue(cellQuality);
-        dbReference.child(child).child("id").setValue(2);
+        dbReference.child(child).child("id").setValue(3);
 
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();

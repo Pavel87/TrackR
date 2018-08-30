@@ -44,8 +44,8 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
 
     private Context context = null;
     private GoogleApiClient mGoogleApiClient;
-    private FirebaseDatabase database;
-    private DatabaseReference dbReference;
+//    private FirebaseDatabase database;
+//    private DatabaseReference dbReference;
     private SharedPreferences preferences;
     private String child = null;
 
@@ -75,8 +75,8 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
         try {
 //            database = FirebaseDatabase.getInstance();
 //            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
-            database = FirebaseSetup.initializeDB(context, TrackRApplication.isUseAltDatabase());
-            dbReference = database.getReference();
+//            database = FirebaseSetup.initializeDB(context, TrackRApplication.isUseAltDatabase());
+//            dbReference = database.getReference();
         } catch (Exception e) {
             e.printStackTrace();
             return;
@@ -117,7 +117,7 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        dbReference.goOffline();
+//        dbReference.goOffline();
     }
 
     @Override
@@ -133,20 +133,22 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
         lastLocationTime = time;
         double batteryLevel = Math.round(getBatteryLevel() * 100.0) / 100.0;
         int cellQuality = getCellSignalQuality(context);
-        dbReference.goOnline();
+//        dbReference.goOnline();
         Log.d(TAG, "Firebase goes online - attempt to update location");
-        dbReference.keepSynced(false);
+//        dbReference.keepSynced(false);
 
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
 
-        dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel() + 0.01);
-        dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
-        dbReference.child(child).child("longitude").setValue(newLocation.getLongitude());
-        dbReference.child(child).child("timestamp").setValue(time);
-        dbReference.child(child).child("cellQuality").setValue(cellQuality);
-        dbReference.child(child).child("id").setValue(2);
-        dbReference.goOffline();
+        FirebaseUpload.firestormUpload(newLocation, child);
+
+//        dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel() + 0.01);
+//        dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
+//        dbReference.child(child).child("longitude").setValue(newLocation.getLongitude());
+//        dbReference.child(child).child("timestamp").setValue(time);
+//        dbReference.child(child).child("cellQuality").setValue(cellQuality);
+//        dbReference.child(child).child("id").setValue(3);
+//        dbReference.goOffline();
 
         if(listener != null) {
             listener.newLocationUploadFinished();

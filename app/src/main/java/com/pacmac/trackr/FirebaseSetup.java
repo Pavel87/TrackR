@@ -15,6 +15,8 @@ public final class FirebaseSetup {
             .setApplicationId("1:420014880695:android:82b90970f95226b2") // Required for Analytics.
             .setApiKey("AIzaSyBnbgddQpJipRY4oHyeNfscKv2FF7KkTVg") // Required for Auth.
             .setDatabaseUrl("https://trackr1.firebaseio.com") // Required for RTDB.
+            .setProjectId("firebase-trackr1")
+            .setStorageBucket("firebase-trackr1.appspot.com")
             .build();
 
     private static FirebaseOptions db2 = new FirebaseOptions.Builder()
@@ -25,6 +27,7 @@ public final class FirebaseSetup {
             .setStorageBucket("trackr2-backup.appspot.com")
             .build();
 
+    private static boolean isPrimaryDBInitialized = false;
     private static boolean isAlternativeDBInitialized = false;
 
     public static FirebaseDatabase initializeDB(Context context, boolean alternativeDB) {
@@ -37,7 +40,10 @@ public final class FirebaseSetup {
             }
             firebaseApp = FirebaseApp.getInstance("secondary");
         } else {
-            FirebaseApp.initializeApp(context /* Context */, db1, "primary");
+            if (!isPrimaryDBInitialized) {
+                FirebaseApp.initializeApp(context /* Context */, db1, "primary");
+                isPrimaryDBInitialized = true;
+            }
             // Retrieve secondary app.
             firebaseApp = FirebaseApp.getInstance("primary");
         }

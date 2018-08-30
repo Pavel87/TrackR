@@ -75,8 +75,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
     private GoogleMap mMap;
     private NetworkStateChangedReceiver connReceiver = null;
-    private FirebaseDatabase database;
-    private DatabaseReference dbReference;
+//    private FirebaseDatabase database;
+//    private DatabaseReference dbReference;
     private List<LocationRecord> userRecords = new ArrayList<>();
 
     private RecyclerView mRecyclerView;
@@ -169,8 +169,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
 //            database = FirebaseDatabase.getInstance();
 //            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
-        database = FirebaseSetup.initializeDB(getApplicationContext(), TrackRApplication.isUseAltDatabase());
-        dbReference = database.getReference();
+//        database = FirebaseSetup.initializeDB(getApplicationContext(), TrackRApplication.isUseAltDatabase());
+//        dbReference = database.getReference();
 
 
         // restore location on reconfiguration
@@ -654,81 +654,81 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             return;
         }
 
-        dbReference.goOnline();
+//        dbReference.goOnline();
         Log.d(TAG, "Firebase goes online");
-        dbReference.keepSynced(false);
+//        dbReference.keepSynced(false);
 
-        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                        for (int i = 0; i < userRecords.size(); i++) {
-                            if (snapshot.getKey().equals(userRecords.get(i).getSafeId())) {
-                                // Processing received data
-                                if (snapshot.hasChildren()) {
-
-                                    Map<String, Object> toDelete = new HashMap<>();
-
-                                    Long idLong = ((Long) snapshot.child("id").getValue());
-                                    double batteryLevel = -1;
-                                    if (idLong != null) {
-                                        // batteryLevelShould be sent if id is not null
-                                        batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
-                                    }
-                                    double latitude = (double) snapshot.child("latitude").getValue();
-                                    double longitude = (double) snapshot.child("longitude").getValue();
-                                    long timeStamp = (long) snapshot.child("timestamp").getValue();
-
-                                    // cellQuality will be null on older app versions
-                                    Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
-                                    int cellQuality = 0;
-                                    if (cellQualityLong != null) {
-                                        cellQuality = cellQualityLong.intValue();
-                                    }
-
-
-                                    Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + userRecords.get(i).getAlias());
-
-                                    // check if timestamps are same and if yes then don't
-                                    // update loc record to save duplicate porcessing
-
-                                    if (userRecords.get(i).getTimestamp() == timeStamp) {
-                                        if (userRecords.get(i).getAddress().equals("")
-                                                || userRecords.get(i).getAddress().equals(getResources().getString(R.string.address_not_found))
-                                                || userRecords.get(i).getAddress().equals(getResources().getString(R.string.address_loc_error))) {
-                                            getAddress(i);
-                                        }
-                                        continue;
-                                    }
-                                    // Store location and request addres translation
-                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality);
-                                    mAdapter.notifyItemChanged(i);
-                                    getAddress(i);
-                                    Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
-                                            Utility.createJsonArrayStringFromUserRecords(userRecords));
-
-                                }
-
-                            }
-                        }
-                    }
-                    dbReference.goOffline();
-                    Log.i(Constants.TAG, "Firebase goes offline");
-                    // Update location markers on the map.
-                    showUsersLocationOnMap(shouldAnimateMap);
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                dbReference.goOffline();
-                Log.i(Constants.TAG, "Update Cancelled1" + databaseError.getMessage());
-                Log.i(Constants.TAG, "Update Cancelled2" + databaseError.getDetails());
-
-            }
-        });
+//        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(DataSnapshot dataSnapshot) {
+//                {
+//                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
+//
+//                        for (int i = 0; i < userRecords.size(); i++) {
+//                            if (snapshot.getKey().equals(userRecords.get(i).getSafeId())) {
+//                                // Processing received data
+//                                if (snapshot.hasChildren()) {
+//
+//                                    Map<String, Object> toDelete = new HashMap<>();
+//
+//                                    Long idLong = ((Long) snapshot.child("id").getValue());
+//                                    double batteryLevel = -1;
+//                                    if (idLong != null) {
+//                                        // batteryLevelShould be sent if id is not null
+//                                        batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
+//                                    }
+//                                    double latitude = (double) snapshot.child("latitude").getValue();
+//                                    double longitude = (double) snapshot.child("longitude").getValue();
+//                                    long timeStamp = (long) snapshot.child("timestamp").getValue();
+//
+//                                    // cellQuality will be null on older app versions
+//                                    Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
+//                                    int cellQuality = 0;
+//                                    if (cellQualityLong != null) {
+//                                        cellQuality = cellQualityLong.intValue();
+//                                    }
+//
+//
+//                                    Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + userRecords.get(i).getAlias());
+//
+//                                    // check if timestamps are same and if yes then don't
+//                                    // update loc record to save duplicate porcessing
+//
+//                                    if (userRecords.get(i).getTimestamp() == timeStamp) {
+//                                        if (userRecords.get(i).getAddress().equals("")
+//                                                || userRecords.get(i).getAddress().equals(getResources().getString(R.string.address_not_found))
+//                                                || userRecords.get(i).getAddress().equals(getResources().getString(R.string.address_loc_error))) {
+//                                            getAddress(i);
+//                                        }
+//                                        continue;
+//                                    }
+//                                    // Store location and request addres translation
+//                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality);
+//                                    mAdapter.notifyItemChanged(i);
+//                                    getAddress(i);
+//                                    Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
+//                                            Utility.createJsonArrayStringFromUserRecords(userRecords));
+//
+//                                }
+//
+//                            }
+//                        }
+//                    }
+////                    dbReference.goOffline();
+//                    Log.i(Constants.TAG, "Firebase goes offline");
+//                    // Update location markers on the map.
+//                    showUsersLocationOnMap(shouldAnimateMap);
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(DatabaseError databaseError) {
+////                dbReference.goOffline();
+//                Log.i(Constants.TAG, "Update Cancelled1" + databaseError.getMessage());
+//                Log.i(Constants.TAG, "Update Cancelled2" + databaseError.getDetails());
+//
+//            }
+//        });
     }
 
     private void showUpdateDialog() {
