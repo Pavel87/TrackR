@@ -67,7 +67,7 @@ import java.util.Map;
  * Created by pacmac on 2017-08-05.
  */
 public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
-        NetworkStateListener, TrackListMainAdapter.TrackListItemSelectedListener {
+        NetworkStateListener, TrackListMainAdapter.TrackListItemSelectedListener, FirebaseDowloader.FirebaseDownloadCompleteListener {
 
     private static final String TAG = "TrackRMain";
 
@@ -655,7 +655,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         }
 
 //        dbReference.goOnline();
-        Log.d(TAG, "Firebase goes online");
+//        Log.d(TAG, "Firebase goes online");
 //        dbReference.keepSynced(false);
 
 //        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -919,6 +919,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
     public boolean isConnected() {
         return isConnected;
+    }
+
+    @Override
+    public void onDownloadCompleteListener(int id) {
+
     }
 }
 

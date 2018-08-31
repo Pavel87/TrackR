@@ -38,41 +38,4 @@ public final class FirebaseUpload {
 
     }
 
-
-    private void testFirestormREAD() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        DocumentReference docRef = db.collection("users").document("pavelTest3");
-        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
-                LocationTxObject locationTxObject = documentSnapshot.toObject(LocationTxObject.class);
-                Log.e("FIRESTORM_PACMAC", locationTxObject.toString());
-            }
-        });
-    }
-
-    private void testFirestormReadMulti() {
-        FirebaseFirestore db = FirebaseFirestore.getInstance();
-
-        String[] ids = new String[]{"pavelTest3", "pavelTest4", "pavelTest5"};
-
-        for (String id : ids) {
-            DocumentReference docRef = db.collection("users").document(id);
-            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-                @Override
-                public void onSuccess(DocumentSnapshot documentSnapshot) {
-                    LocationTxObject locationTxObject = documentSnapshot.toObject(LocationTxObject.class);
-                    Log.e("FIRESTORM_PACMAC", locationTxObject.toString());
-                }
-            })
-                    .addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            e.printStackTrace();
-                        }
-                    });
-        }
-    }
-
 }
