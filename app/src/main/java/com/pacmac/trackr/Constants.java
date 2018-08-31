@@ -41,7 +41,7 @@ public class Constants {
     public static final int TYPE_PASSWORD_NOT_ACTIVE = 3;
     public final static int TIME_BATTERY_OK = 20; // 20 * 60 * 1000;
     public final static int FB_REQUEST_TIMEOUT = 5 * 60 * 1000; // 5 minutes
-    public final static int OLD_ID_THRESHOLD = 7 * 24 * 60 * 60 * 1000; // 7 days
+    public final static int OLD_ID_THRESHOLD = 10 * 24 * 60 * 60 * 1000; // 7 days
     public final static int RATING_POPUP_ATTEMPTS = 7; // popup will show after user open the app 8 times
 
     public static final int TYPE_NORMAL = 0;

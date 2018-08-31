@@ -11,10 +11,7 @@ import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Point;
-import android.location.Geocoder;
 import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
@@ -38,7 +35,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.appinvite.AppInviteInvitation;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -46,11 +42,6 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.pacmac.trackr.mapmarker.IconGenerator;
 
 import org.json.JSONArray;
@@ -59,15 +50,13 @@ import org.json.JSONObject;
 
 import java.io.File;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Created by pacmac on 2017-08-05.
  */
 public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallback, GoogleMap.OnMapClickListener,
-        NetworkStateListener, TrackListMainAdapter.TrackListItemSelectedListener, FirebaseDowloader.FirebaseDownloadCompleteListener {
+        NetworkStateListener, TrackListMainAdapter.TrackListItemSelectedListener, FirebaseHandler.FirebaseDownloadCompleteListener {
 
     private static final String TAG = "TrackRMain";
 
@@ -291,6 +280,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     @Override
     protected void onResume() {
         super.onResume();
+        registerAddressResolverReceiver();
+
         shouldAnimateMap = true;
         refreshCounter = 0;
         if (userRecords.size() > 0 && Utility.checkPlayServices(this)) {
@@ -654,6 +645,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             return;
         }
 
+        FirebaseHandler.fetchFirebaseData(getApplicationContext(), userRecords, this);
 //        dbReference.goOnline();
 //        Log.d(TAG, "Firebase goes online");
 //        dbReference.keepSynced(false);
@@ -756,18 +748,18 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     }
 
 
-    private void getAddress(int rowId) {
-        registerAddressResolverReceiver();
-        if (Geocoder.isPresent()) {
-            Thread t = new Thread(new AddressResolverRunnable(getApplicationContext(), rowId, userRecords.get(rowId).getLatitude(),
-                    userRecords.get(rowId).getLongitude()));
-            t.setName("AddressResolverTrackR");
-            t.setDaemon(true);
-            t.start();
-        } else {
-            userRecords.get(rowId).setAddress(getResources().getString(R.string.not_available));
-        }
-    }
+//    private void getAddress(int rowId) {
+//        registerAddressResolverReceiver();
+//        if (Geocoder.isPresent()) {
+//            Thread t = new Thread(new AddressResolverRunnable(getApplicationContext(), rowId, userRecords.get(rowId).getLatitude(),
+//                    userRecords.get(rowId).getLongitude()));
+//            t.setName("AddressResolverTrackR");
+//            t.setDaemon(true);
+//            t.start();
+//        } else {
+//            userRecords.get(rowId).setAddress(getResources().getString(R.string.not_available));
+//        }
+//    }
 
     private void registerAddressResolverReceiver() {
         if (!isAddressResolverRegistred) {
@@ -922,8 +914,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     }
 
     @Override
-    public void onDownloadCompleteListener(int id) {
-
+    public void onDownloadCompleteListener(int row) {
+        mAdapter.notifyItemChanged(row);
     }
 }
 

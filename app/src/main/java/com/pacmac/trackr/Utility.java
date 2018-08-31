@@ -130,6 +130,8 @@ public class Utility {
     //     This is util method to delete unused ID from Firebase DB
     protected static void deleteUnusedIdFromFb(Context context) {
         final long timeThreshold = System.currentTimeMillis() - Constants.OLD_ID_THRESHOLD; // 7 days
+        FirebaseHandler.deleteUnusedIdFromFb(context);
+
 
 //        FirebaseDatabase database = FirebaseDatabase.getInstance();
 //        final DatabaseReference dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
@@ -713,7 +715,7 @@ public class Utility {
             return context.getResources().getString(R.string.just_now);
         }
         StringBuilder sb = new StringBuilder();
-        sb.append(context.getResources().getString(R.string.last_seen));
+        sb.append(context.getResources().getString(R.string.last_seen) + " ");
         if (days > 0) {
             sb.append(String.valueOf(days) + "d ");
         }

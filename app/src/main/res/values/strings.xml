@@ -80,7 +80,7 @@
     <string name="help_child_how_to_set_receiver">Adding devices is now simpler than ever and it can be done from the application main screen by tapping on button with plus symbol. You have to set alias for tracked phone and unique ID which is defined in phone which is transmitting its location. Optionally you can set image for better distinction between multiple tracked devices.</string>
 
 
-    <string name="last_seen">Last seen </string>
+    <string name="last_seen">Last seen</string>
     <string name="just_now">Just now</string>
     <string name="ago">ago.</string>
 
