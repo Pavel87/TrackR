@@ -20,9 +20,7 @@ import com.google.firebase.firestore.FirebaseFirestore;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class FirebaseHandler {
 
@@ -102,6 +100,9 @@ public final class FirebaseHandler {
                     }
                     return;
                 }
+                if (userRecord.getTimestamp() > recoveredUser.getTimestamp()) {
+                    return;
+                }
 
                 userRecord.setBatteryLevel(recoveredUser.getBatteryLevel());
                 userRecord.setCellQuality(recoveredUser.getCellQuality());
@@ -163,8 +164,6 @@ public final class FirebaseHandler {
                                 // Processing received data
                                 if (snapshot.hasChildren()) {
 
-                                    Map<String, Object> toDelete = new HashMap<>();
-
                                     Long idLong = ((Long) snapshot.child("id").getValue());
                                     double batteryLevel = -1;
                                     if (idLong != null) {
@@ -185,6 +184,9 @@ public final class FirebaseHandler {
 
                                     Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + listUserRecords.get(i).getAlias());
 
+                                    if (listUserRecords.get(i).getTimestamp() > timeStamp)  {
+                                        return;
+                                    }
                                     // check if timestamps are same and if yes then don't
                                     // update loc record to save duplicate porcessing
                                     if (listUserRecords.get(i).getTimestamp() == timeStamp) {
