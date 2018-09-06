@@ -100,4 +100,7 @@
     <string name="dialog_content_track_enable">If you want to enable tracking of this device click YES. Otherwise this device will be only capable to receive other device locations.</string>
 
 
+    <string name="app_update_needed">App update needed on this phone!</string>
+
+
 </resources>

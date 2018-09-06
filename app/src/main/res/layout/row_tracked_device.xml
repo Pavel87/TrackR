@@ -5,6 +5,7 @@
     android:orientation="vertical">
 
     <LinearLayout
+        android:id="@+id/mainView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
@@ -208,9 +209,12 @@
     </LinearLayout>
 
     <LinearLayout
+        android:id="@+id/obsoleteAppView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
+        android:paddingLeft="8dp"
+        android:paddingRight="4dp"
+        android:layout_alignBottom="@+id/mainView"
         android:background="@color/obsolete_box_bg"
         android:orientation="horizontal">
 
@@ -220,20 +224,25 @@
             android:layout_height="wrap_content"
             android:textSize="12sp"
             android:textColor="@color/white"
-            android:text="This is placeholder"
+            android:text="@string/app_update_needed"
             android:layout_gravity="center_vertical"
+            android:paddingRight="4dp"
             android:gravity="center_vertical"
             />
 
         <Button
+            android:id="@+id/dismissBtn"
             android:layout_width="0dp"
             android:layout_weight="0.5"
             android:layout_height="30dp"
-            android:textSize="12sp"
+            android:padding="4dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:elevation="8dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:textColor="@color/colorPrimary"
             style="?android:attr/borderlessButtonStyle"
-            android:text="BUTTON"/>
-
-
+            android:text="DISMISS"/>
     </LinearLayout>
 
 </RelativeLayout>

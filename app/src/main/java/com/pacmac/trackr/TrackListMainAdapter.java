@@ -7,7 +7,9 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
@@ -116,6 +118,14 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         }
         ((ViewHolderForRow) holder).profileImage.setImageDrawable(context.getResources().getDrawable(stockImages
                 .getResourceId(mDataset.get(position).getProfileImageId(), 0)));
+
+        ((ViewHolderForRow) holder).dismissObsoleteView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                ((ViewHolderForRow) holder).obsoleteAppView.setVisibility(View.GONE);
+                //TODO set preference to never show the obsoleteAppView
+            }
+        });
     }
 
     protected class ViewHolderForRow extends RecyclerView.ViewHolder {
@@ -129,6 +139,8 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         protected ImageView profileImage;
         protected ImageView cellQualityIndicator;
         protected TextView cellQualityText;
+        protected LinearLayout obsoleteAppView;
+        protected Button dismissObsoleteView;
 
         protected ViewHolderForRow(View rowView) {
             super(rowView);
@@ -141,6 +153,8 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
             profileImage = rowView.findViewById(R.id.profileImage);
             cellQualityIndicator = rowView.findViewById(R.id.cellServiceIndicator);
             cellQualityText = rowView.findViewById(R.id.cellService);
+            obsoleteAppView = rowView.findViewById(R.id.obsoleteAppView);
+            dismissObsoleteView = rowView.findViewById(R.id.dismissBtn);
         }
     }
 

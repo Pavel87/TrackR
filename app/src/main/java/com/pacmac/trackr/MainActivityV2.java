@@ -917,5 +917,10 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     public void onDownloadCompleteListener(int row) {
         mAdapter.notifyItemChanged(row);
     }
+
+    @Override
+    public void updateMap() {
+        showUsersLocationOnMap(shouldAnimateMap);
+    }
 }
 
