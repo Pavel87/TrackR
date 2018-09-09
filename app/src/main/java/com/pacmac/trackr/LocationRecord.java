@@ -36,7 +36,8 @@ public class LocationRecord {
         batteryLevel = -1;
     }
 
-    public void updateLocationRecord(double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality) {
+    public void updateLocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality) {
+        this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;

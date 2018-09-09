@@ -1,5 +1,23 @@
 package com.pacmac.trackr;
 
+import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.android.gms.appinvite.AppInviteInvitation;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.pacmac.trackr.mapmarker.IconGenerator;
+
 import android.Manifest;
 import android.app.Activity;
 import android.app.Dialog;
@@ -12,6 +30,7 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
@@ -35,23 +54,6 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-import com.google.android.gms.maps.CameraUpdateFactory;
-import com.google.android.gms.maps.GoogleMap;
-import com.google.android.gms.maps.OnMapReadyCallback;
-import com.google.android.gms.maps.SupportMapFragment;
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.LatLng;
-import com.google.android.gms.maps.model.MarkerOptions;
-import com.pacmac.trackr.mapmarker.IconGenerator;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.File;
-import java.util.ArrayList;
-import java.util.List;
-
 /**
  * Created by pacmac on 2017-08-05.
  */
@@ -64,8 +66,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
     private GoogleMap mMap;
     private NetworkStateChangedReceiver connReceiver = null;
-//    private FirebaseDatabase database;
-//    private DatabaseReference dbReference;
     private List<LocationRecord> userRecords = new ArrayList<>();
 
     private RecyclerView mRecyclerView;
@@ -90,6 +90,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private boolean isAddressResolverRegistred = false;
     private boolean isRefreshListHandlerRegistred = false;
     private boolean isFirstAppRun = false;
+    private boolean shouldShowObsoleteNotification = true;
 
     private int currentTracker = 0;
     private int refreshCounter = 0;
@@ -138,6 +139,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 MODE_PRIVATE);
         isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(), LOCATION_PERMISSION);
 
+        shouldShowObsoleteNotification = preferences.getBoolean(Constants.OBSOLETE_INFO, true);
+        if(!shouldShowObsoleteNotification && Utility.getDayOfMonth() < 23) {
+            shouldShowObsoleteNotification = true;
+            preferences.edit().putBoolean(Constants.OBSOLETE_INFO, shouldShowObsoleteNotification).apply();
+        }
+
         isFirstAppRun = preferences.getBoolean(Constants.FIRST_RUN, true);
         if (isFirstAppRun) {
             createDefaultIdsAndMyPhoneRow();
@@ -155,12 +162,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             }
             loadUserRecordsFromFile();
         }
-
-//            database = FirebaseDatabase.getInstance();
-//            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
-//        database = FirebaseSetup.initializeDB(getApplicationContext(), TrackRApplication.isUseAltDatabase());
-//        dbReference = database.getReference();
-
 
         // restore location on reconfiguration
         if (savedInstanceState != null) {
@@ -181,7 +182,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         mRecyclerView.setLayoutManager(mLayoutManager);
 
         // specify an adapter (see also next example)
-        mAdapter = new TrackListMainAdapter(userRecords, getApplicationContext());
+        mAdapter = new TrackListMainAdapter(userRecords, getApplicationContext(), shouldShowObsoleteNotification);
         mRecyclerView.setAdapter(mAdapter);
         mRecyclerView.setVerticalScrollBarEnabled(false);
 
@@ -281,6 +282,8 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     protected void onResume() {
         super.onResume();
         registerAddressResolverReceiver();
+
+        Utility.stopFetchingService(getApplicationContext());
 
         shouldAnimateMap = true;
         refreshCounter = 0;
@@ -409,7 +412,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 //                  int img = resultIntent.getIntExtra(Constants.EDIT_USER_IMG, -1);
                 // if position is = -1 then it is very new record
                 if (position == -1) {
-                    userRecords.add(new LocationRecord(userRecords.size(), id, Utility.checkAndReplaceForbiddenChars(id), alias, profileImageId));
+                    userRecords.add(new LocationRecord(-1, id, Utility.checkAndReplaceForbiddenChars(id), alias, profileImageId));
                     retrieveLocations = true;
                     mAdapter.notifyItemInserted(userRecords.size() - 1);
                 } else {
@@ -484,13 +487,12 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     }
 
     private void onInviteClicked() {
-        TrackRApplication.setUseAltDatabase(false);
-//        Intent intent = new AppInviteInvitation.IntentBuilder("Android TrackeR")
-//                .setMessage(getApplicationContext().getString(R.string.invite_subject))
-//                .setDeepLink(Uri.parse("https://play.google.com/store/apps/details?id=com.pacmac.trackr"))
-//                .setCallToActionText(getApplicationContext().getString(R.string.invite_action))
-//                .build();
-//        startActivityForResult(intent, 8213);
+        Intent intent = new AppInviteInvitation.IntentBuilder("Android TrackeR")
+                .setMessage(getApplicationContext().getString(R.string.invite_subject))
+                .setDeepLink(Uri.parse("https://play.google.com/store/apps/details?id=com.pacmac.trackr"))
+                .setCallToActionText(getApplicationContext().getString(R.string.invite_action))
+                .build();
+        startActivityForResult(intent, 8213);
     }
 
     private void createDefaultIdsAndMyPhoneRow() {
@@ -505,6 +507,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         editor.commit();
 
         if (isPermissionEnabled) {
+            Log.d(TAG, "IN createDefaultIdsAndMyPhoneRow");
             userRecords = Utility.convertJsonStringToUserRecords(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
             userRecords.add(new LocationRecord(-10, trackId, trackId, "My Phone", -1));
             Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
@@ -644,90 +647,14 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             skipfbCallOnReconfiguration = false;
             return;
         }
-
         FirebaseHandler.fetchFirebaseData(getApplicationContext(), userRecords, this);
-//        dbReference.goOnline();
-//        Log.d(TAG, "Firebase goes online");
-//        dbReference.keepSynced(false);
-
-//        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(DataSnapshot dataSnapshot) {
-//                {
-//                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-//
-//                        for (int i = 0; i < userRecords.size(); i++) {
-//                            if (snapshot.getKey().equals(userRecords.get(i).getSafeId())) {
-//                                // Processing received data
-//                                if (snapshot.hasChildren()) {
-//
-//                                    Map<String, Object> toDelete = new HashMap<>();
-//
-//                                    Long idLong = ((Long) snapshot.child("id").getValue());
-//                                    double batteryLevel = -1;
-//                                    if (idLong != null) {
-//                                        // batteryLevelShould be sent if id is not null
-//                                        batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
-//                                    }
-//                                    double latitude = (double) snapshot.child("latitude").getValue();
-//                                    double longitude = (double) snapshot.child("longitude").getValue();
-//                                    long timeStamp = (long) snapshot.child("timestamp").getValue();
-//
-//                                    // cellQuality will be null on older app versions
-//                                    Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
-//                                    int cellQuality = 0;
-//                                    if (cellQualityLong != null) {
-//                                        cellQuality = cellQualityLong.intValue();
-//                                    }
-//
-//
-//                                    Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + userRecords.get(i).getAlias());
-//
-//                                    // check if timestamps are same and if yes then don't
-//                                    // update loc record to save duplicate porcessing
-//
-//                                    if (userRecords.get(i).getTimestamp() == timeStamp) {
-//                                        if (userRecords.get(i).getAddress().equals("")
-//                                                || userRecords.get(i).getAddress().equals(getResources().getString(R.string.address_not_found))
-//                                                || userRecords.get(i).getAddress().equals(getResources().getString(R.string.address_loc_error))) {
-//                                            getAddress(i);
-//                                        }
-//                                        continue;
-//                                    }
-//                                    // Store location and request addres translation
-//                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality);
-//                                    mAdapter.notifyItemChanged(i);
-//                                    getAddress(i);
-//                                    Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
-//                                            Utility.createJsonArrayStringFromUserRecords(userRecords));
-//
-//                                }
-//
-//                            }
-//                        }
-//                    }
-////                    dbReference.goOffline();
-//                    Log.i(Constants.TAG, "Firebase goes offline");
-//                    // Update location markers on the map.
-//                    showUsersLocationOnMap(shouldAnimateMap);
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(DatabaseError databaseError) {
-////                dbReference.goOffline();
-//                Log.i(Constants.TAG, "Update Cancelled1" + databaseError.getMessage());
-//                Log.i(Constants.TAG, "Update Cancelled2" + databaseError.getDetails());
-//
-//            }
-//        });
     }
 
     private void showUpdateDialog() {
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
-        if (!preferences.getString(Constants.NEW_UPDATE, "3.1.16").equals(appVersion)) {
-//            Utility.createAlertDialog(MainActivityV2.this);
+        if (!preferences.getString(Constants.NEW_UPDATE, "3.3.0").equals(appVersion)) {
+            Utility.createAlertDialog(MainActivityV2.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);
             editor.commit();

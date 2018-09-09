@@ -32,5 +32,4 @@ public final class JobSchedulerHelper {
         JobScheduler jobScheduler = (JobScheduler) context.getSystemService(Context.JOB_SCHEDULER_SERVICE);
         jobScheduler.cancel(LOCATION_JOB_ID);
     }
-
 }

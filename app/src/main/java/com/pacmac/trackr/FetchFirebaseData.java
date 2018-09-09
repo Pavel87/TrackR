@@ -1,35 +1,24 @@
 package com.pacmac.trackr;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.location.Geocoder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 public class FetchFirebaseData extends Service {
 
     private final static String TAG = "FetchFirebaseData";
     private List<LocationRecord> userRecords = new ArrayList<>();
-    private DatabaseReference dbReference = null;
     private boolean isAddressResolverRegistred = false;
-
     private long lastFirebaseFetchTimestamp = 0L;
 
     private static final long ONE_HOUR = 60 * 60L;
@@ -112,96 +101,10 @@ public class FetchFirebaseData extends Service {
         }
 
         lastFirebaseFetchTimestamp = System.currentTimeMillis();
-//        FirebaseDatabase database = FirebaseDatabase.getInstance();
-//        dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
-        FirebaseDatabase database = FirebaseSetup.initializeDB(getApplicationContext(), TrackRApplication.isUseAltDatabase());
-        dbReference = database.getReference();
-
-        dbReference.goOnline();
-        Log.d(TAG, "Firebase goes online");
-        dbReference.keepSynced(false);
-
-        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                {
-                    for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-
-                        for (int i = 0; i < userRecords.size(); i++) {
-                            if (snapshot.getKey().equals(userRecords.get(i).getSafeId())) {
-                                // Processing received data
-                                if (snapshot.hasChildren()) {
-
-                                    Map<String, Object> toDelete = new HashMap<>();
-
-                                    Long idLong = ((Long) snapshot.child("id").getValue());
-                                    double batteryLevel = -1;
-                                    if (idLong != null) {
-                                        // batteryLevelShould be sent if id is not null
-                                        batteryLevel = Double.parseDouble(String.valueOf(snapshot.child("batteryLevel").getValue()));
-                                    }
-                                    double latitude = (double) snapshot.child("latitude").getValue();
-                                    double longitude = (double) snapshot.child("longitude").getValue();
-                                    long timeStamp = (long) snapshot.child("timestamp").getValue();
-
-                                    // cellQuality will be null on older app versions
-                                    Long cellQualityLong = (Long) snapshot.child("cellQuality").getValue();
-                                    int cellQuality = 0;
-                                    if (cellQualityLong != null) {
-                                        cellQuality = cellQualityLong.intValue();
-                                    }
-
-
-                                    Log.i(Constants.TAG, "Recovered data from FB for id: " + i + " alias: " + userRecords.get(i).getAlias());
-
-                                    // check if timestamps are same and if yes then don't
-                                    // update loc record to save duplicate porcessing
-
-                                    if (userRecords.get(i).getTimestamp() == timeStamp) {
-                                        if (userRecords.get(i).getAddress().equals("")
-                                                || userRecords.get(i).getAddress().equals(getResources().getString(R.string.address_not_found))
-                                                || userRecords.get(i).getAddress().equals(getResources().getString(R.string.address_loc_error))) {
-                                            getAddress(i);
-                                        }
-                                        continue;
-                                    }
-                                    // Store location and request addres translation
-                                    userRecords.get(i).updateLocationRecord(latitude, longitude, timeStamp, batteryLevel, cellQuality);
-                                    Utility.saveJsonStringToFile(getFilesDir() + Constants.JSON_LOC_FILE_NAME,
-                                            Utility.createJsonArrayStringFromUserRecords(userRecords));
-
-                                }
-
-                            }
-                        }
-                    }
-                    dbReference.goOffline();
-                    Log.i(Constants.TAG, "Firebase goes offline");
-                    // Update location markers on the map.
-                }
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                dbReference.goOffline();
-                Log.i(Constants.TAG, "Update Cancelled1" + databaseError.getMessage());
-                Log.i(Constants.TAG, "Update Cancelled2" + databaseError.getDetails());
-
-            }
-        });
-    }
-
-    private void getAddress(int rowId) {
         registerAddressResolverReceiver();
-        if (Geocoder.isPresent()) {
-            Thread t = new Thread(new AddressResolverRunnable(getApplicationContext(), rowId, userRecords.get(rowId).getLatitude(),
-                    userRecords.get(rowId).getLongitude()));
-            t.setName("AddressResolverTrackR");
-            t.setDaemon(true);
-            t.start();
-        } else {
-            userRecords.get(rowId).setAddress(getResources().getString(R.string.not_available));
-        }
+
+        /** FETCH FIRESTORM / FIREBASE DATA **/
+        FirebaseHandler.fetchFirebaseData(getApplicationContext(), userRecords, null);
     }
 
     private void registerAddressResolverReceiver() {

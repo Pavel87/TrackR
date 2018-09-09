@@ -216,6 +216,8 @@
         android:paddingRight="4dp"
         android:layout_alignBottom="@+id/mainView"
         android:background="@color/obsolete_box_bg"
+        android:visibility="invisible"
+        android:elevation="8dp"
         android:orientation="horizontal">
 
         <TextView

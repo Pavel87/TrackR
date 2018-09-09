@@ -1,34 +1,18 @@
 package com.pacmac.trackr;
 
-import android.annotation.SuppressLint;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.location.Location;
-import android.os.BatteryManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
-import android.telephony.TelephonyManager;
-import android.util.Log;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
 
-import java.util.List;
-
-import static android.content.Context.TELEPHONY_SERVICE;
+import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.location.Location;
+import android.os.Bundle;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by pacmac on 2018-07-24.
@@ -44,17 +28,14 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
 
     private Context context = null;
     private GoogleApiClient mGoogleApiClient;
-//    private FirebaseDatabase database;
-//    private DatabaseReference dbReference;
     private SharedPreferences preferences;
-    private String child = null;
+    private String trackingID = null;
 
     private static TrackLocationUpdateListener listener = null;
     private boolean isPermissionEnabled = true;
 
     private long lastLocationTime = 0L;
     private int updateFreq;
-
 
     public static LocationUpdate getLocationUpdateInstance(Context context, TrackLocationUpdateListener listener) {
         LocationUpdate.listener = listener;
@@ -72,16 +53,6 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
     }
 
     private void initializeGPSandFirebase(Context context) {
-        try {
-//            database = FirebaseDatabase.getInstance();
-//            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
-//            database = FirebaseSetup.initializeDB(context, TrackRApplication.isUseAltDatabase());
-//            dbReference = database.getReference();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
-
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(context)
                     .addConnectionCallbacks(this)
@@ -89,8 +60,8 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
                     .addApi(LocationServices.API)
                     .build();
         }
-        child = preferences.getString(Constants.TRACKING_ID, "Error");
-        if (child.equals("Error")) return;
+        trackingID = preferences.getString(Constants.TRACKING_ID, "Error");
+        if (trackingID.equals("Error")) return;
         mGoogleApiClient.connect();
     }
 
@@ -117,7 +88,6 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-//        dbReference.goOffline();
     }
 
     @Override
@@ -130,87 +100,16 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
             return;
         }
         long time = lastLocation.getTime();
+        if (time == lastLocationTime) {
+            return;
+        }
         lastLocationTime = time;
-        double batteryLevel = Math.round(getBatteryLevel() * 100.0) / 100.0;
-        int cellQuality = getCellSignalQuality(context);
-//        dbReference.goOnline();
-        Log.d(TAG, "Firebase goes online - attempt to update location");
-//        dbReference.keepSynced(false);
+        double batteryLevel = Utility.getBatteryLevel(context);
+        int cellQuality = Utility.getCellSignalQuality(context, isPermissionEnabled);
 
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
 
-        FirebaseUpload.firestormUpload(newLocation, child);
-
-//        dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel() + 0.01);
-//        dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
-//        dbReference.child(child).child("longitude").setValue(newLocation.getLongitude());
-//        dbReference.child(child).child("timestamp").setValue(time);
-//        dbReference.child(child).child("cellQuality").setValue(cellQuality);
-//        dbReference.child(child).child("id").setValue(3);
-//        dbReference.goOffline();
-
-        if(listener != null) {
-            listener.newLocationUploadFinished();
-        }
-    }
-
-
-    private float getBatteryLevel() {
-        Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
-        if(batteryIntent == null) {
-            return -1;
-        }
-        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-        // Error checking that probably isn't needed but I added just in case.
-        if (level == -1 || scale == -1) {
-            return -1;
-        }
-
-        return ((float) level / (float) scale) * 100.0f;
-    }
-
-    @SuppressLint("MissingPermission")
-    private int getCellSignalQuality(Context context) {
-        int cellQuality = -1;
-        try {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                return cellQuality;
-            }
-
-            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
-            if (telephonyManager == null) {
-                return cellQuality;
-            }
-
-            if (!isPermissionEnabled) {
-                return cellQuality;
-            }
-            List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
-            if (cellInfoList == null) {
-                return cellQuality;
-            }
-            for (CellInfo cell : cellInfoList) {
-                if (cell.isRegistered()) {
-                    if (cell instanceof CellInfoLte) {
-                        cellQuality = ((CellInfoLte) cell).getCellSignalStrength().getLevel();
-                    } else if (cell instanceof CellInfoWcdma) {
-                        cellQuality = ((CellInfoWcdma) cell).getCellSignalStrength().getLevel();
-                    } else if (cell instanceof CellInfoGsm) {
-                        cellQuality = ((CellInfoGsm) cell).getCellSignalStrength().getLevel();
-                    } else if (cell instanceof CellInfoCdma) {
-                        cellQuality = ((CellInfoCdma) cell).getCellSignalStrength().getLevel();
-                    }
-                    break;
-                }
-            }
-        } catch (Exception e){
-            e.printStackTrace();
-        }
-        return cellQuality;
-
+        FirebaseHandler.fireUpload(newLocation, trackingID, listener);
     }
 }

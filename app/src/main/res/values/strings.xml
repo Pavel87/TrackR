@@ -18,7 +18,7 @@
     <string name="location_message">Location Permission is required for correct application functionality.</string>
     <string name="request_perm">Request</string>
     <string name="new_update_title">New App Update v</string>
-    <string name="updateMsg1">- Map interaction issue fixed!</string>
+    <string name="updateMsg1">- Note that for correct functionality it is essential to update to the latest TrackeR version!</string>
     <string name="updateMsg3">- Crash Fixes.</string>
     <string name="rateApp">How do you like TrackR?</string>
     <string name="rta_dialog_message">TrackR development team is honoured by You using this app. Please take a few seconds and rate this app in Google Store. Also any kind of feedback or feature request is much appreciated.</string>

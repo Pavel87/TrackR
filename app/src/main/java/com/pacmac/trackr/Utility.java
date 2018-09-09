@@ -1,21 +1,31 @@
 package com.pacmac.trackr;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
+import android.os.BatteryManager;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.AppCompatCheckBox;
+import android.telephony.CellInfo;
+import android.telephony.CellInfoCdma;
+import android.telephony.CellInfoGsm;
+import android.telephony.CellInfoLte;
+import android.telephony.CellInfoWcdma;
+import android.telephony.SignalStrength;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
@@ -117,6 +127,12 @@ public class Utility {
                 + String.format("%02d", minute);
     }
 
+    public static int getDayOfMonth() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(System.currentTimeMillis());
+        return calendar.get(Calendar.DAY_OF_MONTH);
+    }
+
     public static String checkAndReplaceForbiddenChars(String id) {
         // Firebase paths must not contain '.', '#', '$', '[', or ']'
         // We have to make sure these chars will be replaced
@@ -126,48 +142,6 @@ public class Utility {
         return id.replace(".", ",").replace("#", "@").replace("$", "%").replace("[", "(").replace("[", "(");
     }
 
-
-    //     This is util method to delete unused ID from Firebase DB
-    protected static void deleteUnusedIdFromFb(Context context) {
-        final long timeThreshold = System.currentTimeMillis() - Constants.OLD_ID_THRESHOLD; // 7 days
-        FirebaseHandler.deleteUnusedIdFromFb(context);
-
-
-//        FirebaseDatabase database = FirebaseDatabase.getInstance();
-//        final DatabaseReference dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
-        FirebaseDatabase database = FirebaseSetup.initializeDB(context, TrackRApplication.isUseAltDatabase());
-        final DatabaseReference dbReference = database.getReference();
-
-        dbReference.goOnline();
-        Log.d(Constants.TAG, "Firebase goes online");
-        dbReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                for (DataSnapshot snapshot : dataSnapshot.getChildren()) {
-                    long timestamp = timeThreshold - 1;
-                    try {
-                        //Some stored keys might be in weird format likely because people use //\\
-                        timestamp = (long) snapshot.child("timestamp").getValue();
-                    } catch (Exception ex) {
-                        Log.d(Constants.TAG, "Error while deleting old records: " + ex.getMessage() + " " + snapshot.toString());
-                    }
-                    String id = snapshot.getKey();
-                    if (timestamp < timeThreshold) {
-                        Log.d(Constants.TAG, id + " ID was not updated in last 7 days - likely not in use anymore");
-                        dbReference.child(id).removeValue();
-//                        firebase.child(id).removeValue();
-                    }
-                }
-                Log.d(Constants.TAG, "Firebase goes offline");
-                dbReference.goOffline();
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Log.e(Constants.TAG, "DELETING UNUSED IDs WAS CANCELED");
-            }
-        });
-    }
 
 //TODO re-add this
 //    public static Intent createShareIntent(StringBuilder sb) {
@@ -508,29 +482,6 @@ public class Utility {
     }
 
 
-    public static HashMap<Integer, LocationRecord> convertJsonStringToLocList(String filePath) {
-        String jsonString = Utility.loadJsonStringFromFile(filePath);
-        if (jsonString.equals("")) {
-            return null;
-        }
-        HashMap<Integer, LocationRecord> locationRecList = new HashMap<>();
-        try {
-            JSONObject jsnobject = new JSONObject(jsonString);
-            JSONArray jsonArray = jsnobject.getJSONArray("locrecords");
-
-            for (int i = 0; i < jsonArray.length(); i++) {
-                LocationRecord locationRecord = Utility.createLocationRecordFromJson((JSONObject) jsonArray.get(i));
-                if (locationRecord != null) {
-                    locationRecList.put(locationRecord.getId(), locationRecord);
-                }
-            }
-            return locationRecList;
-        } catch (JSONException e) {
-            Log.e(Constants.TAG, "#7# Error getting LocRecord JSON obj or array. " + e.getMessage());
-        }
-        return null;
-    }
-
     public static List<LocationRecord> convertJsonStringToUserRecords(String filePath) {
         List<LocationRecord> userRecords = new ArrayList<>();
         String jsonString = Utility.loadJsonStringFromFile(filePath);
@@ -588,11 +539,12 @@ public class Utility {
     protected static void startTrackingService(Context context, final SharedPreferences preferences) {
         boolean isTrackingOn = preferences.getBoolean(Constants.TRACKING_STATE, false);
         long updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
+
+
         if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 && updateFreq < 15 * 60 * 1000L) {
             updateFreq = 15 * 60 * 1000L;
         }
-        if (isTrackingOn && (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1
-                || !isMyServiceRunning(context, LocationService.class))) {
+        if (isTrackingOn && (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 || !isMyServiceRunning(context, LocationService.class))) {
 
             Intent intentService = new Intent(context, LocationService.class);
 
@@ -605,7 +557,8 @@ public class Utility {
     }
 
     protected static void startFetchingService(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O && !isMyServiceRunning(context, FetchFirebaseData.class)) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+                && !isMyServiceRunning(context, FetchFirebaseData.class)) {
             Intent intentService = new Intent(context, FetchFirebaseData.class);
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 context.startService(intentService);
@@ -615,15 +568,21 @@ public class Utility {
             }
         }
     }
+
     protected static void stopFetchingService(Context context) {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O && isMyServiceRunning(context, FetchFirebaseData.class)) {
-            Intent intentService = new Intent(context, FetchFirebaseData.class);
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-                context.stopService(intentService);
-            } else {
-                // TODO add job for this.
-                // JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O
+                    && isMyServiceRunning(context, FetchFirebaseData.class)) {
+                Intent intentService = new Intent(context, FetchFirebaseData.class);
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                    context.stopService(intentService);
+                } else {
+                    // TODO add job for this.
+                    // JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
@@ -745,5 +704,72 @@ public class Utility {
         }
     }
 
+
+
+    @SuppressLint("MissingPermission")
+    public static int getCellSignalQuality(Context context, boolean isPermissionEnabled) {
+        int cellQuality = -1;
+        try {
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                return cellQuality;
+            }
+
+            TelephonyManager telephonyManager = (TelephonyManager) context
+                    .getSystemService(Context.TELEPHONY_SERVICE);
+            if (telephonyManager == null) {
+                return cellQuality;
+            }
+
+            if (!isPermissionEnabled) {
+                return cellQuality;
+            }
+
+            if (Build.VERSION.SDK_INT > Build.VERSION_CODES.O_MR1) {
+                SignalStrength signalStrength = telephonyManager.getSignalStrength();
+                if (signalStrength != null) {
+                    return signalStrength.getLevel();
+                }
+            }
+
+            List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
+            if (cellInfoList == null) {
+                return cellQuality;
+            }
+            for (CellInfo cell : cellInfoList) {
+                if (cell.isRegistered()) {
+                    if (cell instanceof CellInfoLte) {
+                        cellQuality = ((CellInfoLte) cell).getCellSignalStrength().getLevel();
+                    } else if (cell instanceof CellInfoWcdma) {
+                        cellQuality = ((CellInfoWcdma) cell).getCellSignalStrength().getLevel();
+                    } else if (cell instanceof CellInfoGsm) {
+                        cellQuality = ((CellInfoGsm) cell).getCellSignalStrength().getLevel();
+                    } else if (cell instanceof CellInfoCdma) {
+                        cellQuality = ((CellInfoCdma) cell).getCellSignalStrength().getLevel();
+                    }
+                    break;
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return cellQuality;
+    }
+
+
+    public static float getBatteryLevel(Context context) {
+        Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
+        if (batteryIntent == null) {
+            return -1;
+        }
+        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
+        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
+
+        // Error checking that probably isn't needed but I added just in case.
+        if (level == -1 || scale == -1) {
+            return -1;
+        }
+        float rawLevel = ((float) level / (float) scale) * 100.0f;
+        return (float) (0.01 + Math.round(rawLevel * 100.0) / 100.0);
+    }
 
 }

@@ -21,8 +21,6 @@ import android.widget.EditText;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -183,15 +181,11 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 String password = newPassword.getText().toString();
 
                 if (password.length() > 0 && password.length() < 33) {
-
                     if (password.equals("p@cmacDEVdb2016")) {
-                        Utility.deleteUnusedIdFromFb(getApplicationContext());
-                        Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error), 0);
+                        FirebaseHandler.deleteUnusedIdFromFb();
+                        Utility.showToast(getApplicationContext(),
+                                getResources().getString(R.string.pass_entry_error), 0);
                         return;
-                    } else if(password.equals("p@cmac1")) {
-                        TutelaSDKFactory.getTheSDK().userConsent(getApplicationContext(),true);
-                    } else if(password.equals("p@cmac2")) {
-                        TutelaSDKFactory.getTheSDK().userConsent(getApplicationContext(),false);
                     }
 
                     if (!isLocked) {
@@ -200,15 +194,17 @@ public class SettingsActivityV2 extends AppCompatActivity {
                         dialog.dismiss();
                     } else {
                         if (password.equals(parentalPass)) {
-                            savePassword(Constants.TYPE_PASSWORD_NOT_ACTIVE, null); //unlock
+                            savePassword(Constants.TYPE_PASSWORD_NOT_ACTIVE, null); // unlock
                             dialog.dismiss();
                         } else {
-                            Utility.showToast(getApplicationContext(), getResources().getString(R.string.pass_entry_error), 0);
+                            Utility.showToast(getApplicationContext(),
+                                    getResources().getString(R.string.pass_entry_error), 0);
                         }
                     }
 
                 } else {
-                    Utility.showToast(getApplicationContext(), getString(R.string.password_length_wrong), 0);
+                    Utility.showToast(getApplicationContext(),
+                            getString(R.string.password_length_wrong), 0);
                 }
             }
         });

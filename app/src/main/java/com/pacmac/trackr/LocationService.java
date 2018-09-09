@@ -1,43 +1,20 @@
 package com.pacmac.trackr;
 
-import android.Manifest;
-import android.annotation.SuppressLint;
-import android.app.Service;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.content.SharedPreferences;
-import android.location.Location;
-import android.os.BatteryManager;
-import android.os.Build;
-import android.os.Bundle;
-import android.os.IBinder;
-import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
-import android.telephony.CellInfo;
-import android.telephony.CellInfoCdma;
-import android.telephony.CellInfoGsm;
-import android.telephony.CellInfoLte;
-import android.telephony.CellInfoWcdma;
-import android.telephony.PhoneStateListener;
-import android.telephony.TelephonyManager;
-import android.util.Log;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import android.app.Service;
+import android.content.Intent;
+import android.content.SharedPreferences;
+import android.location.Location;
+import android.os.Bundle;
+import android.os.IBinder;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+import android.util.Log;
 
 /**
  * Created by pacmac on 28/04/16.
@@ -50,17 +27,15 @@ public class LocationService extends Service implements LocationListener, Google
 
     private GoogleApiClient mGoogleApiClient;
     private LocationRequest mLocationRequest;
-    private FirebaseDatabase database;
-    private DatabaseReference dbReference;
     private SharedPreferences preferences;
-    private String child = null;
+    private String trackingID = null;
     private boolean lastBatLevel = false;
 
     private boolean isPermissionEnabled = true;
 
     private int updateFreq = Constants.TIME_BATTERY_OK * 60 * 1000;
     private int updateFreqLowBat = updateFreq + 25 * 60 * 1000;
-
+    private long lastLocationTime = 0L;
     @Override
     public void onCreate() {
         super.onCreate();
@@ -77,17 +52,6 @@ public class LocationService extends Service implements LocationListener, Google
             return START_NOT_STICKY;
         }
 
-        try {
-//            database = FirebaseDatabase.getInstance();
-//            dbReference = database.getReferenceFromUrl("https://trackr1.firebaseio.com/");
-            database = FirebaseSetup.initializeDB(getApplicationContext(), TrackRApplication.isUseAltDatabase());
-            dbReference = database.getReference();
-        } catch (IllegalStateException e) {
-            e.printStackTrace();
-            stopSelf();
-            return START_NOT_STICKY;
-        }
-
         if (mGoogleApiClient == null) {
             mGoogleApiClient = new GoogleApiClient.Builder(this)
                     .addConnectionCallbacks(this)
@@ -96,8 +60,8 @@ public class LocationService extends Service implements LocationListener, Google
                     .build();
         }
         updateLocFreqTime();
-        child = preferences.getString(Constants.TRACKING_ID, "Error");
-        if (child.equals("Error")) stopSelf();
+        trackingID = preferences.getString(Constants.TRACKING_ID, "Error");
+        if (trackingID.equals("Error")) stopSelf();
 
         mGoogleApiClient.connect();
         Log.d(TAG, "LocationService Started");
@@ -148,7 +112,7 @@ public class LocationService extends Service implements LocationListener, Google
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        float level = getBatteryLevel();
+        float level =  Utility.getBatteryLevel(getApplicationContext());
         if (level >= 25) {
             createLocationRequest(updateFreq);
             Log.d(TAG, "Battery OK: " + level);
@@ -163,27 +127,23 @@ public class LocationService extends Service implements LocationListener, Google
 
     @Override
     public void onConnectionSuspended(int i) {
-
     }
 
     @Override
     public void onLocationChanged(Location lastLocation) {
-        long time = lastLocation.getTime();
-        double batteryLevel = Math.round(getBatteryLevel() * 100.0) / 100.0;
-        int cellQuality = getCellSignalQuality(getApplicationContext());
-        dbReference.goOnline();
-        Log.d(TAG, "Firebase goes online - attempt to update location");
-        dbReference.keepSynced(false);
+        Log.d(TAG, "TRACKR retrieved new LOCATION.");
 
+        long time = lastLocation.getTime();
+        if (time == lastLocationTime) {
+            return;
+        }
+        lastLocationTime = time;
+        double batteryLevel = Utility.getBatteryLevel(getApplicationContext());
+        int cellQuality = Utility.getCellSignalQuality(getApplicationContext(), isPermissionEnabled);
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
 
-        dbReference.child(child).child("batteryLevel").setValue(newLocation.getBatteryLevel() + 0.01);
-        dbReference.child(child).child("latitude").setValue(newLocation.getLatitude());
-        dbReference.child(child).child("longitude").setValue(newLocation.getLongitude());
-        dbReference.child(child).child("timestamp").setValue(time);
-        dbReference.child(child).child("cellQuality").setValue(cellQuality);
-        dbReference.child(child).child("id").setValue(3);
+        FirebaseHandler.fireUpload(newLocation, trackingID, null);
 
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();
@@ -198,71 +158,9 @@ public class LocationService extends Service implements LocationListener, Google
             createLocationRequest(updateFreqLowBat);
             startLocationUpdates();
         }
-        dbReference.goOffline();
     }
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        dbReference.goOffline();
     }
-
-    public float getBatteryLevel() {
-        Intent batteryIntent = registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
-
-        if (batteryIntent == null) {
-            return -1;
-        }
-
-        int level = batteryIntent.getIntExtra(BatteryManager.EXTRA_LEVEL, -1);
-        int scale = batteryIntent.getIntExtra(BatteryManager.EXTRA_SCALE, -1);
-
-        // Error checking that probably isn't needed but I added just in case.
-        if (level == -1 || scale == -1) {
-            return -1;
-        }
-
-        return ((float) level / (float) scale) * 100.0f;
-    }
-
-    @SuppressLint("MissingPermission")
-    private int getCellSignalQuality(Context context) {
-        int cellQuality = -1;
-        try {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                return cellQuality;
-            }
-
-            TelephonyManager telephonyManager = (TelephonyManager) context.getSystemService(TELEPHONY_SERVICE);
-            if (telephonyManager == null) {
-                return cellQuality;
-            }
-
-            if (!isPermissionEnabled) {
-                return cellQuality;
-            }
-            List<CellInfo> cellInfoList = telephonyManager.getAllCellInfo();
-            if (cellInfoList == null) {
-                return cellQuality;
-            }
-            for (CellInfo cell : cellInfoList) {
-                if (cell.isRegistered()) {
-                    if (cell instanceof CellInfoLte) {
-                        cellQuality = ((CellInfoLte) cell).getCellSignalStrength().getLevel();
-                    } else if (cell instanceof CellInfoWcdma) {
-                        cellQuality = ((CellInfoWcdma) cell).getCellSignalStrength().getLevel();
-                    } else if (cell instanceof CellInfoGsm) {
-                        cellQuality = ((CellInfoGsm) cell).getCellSignalStrength().getLevel();
-                    } else if (cell instanceof CellInfoCdma) {
-                        cellQuality = ((CellInfoCdma) cell).getCellSignalStrength().getLevel();
-                    }
-                    break;
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return cellQuality;
-
-    }
-
 }

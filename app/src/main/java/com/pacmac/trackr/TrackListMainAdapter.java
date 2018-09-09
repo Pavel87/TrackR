@@ -1,6 +1,7 @@
 package com.pacmac.trackr;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.res.TypedArray;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -14,16 +15,20 @@ import android.widget.TextView;
 
 import java.util.List;
 
+import io.grpc.okhttp.internal.Util;
+
+import static android.content.Context.MODE_PRIVATE;
+
 /**
  * Created by pacmac on 2017-08-05.
  */
-
 
 public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<LocationRecord> mDataset;
     private Context context;
     private TrackListItemSelectedListener listener = null;
+    private boolean showObsoleteInfo = false;
 
     protected void add(int position, LocationRecord record) {
         mDataset.add(record);
@@ -39,11 +44,17 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         notifyDataSetChanged();
     }
 
-
     // Provide a suitable constructor (depends on the kind of dataset)
-    protected TrackListMainAdapter(List<LocationRecord> myDataset, Context context) {
+    protected TrackListMainAdapter(List<LocationRecord> myDataset, Context context,
+            boolean obsoleteInfoPref) {
         mDataset = myDataset;
         this.context = context;
+
+        // SHOW DEPRECATED APP VERSION OVERLAY after 22 day of month as DB might be full
+        // onward.
+        if (obsoleteInfoPref && Utility.getDayOfMonth() > 22) {
+            showObsoleteInfo = true;
+        }
     }
 
     // Return the size of your dataset (invoked by the layout manager)
@@ -83,11 +94,14 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         });
 
         ((ViewHolderForRow) holder).alias.setText(mDataset.get(position).getAlias());
-        ((ViewHolderForRow) holder).lastUpdateTime.setText(Utility.getLastUpdateString(context, mDataset.get(position).getTimestamp()));
+        ((ViewHolderForRow) holder).lastUpdateTime.setText(
+                Utility.getLastUpdateString(context, mDataset.get(position).getTimestamp()));
         ((ViewHolderForRow) holder).address.setText(mDataset.get(position).getAddress());
-        ((ViewHolderForRow) holder).cellQualityText.setText(getSignalQualityText(mDataset.get(position).getCellQuality(), ((ViewHolderForRow) holder).cellQualityIndicator));
+        ((ViewHolderForRow) holder).cellQualityText
+                .setText(getSignalQualityText(mDataset.get(position).getCellQuality(),
+                        ((ViewHolderForRow) holder).cellQualityIndicator));
         // if small density (< xhdpi) then hide cell quality text
-        if(context.getResources().getConfiguration().densityDpi < 260) {
+        if (context.getResources().getConfiguration().densityDpi < 260) {
             ((ViewHolderForRow) holder).cellQualityText.setVisibility(View.GONE);
         }
 
@@ -96,7 +110,8 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
         if (batteryLevel == -1) {
             ((ViewHolderForRow) holder).batteryLevel.setText("NA");
         } else {
-            ((ViewHolderForRow) holder).batteryLevel.setText(String.format("%.0f", batteryLevel) + "%");
+            ((ViewHolderForRow) holder).batteryLevel
+                    .setText(String.format("%.0f", batteryLevel) + "%");
         }
         setBatteryIndicatorDrawable(((ViewHolderForRow) holder).batIndicator, batteryLevel);
         ((ViewHolderForRow) holder).userEdit.setOnClickListener(new View.OnClickListener() {
@@ -111,21 +126,33 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
 
         // Set image to default if some error happened
 
-        if(mDataset.get(position).getProfileImageId() >= stockImages.length()
+        if (mDataset.get(position).getProfileImageId() >= stockImages.length()
                 || mDataset.get(position).getProfileImageId() < 0) {
             // if image list was modified then set it to 0
             mDataset.get(position).setProfileImageId(0);
         }
-        ((ViewHolderForRow) holder).profileImage.setImageDrawable(context.getResources().getDrawable(stockImages
-                .getResourceId(mDataset.get(position).getProfileImageId(), 0)));
 
-        ((ViewHolderForRow) holder).dismissObsoleteView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ((ViewHolderForRow) holder).obsoleteAppView.setVisibility(View.GONE);
-                //TODO set preference to never show the obsoleteAppView
-            }
-        });
+        ((ViewHolderForRow) holder).profileImage
+                .setImageDrawable(context.getResources().getDrawable(stockImages
+                        .getResourceId(mDataset.get(position).getProfileImageId(), 0)));
+        
+        if (showObsoleteInfo && mDataset.get(position).getId() != -10
+                && mDataset.get(position).getId() != 4 && mDataset.get(position).getId() != -1) {
+            ((ViewHolderForRow) holder).obsoleteAppView.setVisibility(View.VISIBLE);
+
+            ((ViewHolderForRow) holder).dismissObsoleteView
+                    .setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            ((ViewHolderForRow) holder).obsoleteAppView
+                                    .setVisibility(View.INVISIBLE);
+                            showObsoleteInfo = false;
+                            SharedPreferences preferences = context.getSharedPreferences(
+                                    Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+                            preferences.edit().putBoolean(Constants.OBSOLETE_INFO, false).apply();
+                        }
+                    });
+        }
     }
 
     protected class ViewHolderForRow extends RecyclerView.ViewHolder {
@@ -161,12 +188,15 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
     private void setBatteryIndicatorDrawable(ImageView batteryIndicatorView, double batteryLevel) {
         if (context != null) {
             if (batteryLevel > 75) {
-                batteryIndicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.bat1));
+                batteryIndicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.bat1));
             } else if (batteryLevel > 20) {
-                batteryIndicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.bat2));
+                batteryIndicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.bat2));
 
             } else {
-                batteryIndicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.bat3));
+                batteryIndicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.bat3));
             }
         }
     }
@@ -174,22 +204,28 @@ public class TrackListMainAdapter extends RecyclerView.Adapter<RecyclerView.View
     private String getSignalQualityText(int level, ImageView indicatorView) {
         switch (level) {
             case 0:
-                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
+                indicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
                 return context.getResources().getString(R.string.sig_poor);
             case 1:
-                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_poor));
+                indicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.sig_poor));
                 return context.getResources().getString(R.string.sig_bad);
             case 2:
-                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_avg));
+                indicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.sig_avg));
                 return context.getResources().getString(R.string.sig_average);
             case 3:
-                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_good));
+                indicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.sig_good));
                 return context.getResources().getString(R.string.sig_good);
             case 4:
-                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_full));
+                indicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.sig_full));
                 return context.getResources().getString(R.string.sig_great);
             default:
-                indicatorView.setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
+                indicatorView
+                        .setImageDrawable(context.getResources().getDrawable(R.drawable.sig_none));
                 return "";
         }
     }

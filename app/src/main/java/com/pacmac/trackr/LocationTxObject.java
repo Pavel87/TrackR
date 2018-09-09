@@ -15,8 +15,11 @@ public class LocationTxObject {
     private double longitude, latitude;
     private Double batteryLevel = -1.0;
     private int cellQuality = -1;
-    private int id = 3;
+    private int id = 4;
 
+    /**
+     * public constructor used for re-constructing object from firestorm. DO NOT DELETE!
+     */
     public LocationTxObject() {
     }
 

@@ -25,6 +25,7 @@ public class Constants {
     public static final String FIRST_RUN = "firstRUN";
     public static final String PADLOCK_ACTIVE = "padlock_active";
     public static final String PADLOCK_PASS = "padlock_pass";
+    public static final String OBSOLETE_INFO = "obsolete_info";
 
     public static final String WORK_LOC = "work_location";
     public static final String HOME_LOC = "home_location";
