@@ -22,7 +22,7 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
         GoogleApiClient.OnConnectionFailedListener {
 
     private static final String TAG = "LocationUpdate";
-    private static final long DELAY_LOCATION = 60*1000L;
+    private static final long DELAY_LOCATION = 60 * 1000L;
 
     protected static LocationUpdate sInstance = null;
 
@@ -39,7 +39,7 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
 
     public static LocationUpdate getLocationUpdateInstance(Context context, TrackLocationUpdateListener listener) {
         LocationUpdate.listener = listener;
-        if(sInstance == null) {
+        if (sInstance == null) {
             sInstance = new LocationUpdate(context);
         }
         return sInstance;
@@ -48,7 +48,6 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
     private LocationUpdate(Context context) {
         this.context = context;
         preferences = context.getSharedPreferences(Constants.PACKAGE_NAME + Constants.PREF_TRACKR, Context.MODE_PRIVATE);
-        updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
         initializeGPSandFirebase(context);
     }
 
@@ -60,13 +59,16 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
                     .addApi(LocationServices.API)
                     .build();
         }
-        trackingID = preferences.getString(Constants.TRACKING_ID, "Error");
-        if (trackingID.equals("Error")) return;
         mGoogleApiClient.connect();
     }
 
     protected void getLocation() {
-        if(mGoogleApiClient != null && mGoogleApiClient.isConnected() && System.currentTimeMillis() > lastLocationTime + DELAY_LOCATION) {
+        trackingID = preferences.getString(Constants.TRACKING_ID, "Error");
+        if (trackingID.equals("Error")) {
+            return;
+        }
+
+        if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && System.currentTimeMillis() > lastLocationTime + DELAY_LOCATION) {
             newLocation(getLastKnownLocation());
         }
     }
@@ -104,7 +106,7 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
             return;
         }
         lastLocationTime = time;
-        double batteryLevel = Utility.getBatteryLevel(context);
+        int batteryLevel = Utility.getBatteryLevel(context);
         int cellQuality = Utility.getCellSignalQuality(context, isPermissionEnabled);
 
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),

@@ -6,6 +6,7 @@ import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
 
+import android.annotation.SuppressLint;
 import android.app.Service;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,6 +37,7 @@ public class LocationService extends Service implements LocationListener, Google
     private int updateFreq = Constants.TIME_BATTERY_OK * 60 * 1000;
     private int updateFreqLowBat = updateFreq + 25 * 60 * 1000;
     private long lastLocationTime = 0L;
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -112,7 +114,7 @@ public class LocationService extends Service implements LocationListener, Google
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        float level =  Utility.getBatteryLevel(getApplicationContext());
+        int level = Utility.getBatteryLevel(getApplicationContext());
         if (level >= 25) {
             createLocationRequest(updateFreq);
             Log.d(TAG, "Battery OK: " + level);
@@ -122,7 +124,13 @@ public class LocationService extends Service implements LocationListener, Google
             Log.d(TAG, "Battery LOW: " + level);
             lastBatLevel = false;
         }
+        processNewLocation(getLastKnownLocation());
         startLocationUpdates();
+    }
+
+    @SuppressLint("MissingPermission")
+    private Location getLastKnownLocation() {
+        return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
     }
 
     @Override
@@ -132,13 +140,24 @@ public class LocationService extends Service implements LocationListener, Google
     @Override
     public void onLocationChanged(Location lastLocation) {
         Log.d(TAG, "TRACKR retrieved new LOCATION.");
+        processNewLocation(lastLocation);
+    }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+    }
+
+    private void processNewLocation(Location lastLocation) {
+        if (lastLocation == null) {
+            return;
+        }
         long time = lastLocation.getTime();
         if (time == lastLocationTime) {
+            Log.d(TAG, "Location same as previous. SKIP");
             return;
         }
         lastLocationTime = time;
-        double batteryLevel = Utility.getBatteryLevel(getApplicationContext());
+        int batteryLevel = Utility.getBatteryLevel(getApplicationContext());
         int cellQuality = Utility.getCellSignalQuality(getApplicationContext(), isPermissionEnabled);
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
@@ -158,9 +177,5 @@ public class LocationService extends Service implements LocationListener, Google
             createLocationRequest(updateFreqLowBat);
             startLocationUpdates();
         }
-    }
-
-    @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }
 }

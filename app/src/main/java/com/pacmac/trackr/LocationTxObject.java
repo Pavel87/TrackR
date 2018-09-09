@@ -13,7 +13,7 @@ public class LocationTxObject {
 
     private long timestamp = 0;
     private double longitude, latitude;
-    private Double batteryLevel = -1.0;
+    private int batteryLevel = -1;
     private int cellQuality = -1;
     private int id = 4;
 
@@ -23,7 +23,7 @@ public class LocationTxObject {
     public LocationTxObject() {
     }
 
-    public LocationTxObject(double latitude, double longitude, long timestamp, Double batteryLevel, int cellQuality) {
+    public LocationTxObject(double latitude, double longitude, long timestamp, int batteryLevel, int cellQuality) {
         this.latitude = latitude;
         this.longitude = longitude;
         this.timestamp = timestamp;
@@ -43,7 +43,7 @@ public class LocationTxObject {
         return timestamp;
     }
 
-    public Double getBatteryLevel() {
+    public int getBatteryLevel() {
         return batteryLevel;
     }
 

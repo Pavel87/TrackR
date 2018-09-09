@@ -1,7 +1,7 @@
 package com.pacmac.trackr;
 
-import android.app.Application;
 import android.os.Build;
+import android.support.multidex.MultiDexApplication;
 
 import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
 
@@ -9,7 +9,7 @@ import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
 /**
  * Created by pacmac on 2016-11-27.
  */
-public class TrackRApplication extends Application {
+public class TrackRApplication extends MultiDexApplication {
 
     @Override
     public void onCreate() {

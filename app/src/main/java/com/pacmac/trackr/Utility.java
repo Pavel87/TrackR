@@ -415,8 +415,9 @@ public class Utility {
 
     public static LocationRecord createLocationRecordFromJson(JSONObject object) {
         try {
+            int batteryLevel = (int)object.getDouble("batteryLevel");
             return new LocationRecord(object.getInt("id"), object.getDouble("latitude"), object.getDouble("longitude"),
-                    object.getLong("timestamp"), object.getDouble("batteryLevel"), object.getString("address"),
+                    object.getLong("timestamp"), batteryLevel, object.getString("address"),
                     object.getString("alias"), object.getString("recId"), object.getString("safeId"),
                     object.getInt("profileImageId"), object.getInt("cellQuality"));
         } catch (JSONException e) {
@@ -756,7 +757,7 @@ public class Utility {
     }
 
 
-    public static float getBatteryLevel(Context context) {
+    public static int getBatteryLevel(Context context) {
         Intent batteryIntent = context.registerReceiver(null, new IntentFilter(Intent.ACTION_BATTERY_CHANGED));
         if (batteryIntent == null) {
             return -1;
@@ -769,7 +770,7 @@ public class Utility {
             return -1;
         }
         float rawLevel = ((float) level / (float) scale) * 100.0f;
-        return (float) (0.01 + Math.round(rawLevel * 100.0) / 100.0);
+        return (int) (Math.round(rawLevel * 100.0) / 100.0);
     }
 
 }

@@ -167,14 +167,15 @@ public final class FirebaseHandler {
                                 if (snapshot.hasChildren()) {
 
                                     Long idLong = ((Long) snapshot.child("id").getValue());
-                                    double batteryLevel = -1;
+                                    int batteryLevel = -1;
                                     if (idLong == 4) {
                                         continue;
                                     }
                                     if (idLong != null) {
                                         // batteryLevelShould be sent if id is not null
-                                        batteryLevel = Double.parseDouble(String.valueOf(
+                                        batteryLevel = (int) Double.parseDouble(String.valueOf(
                                                 snapshot.child("batteryLevel").getValue()));
+                                        idLong = 2L;
                                     }
                                     double latitude = (double) snapshot.child("latitude")
                                             .getValue();

@@ -10,7 +10,7 @@ public class LocationRecord {
     private double longitude, latitude;
     private int id = -1;
     private int profileImageId = 0;
-    private double batteryLevel = -1;
+    private int batteryLevel = -1;
     private String address = "";
     private String alias = "TrackR";
     private String recId = "";
@@ -36,7 +36,7 @@ public class LocationRecord {
         batteryLevel = -1;
     }
 
-    public void updateLocationRecord(int id, double latitude, double longitude, long timestamp, double batteryLevel, int cellQuality) {
+    public void updateLocationRecord(int id, double latitude, double longitude, long timestamp, int batteryLevel, int cellQuality) {
         this.id = id;
         this.latitude = latitude;
         this.longitude = longitude;
@@ -47,7 +47,7 @@ public class LocationRecord {
 
 
     public LocationRecord(int id, double latitude, double longitude, long timestamp,
-                          double batteryLevel, String address, String alias,
+                          int batteryLevel, String address, String alias,
                           String recId, String safeId, int profileImageId, int cellQuality) {
         this.id = id;
         this.latitude = latitude;
@@ -78,7 +78,7 @@ public class LocationRecord {
         return id;
     }
 
-    public double getBatteryLevel() {
+    public int getBatteryLevel() {
         return batteryLevel;
     }
 
@@ -106,7 +106,7 @@ public class LocationRecord {
         this.id = id;
     }
 
-    public void setBatteryLevel(double batteryLevel) {
+    public void setBatteryLevel(int batteryLevel) {
         this.batteryLevel = batteryLevel;
     }
 
