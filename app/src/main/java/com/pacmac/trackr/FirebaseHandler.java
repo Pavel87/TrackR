@@ -168,9 +168,6 @@ public final class FirebaseHandler {
 
                                     Long idLong = ((Long) snapshot.child("id").getValue());
                                     int batteryLevel = -1;
-                                    if (idLong == 4) {
-                                        continue;
-                                    }
                                     if (idLong != null) {
                                         // batteryLevelShould be sent if id is not null
                                         batteryLevel = (int) Double.parseDouble(String.valueOf(
