@@ -14,6 +14,7 @@ public class Constants {
     public static final String PREF_TRACKR = "-tracker_PREF";
     public static final String NEW_UPDATE = "TrackR_Update";
     public static final String MY_PHONE_IN_LIST = "trackr_show_this_phone_in_list";
+    public static final String NOTIFICATION_ENABLED = "trackr_show_tracking_notification";
     public static final String TRACKING_STATE = "trackr_gps_state";
     public static final String TRACKING_FREQ = "trackr_update_freq";
     public static final String LAST_APP_OPEN_TS = "trackr_last_opened";

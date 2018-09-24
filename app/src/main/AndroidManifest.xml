@@ -100,8 +100,16 @@
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
-        <service
-            android:name=".FetchFirebaseData"></service>
+        <service android:name=".FetchFirebaseData" />
+
+        <receiver
+            android:name=".CheckInReceiver"
+            android:enabled="true"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android_device_tracker_checkin" />
+            </intent-filter>
+        </receiver>
     </application>
 
 </manifest>

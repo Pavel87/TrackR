@@ -4,6 +4,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -69,19 +71,25 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
         }
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && System.currentTimeMillis() > lastLocationTime + DELAY_LOCATION) {
-            newLocation(getLastKnownLocation());
+            getLastKnownLocation();
         }
     }
 
     @SuppressLint("MissingPermission")
-    private Location getLastKnownLocation() {
-        return LocationServices.FusedLocationApi.getLastLocation(mGoogleApiClient);
+    private void getLastKnownLocation() {
+        Task<Location> task = LocationServices.getFusedLocationProviderClient(context).getLastLocation();
+        task.addOnCompleteListener(new OnCompleteListener<Location>() {
+            @Override
+            public void onComplete(@NonNull Task<Location> task) {
+                newLocation(task.getResult());
+            }
+        });
     }
 
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
-        newLocation(getLastKnownLocation());
+        getLastKnownLocation();
     }
 
     @Override

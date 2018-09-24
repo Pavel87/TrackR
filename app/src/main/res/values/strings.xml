@@ -92,6 +92,7 @@
 
     <string name="lock_settings">Lock Settings</string>
     <string name="show_dev_inlist">Display this device in list</string>
+    <string name="show_notification">Notification Enabled</string>
     <string name="invite_friends">Invite Friend</string>
     <string name="help">Help</string>
 
@@ -101,6 +102,8 @@
 
 
     <string name="app_update_needed">App update needed on this phone!</string>
+
+    <string name="check_in_msg">You have just checked in at current location.</string>
 
 
 </resources>

@@ -82,6 +82,7 @@
     <string name="dialog_title_missing_permission">Omezený Přístup</string>
     <string name="lock_settings">Zamknout Nastavení</string>
     <string name="show_dev_inlist">Zobraz tento telefon v seznamu</string>
+    <string name="show_notification">Notifikace Zapnuta</string>
     <string name="invite_friends">Přizvat známého</string>
     <string name="help">Nápověda</string>
     <string name="invite_subject">Ahoj vyzkoušej tuhle novou alikaci Android TrackeR!</string>

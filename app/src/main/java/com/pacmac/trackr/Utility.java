@@ -554,6 +554,7 @@ public class Utility {
             } else {
                 JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
             }
+            TrackingNotification.subscribeForNotification(context);
         }
     }
 

@@ -37,6 +37,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
     private boolean isLocked = false;
     private boolean isTrackingEnabled = false;
     private boolean isPermissionEnabled = true;
+    private boolean isNotificationEnabled = true;
     private boolean isMyPhoneEnabled = true;
 
     private String trackId = "Error #5#";
@@ -46,7 +47,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
     private SwitchCompat padlock, txSwitch;
     private SeekBar locUpdateFreqSeekbar;
     private TextView locReqFrequency, trackingID;
-    private AppCompatCheckBox showMyPhoneCheckbox;
+    private AppCompatCheckBox showMyPhoneCheckbox, displayTrackingNotification;
 
     private List<LocationRecord> userRecords = new ArrayList<>();
 
@@ -69,6 +70,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
         trackingID = findViewById(R.id.trackingID);
         txSwitch = findViewById(R.id.switchTracking);
         showMyPhoneCheckbox = findViewById(R.id.displayMyPhoneOption);
+        displayTrackingNotification = findViewById(R.id.displayTrackingNotification);
         locReqFrequency = findViewById(R.id.updateFreqText);
         locUpdateFreqSeekbar = findViewById(R.id.locUpdateFreq);
         locUpdateFreqSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -126,13 +128,27 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 isMyPhoneEnabled = isChecked;
                 SharedPreferences.Editor editor = preferences.edit();
                 editor.putBoolean(Constants.MY_PHONE_IN_LIST, isMyPhoneEnabled);
-                editor.commit();
+                editor.apply();
                 if (!isMyPhoneEnabled) {
                     removeMyPhoneFromUserList();
                 } else if (isTrackingEnabled) {
                     //if traking enabled and my phone checkbox as well then add phone into user list
                     addMyPhoneToUserList();
                 }
+            }
+        });
+
+        displayTrackingNotification.setChecked(isNotificationEnabled);
+        displayTrackingNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isNotificationEnabled = isChecked;
+                SharedPreferences.Editor editor = preferences.edit();
+                editor.putBoolean(Constants.NOTIFICATION_ENABLED, isNotificationEnabled);
+                editor.apply();
+
+
+                //TODO ADD NOTIFICATION HANDLING
             }
         });
 
@@ -320,6 +336,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error during service shutdown:" + e.getMessage());
+                TrackingNotification.unsubscribeForTrackingNotification(getApplicationContext());
             }
             try {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -329,6 +346,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error during service restart:" + e.getMessage());
+                TrackingNotification.unsubscribeForTrackingNotification(getApplicationContext());
             }
             return true;
         }
@@ -348,6 +366,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
             freq =15;
         }
         isMyPhoneEnabled = preferences.getBoolean(Constants.MY_PHONE_IN_LIST, true);
+        isNotificationEnabled = preferences.getBoolean(Constants.NOTIFICATION_ENABLED, true);
     }
 
     private void removeMyPhoneFromUserList() {
@@ -428,6 +447,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
             } else {
                 JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
             }
+            TrackingNotification.subscribeForNotification(getApplicationContext());
         } else {
             removeMyPhoneFromUserList();
             Intent intentService = new Intent(getApplicationContext(), LocationService.class);
@@ -436,6 +456,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
             } else {
                 JobSchedulerHelper.cancelLocationUpdateJOB(getApplicationContext());
             }
+            TrackingNotification.unsubscribeForTrackingNotification(getApplicationContext());
         }
     }
 
