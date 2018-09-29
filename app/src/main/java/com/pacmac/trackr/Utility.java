@@ -29,6 +29,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -52,6 +53,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CompoundButton;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -280,11 +282,16 @@ public class Utility {
         }
     }
 
-    public static void showToast(Context context, CharSequence text, int yOffset) {
+    public static void showToast(Context context, CharSequence text, int yOffset, boolean changeColor) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.trackr_notification_top, null);
-        TextView toastText = (TextView) view.findViewById(R.id.toastText);
+        TextView toastText =  view.findViewById(R.id.toastText);
         toastText.setText(text);
+        if(changeColor) {
+            toastText.setTextColor(Color.WHITE);
+            view.findViewById(R.id.toastLayout).setBackgroundColor(context.getResources().getColor(R.color.colorAccent));
+        }
+
 
         Toast toast = new Toast(context);
         toast.setGravity(Gravity.FILL_HORIZONTAL | Gravity.BOTTOM, 0, yOffset);
@@ -441,7 +448,7 @@ public class Utility {
             if (googleAPI.isUserResolvableError(result)) {
                 googleAPI.getErrorDialog(activity, result,
                         PLAY_SERVICES_RESOLUTION_REQUEST).show();
-                showToast(activity.getApplicationContext(), activity.getString(R.string.google_play_services_outdated), 0);
+                showToast(activity.getApplicationContext(), activity.getString(R.string.google_play_services_outdated), 0, false);
             }
             return false;
         }
@@ -544,7 +551,7 @@ public class Utility {
             } else {
                 JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
             }
-            TrackingNotification.startNotification(context);
+            TrackingNotification.startNotification(context, 0);
         }
     }
 

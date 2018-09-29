@@ -350,10 +350,11 @@ public final class FirebaseHandler {
      * @param locationTxObject
      * @param trackingID
      */
-    protected static void fireUpload(final LocationTxObject locationTxObject,
+    protected static void fireUpload(final Context context, final LocationTxObject locationTxObject,
             final String trackingID, final TrackLocationUpdateListener listener) {
         try {
             Log.d(Constants.TAG, "FIRE Upload");
+            final long timestamp = locationTxObject.getTimestamp();
 
             /** FIRESTORM **/
             FirebaseFirestore db = FirebaseFirestore.getInstance();
@@ -366,6 +367,12 @@ public final class FirebaseHandler {
                             if (listener != null) {
                                 listener.newLocationUploadFinished();
                             }
+                            try {
+                                TrackingNotification.startNotification(context, timestamp);
+                            }catch (Exception e) {
+                                e.printStackTrace();
+                            }
+
                         }
                     }).addOnFailureListener(new OnFailureListener() {
                         @Override

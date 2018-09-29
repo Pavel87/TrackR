@@ -64,15 +64,17 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
         mGoogleApiClient.connect();
     }
 
-    protected void getLocation() {
+    protected boolean getLocation() {
         trackingID = preferences.getString(Constants.TRACKING_ID, "Error");
         if (trackingID.equals("Error")) {
-            return;
+            return false;
         }
 
         if (mGoogleApiClient != null && mGoogleApiClient.isConnected() && System.currentTimeMillis() > lastLocationTime + DELAY_LOCATION) {
             getLastKnownLocation();
+            return true;
         }
+        return false;
     }
 
     @SuppressLint("MissingPermission")
@@ -111,6 +113,7 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
         }
         long time = lastLocation.getTime();
         if (time == lastLocationTime) {
+            Log.d(TAG, "Location same as previous. SKIP");
             return;
         }
         lastLocationTime = time;
@@ -119,7 +122,7 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
 
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
-
-        FirebaseHandler.fireUpload(newLocation, trackingID, listener);
+        Log.d(TAG, "Upload new device location to firestorm");
+        FirebaseHandler.fireUpload(context, newLocation, trackingID, listener);
     }
 }

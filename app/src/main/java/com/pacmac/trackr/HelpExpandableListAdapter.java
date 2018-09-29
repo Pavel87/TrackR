@@ -252,7 +252,7 @@ public final class HelpExpandableListAdapter extends BaseExpandableListAdapter {
                     context.startActivity(myIntent);
                 } catch (Exception e) {
                     e.printStackTrace();
-                    Utility.showToast(context, "Navigate to Device Settings and enable Location feature.", 0);
+                    Utility.showToast(context, "Navigate to Device Settings and enable Location feature.", 0, false);
                 }
                 dialog.dismiss();
             }

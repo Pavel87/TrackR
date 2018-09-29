@@ -110,7 +110,7 @@
 
     <string name="app_update_needed">App update needed on this phone!</string>
 
-    <string name="check_in_msg" translatable="false">You have just checked in at current location.</string>
+    <string name="check_in_msg" translatable="false">Your device has checked In.</string>
 
 
 </resources>

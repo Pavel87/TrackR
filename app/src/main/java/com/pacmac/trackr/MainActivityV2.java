@@ -158,7 +158,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 editor.putBoolean(Constants.TRACKING_STATE, false);
                 editor.commit();
                 Utility.showToast(getApplicationContext(), "Tracking Mode Disabled. Check your app settings.",
-                        ((View) bottomNavigation).getHeight());
+                        ((View) bottomNavigation).getHeight(), false);
             }
             loadUserRecordsFromFile();
         }
@@ -384,7 +384,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                         userRecords.get(currentTracker).getLongitude()), 16f));
             } else {
                 Utility.showToast(getApplicationContext(), "Ups nothing to show for " +
-                        userRecords.get(currentTracker).getAlias(),((View) bottomNavigation).getHeight());
+                        userRecords.get(currentTracker).getAlias(),((View) bottomNavigation).getHeight(), false);
             }
         }
     }
@@ -637,7 +637,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             retrieveLocation();
         } else {
             Utility.showToast(getApplicationContext(), getString(R.string.no_connection),
-                    ((View) bottomNavigation).getHeight());
+                    ((View) bottomNavigation).getHeight(), false);
             //enableSearchButton();
         }
     }

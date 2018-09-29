@@ -131,10 +131,10 @@ public class AddDeviceActivity extends AppCompatActivity {
                         finish();
                         return;
                     } else {
-                        Utility.showToast(getApplicationContext(), getString(R.string.id_entry_error), 0);
+                        Utility.showToast(getApplicationContext(), getString(R.string.id_entry_error), 0, false);
                     }
                 } else {
-                    Utility.showToast(getApplicationContext(), getString(R.string.alias_required), 0);
+                    Utility.showToast(getApplicationContext(), getString(R.string.alias_required), 0, false);
                 }
             }
         });
@@ -181,7 +181,7 @@ public class AddDeviceActivity extends AppCompatActivity {
                     finish();
                     return true;
                 } else if (type == -10) {
-                    Utility.showToast(getApplicationContext(), "This row can be only deleted in Setting screen.", 0);
+                    Utility.showToast(getApplicationContext(), "This row can be only deleted in Setting screen.", 0, false);
                     return true;
                 }
                 showDeleteConfirmationDialog(AddDeviceActivity.this);

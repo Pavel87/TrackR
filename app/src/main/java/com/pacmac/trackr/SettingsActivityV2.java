@@ -184,7 +184,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                     if (password.equals("p@cmacDEVdb2016")) {
                         FirebaseHandler.deleteUnusedIdFromFb();
                         Utility.showToast(getApplicationContext(),
-                                getResources().getString(R.string.pass_entry_error), 0);
+                                getResources().getString(R.string.pass_entry_error), 0, false);
                         return;
                     }
 
@@ -198,13 +198,13 @@ public class SettingsActivityV2 extends AppCompatActivity {
                             dialog.dismiss();
                         } else {
                             Utility.showToast(getApplicationContext(),
-                                    getResources().getString(R.string.pass_entry_error), 0);
+                                    getResources().getString(R.string.pass_entry_error), 0, false);
                         }
                     }
 
                 } else {
                     Utility.showToast(getApplicationContext(),
-                            getString(R.string.password_length_wrong), 0);
+                            getString(R.string.password_length_wrong), 0, false);
                 }
             }
         });
@@ -270,7 +270,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 // TODO NEED TO CREATE RULE FOR IDs (characters which we can use)
                 if (id != null && id.length() > 7 && id.length() < 33) {
                     if (id.contains("/") || id.contains("\\")) {
-                        Utility.showToast(getApplicationContext(), getString(R.string.id_char_error), 0);
+                        Utility.showToast(getApplicationContext(), getString(R.string.id_char_error), 0, false);
                     } else if (id == trackId) {
                         // id did not changed no need to do anything.. dismiss didalog
                         dialog.dismiss();
@@ -289,7 +289,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
                         dialog.dismiss();
                     }
                 } else {
-                    Utility.showToast(getApplicationContext(), getString(R.string.id_entry_error), 0);
+                    Utility.showToast(getApplicationContext(), getString(R.string.id_entry_error), 0, false);
                 }
 
             }
@@ -430,7 +430,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
             } else {
                 JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
             }
-            TrackingNotification.startNotification(getApplicationContext());
+            TrackingNotification.startNotification(getApplicationContext(), 0);
         } else {
             removeMyPhoneFromUserList();
             Intent intentService = new Intent(getApplicationContext(), LocationService.class);

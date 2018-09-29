@@ -162,7 +162,7 @@ public class LocationService extends Service implements LocationListener, Google
         LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
                 lastLocation.getLongitude(), time, batteryLevel, cellQuality);
 
-        FirebaseHandler.fireUpload(newLocation, trackingID, null);
+        FirebaseHandler.fireUpload(getApplicationContext(), newLocation, trackingID, null);
 
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();

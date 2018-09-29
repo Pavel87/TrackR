@@ -53,7 +53,7 @@ public final class LocationJobService extends JobService implements TrackLocatio
     public boolean onStopJob(JobParameters params) {
         Log.d(TAG, "onStopJob");
         pendingLocationUpdate = false;
-        return true;
+        return false;
     }
 
     @Override
@@ -62,7 +62,7 @@ public final class LocationJobService extends JobService implements TrackLocatio
         if(handler != null) {
             handler.removeCallbacks(finishJOB);
         }
-        jobFinished(parameters,true);
         Log.d(TAG, "newLocationUploadFinished");
+        jobFinished(parameters,true);
     }
 }
