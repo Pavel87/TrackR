@@ -654,7 +654,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         String appVersion = Utility.getCurrentAppVersion(getApplicationContext());
 
         if (!preferences.getString(Constants.NEW_UPDATE, appVersion).equals(appVersion)
-                && !preferences.getString(Constants.NEW_UPDATE, "3.3.0").equals(appVersion)) {
+                && !preferences.getString(Constants.NEW_UPDATE, "3.5.0").equals(appVersion)) {
             Utility.createAlertDialog(MainActivityV2.this);
             SharedPreferences.Editor editor = preferences.edit();
             editor.putString(Constants.NEW_UPDATE, appVersion);

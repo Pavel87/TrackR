@@ -15,3 +15,7 @@
 #-keepclassmembers class fqcn.of.javascript.interface.for.webview {
 #   public *;
 #}
+-keep class com.tutelatechnologies.** { *; }
+-keep class com.tutelatechnologies.**$** { *; }
+-keep interface com.tutelatechnologies.** { *; }
+-keep enum com.tutelatechnologies.** { *; }
