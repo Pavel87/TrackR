@@ -489,7 +489,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private void onInviteClicked() {
         Intent intent = new AppInviteInvitation.IntentBuilder("Android TrackeR")
                 .setMessage(getApplicationContext().getString(R.string.invite_subject))
-                .setDeepLink(Uri.parse("https://play.google.com/store/apps/details?id=com.pacmac.trackr"))
+                .setDeepLink(Uri.parse("https://play.google.com/store/apps/details?id=com.pacmac.trackrr"))
                 .setCallToActionText(getApplicationContext().getString(R.string.invite_action))
                 .build();
         startActivityForResult(intent, 8213);
