@@ -37,7 +37,6 @@ public class SettingsActivityV2 extends AppCompatActivity {
     private boolean isLocked = false;
     private boolean isTrackingEnabled = false;
     private boolean isPermissionEnabled = true;
-    private boolean isNotificationEnabled = true;
     private boolean isMyPhoneEnabled = true;
 
     private String trackId = "Error #5#";
@@ -47,7 +46,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
     private SwitchCompat padlock, txSwitch;
     private SeekBar locUpdateFreqSeekbar;
     private TextView locReqFrequency, trackingID;
-    private AppCompatCheckBox showMyPhoneCheckbox, displayTrackingNotification;
+    private AppCompatCheckBox showMyPhoneCheckbox;
 
     private List<LocationRecord> userRecords = new ArrayList<>();
 
@@ -70,7 +69,6 @@ public class SettingsActivityV2 extends AppCompatActivity {
         trackingID = findViewById(R.id.trackingID);
         txSwitch = findViewById(R.id.switchTracking);
         showMyPhoneCheckbox = findViewById(R.id.displayMyPhoneOption);
-        displayTrackingNotification = findViewById(R.id.displayTrackingNotification);
         locReqFrequency = findViewById(R.id.updateFreqText);
         locUpdateFreqSeekbar = findViewById(R.id.locUpdateFreq);
         locUpdateFreqSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
@@ -135,20 +133,6 @@ public class SettingsActivityV2 extends AppCompatActivity {
                     //if traking enabled and my phone checkbox as well then add phone into user list
                     addMyPhoneToUserList();
                 }
-            }
-        });
-
-        displayTrackingNotification.setChecked(isNotificationEnabled);
-        displayTrackingNotification.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                isNotificationEnabled = isChecked;
-                SharedPreferences.Editor editor = preferences.edit();
-                editor.putBoolean(Constants.NOTIFICATION_ENABLED, isNotificationEnabled);
-                editor.apply();
-
-
-                //TODO ADD NOTIFICATION HANDLING
             }
         });
 
@@ -366,7 +350,6 @@ public class SettingsActivityV2 extends AppCompatActivity {
             freq =15;
         }
         isMyPhoneEnabled = preferences.getBoolean(Constants.MY_PHONE_IN_LIST, true);
-        isNotificationEnabled = preferences.getBoolean(Constants.NOTIFICATION_ENABLED, true);
     }
 
     private void removeMyPhoneFromUserList() {
@@ -447,7 +430,7 @@ public class SettingsActivityV2 extends AppCompatActivity {
             } else {
                 JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
             }
-            TrackingNotification.subscribeForNotification(getApplicationContext());
+            TrackingNotification.startNotification(getApplicationContext());
         } else {
             removeMyPhoneFromUserList();
             Intent intentService = new Intent(getApplicationContext(), LocationService.class);

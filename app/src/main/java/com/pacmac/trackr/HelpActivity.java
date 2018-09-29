@@ -18,7 +18,7 @@ import com.google.android.gms.common.ConnectionResult;
 public final class HelpActivity extends AppCompatActivity {
 
 
-    protected static final int HEADERS_COUNT = 8;
+    protected static final int HEADERS_COUNT = 9;
 
     private HelpExpandableListAdapter listAdapter;
     private ExpandableListView listView;
@@ -29,7 +29,7 @@ public final class HelpActivity extends AppCompatActivity {
     private boolean isGooglePlayVersionHigher = false;
     private boolean isLocationingEnabled = false;
     private int[] googleVersion = new int[]{-1, -1};
-    private static final int[] GOOGLE_CLIENT_VERSION = new int[]{11, 0};
+    private static final int[] GOOGLE_CLIENT_VERSION = new int[]{15, 0};
 
 
     @Override
@@ -38,13 +38,13 @@ public final class HelpActivity extends AppCompatActivity {
 
         setContentView(R.layout.activiy_help);
 
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
 
-        listView = (ExpandableListView) findViewById(R.id.expandableHelpList);
+        listView = findViewById(R.id.expandableHelpList);
         listAdapter = new HelpExpandableListAdapter(getApplicationContext());
         listView.setAdapter(listAdapter);
 

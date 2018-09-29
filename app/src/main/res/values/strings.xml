@@ -20,7 +20,7 @@
     <string name="new_update_title">New App Update v</string>
     <string name="updateMsg1">- Note that for correct functionality it is essential to update to the latest TrackeR version!</string>
     <string name="updateMsg3">- Crash Fixes.</string>
-    <string name="rateApp">How do you like TrackR?</string>
+    <string name="rateApp">Send Feedback</string>
     <string name="rta_dialog_message">TrackR development team is honoured by You using this app. Please take a few seconds and rate this app in Google Store. Also any kind of feedback or feature request is much appreciated.</string>
     <string name="no_thanks">Later</string>
     <string name="rateit">Rate NOW</string>
@@ -50,6 +50,11 @@
     <string name="dialog_title_location_settings">Location Settings DISABLED</string>
     <string name="dialog_title_missing_permission">"Missing Permission"</string>
 
+    <string name="disclaimer_dialog_text" translatable="false">Please note that Android Device Tracker application purpose is to willingly let your family or friends know about your approximate location. This is NOT a spying or secret surveillance solution. It is your responsibility to ensure that you only share your private unique ID with a party you wish to exchange your data and prevent any abuse of the application. To prevent a misuse we are introducing a persistent notification from where you can turn off location tracking. If you have any concerns please email: pacmac.dev@gmail.com.</string>
+    <string name="disclaimer_dialog_title" translatable="false">Privacy Policy Update</string>
+    <string name="disclaimer_dialog_exit" translatable="false">EXIT</string>
+    <string name="disclaimer_dialog_iagree" translatable="false">I AGREE</string>
+
 
     <string name="fixit">Fix Issue</string>
     <string name="fix_location_perm_title">Missing Location Permission</string>
@@ -62,6 +67,7 @@
 
     <string name="help_header_about">About</string>
     <string name="help_header_contact">Contact</string>
+    <string name="help_header_tracking_policy">Tracking Policy</string>
     <string name="help_header_privacy">Privacy Policy</string>
     <string name="help_header_what_is_collected">Data Sharing</string>
     <string name="help_header_how_to">How To Use Device Tracker</string>
@@ -72,6 +78,7 @@
      <string name="help_child_about" translatable="false">Android Device Tracker 2016-2018\nDeveloped by p@cmac\nVersion:</string>
     <string name="help_child_contact">If you require any technical support or you want to provide feedback please email:\npacmac.dev@gmail.com\n\nFor feature request please use same email address.</string>
     <string name="help_child_privacy">Information sent between devices based on unique IDs are NOT collected and provided to any 3rd party companies.\nFrom time to time Android Device Tracker may collect network quality data(for instance signal strength) which is further anonymized to prevent any reference to specific user phone. Such network quality data might be forwarded to 3rd parties which are involved in mobile network improvements across the globe.</string>
+    <string name="help_child_tracking_policy">@string/disclaimer_dialog_text</string>
     <string name="help_child_what_is_collected">Information sent between phones:\nPhone Location\nTime of location update\nBattery State\nMobile Signal Strength</string>
     <string name="help_child_how_to">Android Device Tracker is application for sharing phone locations between two or more Android devices. Transmitting of phone location is setup using private unique ID available in Settings screen. Transmitting of location updates can be enabled/disabled for this device in Settings including possibility to prevent any further changes by setting a password protection.\nFor receiving of another device location updates the unique ID used in tracked device has to be added into list in main screen.\nThis application works only on Android phones or
         tablets.</string>
@@ -103,7 +110,7 @@
 
     <string name="app_update_needed">App update needed on this phone!</string>
 
-    <string name="check_in_msg">You have just checked in at current location.</string>
+    <string name="check_in_msg" translatable="false">You have just checked in at current location.</string>
 
 
 </resources>

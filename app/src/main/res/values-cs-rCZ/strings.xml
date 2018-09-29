@@ -37,6 +37,7 @@
     <string name="fix_location_perm_content">For correct functionality of the Device Tracker it is mandatory to enable location permission. You can do so by going to:\nSettings>Apps>TrackR>Permissions>Enable Location permission.</string>
     <string name="fix_location_settings_content">For correct functionality of the Device Tracker it is mandatory to enable global location settings. Navigate to System Settings>Location: and enable location.</string>
     <string name="fix_gps_version_content">For correct functionality of the Device Tracker it is mandatory to update your Google Play Service version to version 9.6.1 or higher.</string>
+    <string name="help_header_tracking_policy">Pravidla Sdileni Dat</string>
     <string name="help_header_privacy">Soukromi</string>
     <string name="help_child_contact">If you require any technical support or you want to provide feedback please email:\npacmac.dev@gmail.com\n\nFor feature request please use same email address.</string>
     <string name="help_child_privacy">Information sent between devices based on unique IDs are NOT collected and provided to any 3rd party companies.\nFrom time to time Android Device Tracker may collect network quality data(for instance signal strength) which is further anonymized to prevent any reference to specific user phone. Such network quality data might be forwarded to 3rd parties which are involved in mobile network improvements across the globe.</string>
@@ -46,6 +47,9 @@
     <string name="help_child_how_to_set_tracking">Phone which is intended to provide its location to other phones can be setup in application Settings, where mandatory information is unique ID and tracking mode switch in on position. Optionally if tracking mode is on then this phone can be easily added to main list of tracked devices, additionally frequency of location updates sent by phone can be set in the same menu. Please note that internet connection is required. If no location is sent within few minutes please refer to section "Something Is Wrong" which will automatically appear in this
         list if application sees any obstacle which can affect functionality of this application.</string>
     <string name="help_child_how_to_set_receiver">Adding devices is now simpler than ever and it can be done from the application main screen by tapping on button with plus symbol. You have to set alias for tracked phone and unique ID which is defined in phone which is transmitting its location. Optionally you can set image for better distinction between multiple tracked devices.</string>
+    <string name="help_child_tracking_policy">@string/disclaimer_dialog_text</string>
+
+
     <string name="app_update_needed">App update needed on this phone!</string>
 
     <string name="help_header_about">O Aplikaci</string>

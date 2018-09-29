@@ -1,5 +1,24 @@
 package com.pacmac.trackr;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Locale;
+import java.util.UUID;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ActivityManager;
@@ -35,31 +54,6 @@ import android.widget.Button;
 import android.widget.CompoundButton;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
-
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.UUID;
 
 /**
  * Created by pacmac on 2016-10-27.
@@ -123,8 +117,8 @@ public class Utility {
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
 
-        return month + " " + day + ", " + String.format("%02d", hour) + ":"
-                + String.format("%02d", minute);
+        return String.format("%02d", hour) + ":"
+                + String.format("%02d", minute) + ", " + day + " " + month;
     }
 
     public static int getDayOfMonth() {
@@ -305,11 +299,7 @@ public class Utility {
         File file = new File(path);
         if (file.exists()) {
             file.delete();
-//            try {
-//                file.createNewFile();
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
+
         }
         BufferedWriter writer = null;
         boolean isSuccesful = false;
@@ -554,7 +544,7 @@ public class Utility {
             } else {
                 JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
             }
-            TrackingNotification.subscribeForNotification(context);
+            TrackingNotification.startNotification(context);
         }
     }
 

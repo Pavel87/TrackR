@@ -1,13 +1,20 @@
 package com.pacmac.trackr;
 
+import android.app.Dialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.AppCompatCheckBox;
 import android.view.View;
+import android.view.Window;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.FrameLayout;
 
 
@@ -21,6 +28,7 @@ public class IntroActivity extends AppCompatActivity {
     private boolean isPermissionEnabled = true;
     private boolean isGPSUpToDate = true;
     private boolean isAppScheduledForStart = false;
+    private boolean isPolicyUpdateShowing = false;
 
     private FrameLayout background;
 
@@ -69,18 +77,17 @@ public class IntroActivity extends AppCompatActivity {
 
         SharedPreferences.Editor editor = preferences.edit();
         editor.putLong(Constants.LAST_APP_OPEN_TS, System.currentTimeMillis());
-        editor.commit();
+        editor.apply();
 
-        if (Utility.checkPlayServices(this)) {
-            isGPSUpToDate = true;
-        } else {
-            isGPSUpToDate = false;
-        }
-        checkPermission();
-
-        if (isPermissionEnabled && isGPSUpToDate) {
-            startMainActivityWithOffset(2);
-        }
+            if (Utility.checkPlayServices(this)) {
+                isGPSUpToDate = true;
+            } else {
+                isGPSUpToDate = false;
+            }
+            checkPermission();
+            if (isPermissionEnabled && isGPSUpToDate) {
+                startMainActivityWithOffset(2);
+            }
     }
 
     private void checkPermission() {
@@ -94,7 +101,18 @@ public class IntroActivity extends AppCompatActivity {
     }
 
     private void startMainActivityWithOffset(int delay) {
-        if (!isAppScheduledForStart) {
+
+        SharedPreferences preferences = getSharedPreferences(
+                Constants.PACKAGE_NAME + Constants.PREF_TRACKR, MODE_PRIVATE);
+
+        boolean policyUpdate1 = preferences.getBoolean(Constants.POLICY_UPDATE1_FIRST_RUN, true);
+
+        if (policyUpdate1 && !isPolicyUpdateShowing) {
+            isPolicyUpdateShowing = true;
+            // SHOW APP DISCLAIMER
+            showPolicyUpdate(IntroActivity.this, preferences);
+        } else if (!isAppScheduledForStart && !policyUpdate1) {
+            // START APP
             isAppScheduledForStart = true;
             Handler handler = new Handler();
             handler.postDelayed(new Runnable() {
@@ -111,5 +129,45 @@ public class IntroActivity extends AppCompatActivity {
                 }
             }, delay * 1000);
         }
+    }
+
+
+
+    public void showPolicyUpdate(final Context context, final SharedPreferences preferences) {
+
+        final Dialog dialog = new Dialog(context);
+        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+        dialog.setContentView(R.layout.disclaimer_dialog);
+        dialog.setCancelable(false);
+
+        Button yesButton = dialog.findViewById(R.id.iagree);
+        yesButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                // if user clicks on Rate Now then don't show again this dialog
+                preferences.edit().putBoolean(Constants.POLICY_UPDATE1_FIRST_RUN, false).apply();
+
+                if (Utility.checkPlayServices(IntroActivity.this)) {
+                    isGPSUpToDate = true;
+                } else {
+                    isGPSUpToDate = false;
+                }
+                checkPermission();
+                if (isPermissionEnabled && isGPSUpToDate) {
+                    startMainActivityWithOffset(2);
+                }
+                dialog.dismiss();
+            }
+        });
+
+        Button noButton = dialog.findViewById(R.id.exitApp);
+        noButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finishAffinity();
+            }
+        });
+
+        dialog.show();
     }
 }
