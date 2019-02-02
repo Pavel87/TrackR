@@ -71,73 +71,78 @@ public final class FirebaseHandler {
         if (userRecord.getTimestamp() + 5 * 60 * 1000L > System.currentTimeMillis()) {
             return;
         }
-        DocumentReference docRef = db.collection("devs").document(userRecord.getSafeId());
-        docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-            @Override
-            public void onSuccess(DocumentSnapshot documentSnapshot) {
+        try {
+            DocumentReference docRef = db.collection("devs").document(userRecord.getSafeId());
+            docRef.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+                @Override
+                public void onSuccess(DocumentSnapshot documentSnapshot) {
 
-                int rowID = listUserRecords.indexOf(userRecord);
-                LocationTxObject recoveredUser = documentSnapshot.toObject(LocationTxObject.class);
-                if (recoveredUser == null) {
-                    return;
-                }
-                Log.e("FIRESTORM", recoveredUser.toString());
+                    int rowID = listUserRecords.indexOf(userRecord);
+                    LocationTxObject recoveredUser = documentSnapshot.toObject(LocationTxObject.class);
+                    if (recoveredUser == null) {
+                        return;
+                    }
+                    Log.e("FIRESTORM", recoveredUser.toString());
 
-                // check if timestamps are same and if yes then don't
-                // update loc record to save duplicate porcessing
-                if (userRecord.getTimestamp() == recoveredUser.getTimestamp()) {
-                    if (userRecord.getAddress().equals("")
-                            || userRecord.getAddress().equals(
-                                    context.getResources().getString(R.string.address_not_found))
-                            || userRecord.getAddress().equals(
-                                    context.getResources().getString(R.string.address_loc_error))) {
-                        String address = getAddress(context, rowID, userRecord.getLatitude(),
-                                userRecord.getLongitude());
-                        if (address != null) {
-                            userRecord.setAddress(address);
-                            if (listener != null) {
-                                listener.onDownloadCompleteListener(rowID);
+                    // check if timestamps are same and if yes then don't
+                    // update loc record to save duplicate porcessing
+                    if (userRecord.getTimestamp() == recoveredUser.getTimestamp()) {
+                        if (userRecord.getAddress().equals("")
+                                || userRecord.getAddress().equals(
+                                context.getResources().getString(R.string.address_not_found))
+                                || userRecord.getAddress().equals(
+                                context.getResources().getString(R.string.address_loc_error))) {
+                            String address = getAddress(context, rowID, userRecord.getLatitude(),
+                                    userRecord.getLongitude());
+                            if (address != null) {
+                                userRecord.setAddress(address);
+                                if (listener != null) {
+                                    listener.onDownloadCompleteListener(rowID);
+                                }
                             }
                         }
+                        return;
                     }
-                    return;
-                }
-                if (userRecord.getTimestamp() > recoveredUser.getTimestamp()) {
-                    return;
-                }
+                    if (userRecord.getTimestamp() > recoveredUser.getTimestamp()) {
+                        return;
+                    }
 
-                userRecord.setBatteryLevel(recoveredUser.getBatteryLevel());
-                userRecord.setCellQuality(recoveredUser.getCellQuality());
-                userRecord.setTimestamp(recoveredUser.getTimestamp());
-                userRecord.setLatitude(recoveredUser.getLatitude());
-                userRecord.setLongitude(recoveredUser.getLongitude());
-                if (userRecord.getId() != -10) {
-                    userRecord.setId(recoveredUser.getId());
-                }
-                String address = getAddress(context, rowID, userRecord.getLatitude(),
-                        userRecord.getLongitude());
-                if (address != null) {
-                    userRecord.setAddress(address);
-                }
-                listUserRecords.set(rowID, userRecord);
+                    userRecord.setBatteryLevel(recoveredUser.getBatteryLevel());
+                    userRecord.setCellQuality(recoveredUser.getCellQuality());
+                    userRecord.setTimestamp(recoveredUser.getTimestamp());
+                    userRecord.setLatitude(recoveredUser.getLatitude());
+                    userRecord.setLongitude(recoveredUser.getLongitude());
+                    if (userRecord.getId() != -10) {
+                        userRecord.setId(recoveredUser.getId());
+                    }
+                    String address = getAddress(context, rowID, userRecord.getLatitude(),
+                            userRecord.getLongitude());
+                    if (address != null) {
+                        userRecord.setAddress(address);
+                    }
+                    listUserRecords.set(rowID, userRecord);
 
-                Log.d("FIRESTORM",
-                        " USER UPDATED: " + userRecord.getSafeId() + ", " + userRecord.toString());
-                Utility.saveJsonStringToFile(context.getFilesDir() + Constants.JSON_LOC_FILE_NAME,
-                        Utility.createJsonArrayStringFromUserRecords(listUserRecords));
-                if (listener != null) {
-                    listener.onDownloadCompleteListener(rowID);
-                    listener.updateMap();
+                    Log.d("FIRESTORM",
+                            " USER UPDATED: " + userRecord.getSafeId() + ", " + userRecord.toString());
+                    Utility.saveJsonStringToFile(context.getFilesDir() + Constants.JSON_LOC_FILE_NAME,
+                            Utility.createJsonArrayStringFromUserRecords(listUserRecords));
+                    if (listener != null) {
+                        listener.onDownloadCompleteListener(rowID);
+                        listener.updateMap();
+                    }
                 }
-            }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.d("FIRESTORM", "FAILURE TO FETCH USER FROM DB: " + userRecord.getSafeId() + ", "
-                        + userRecord.toString());
-                e.printStackTrace();
-            }
-        });
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.d("FIRESTORM", "FAILURE TO FETCH USER FROM DB: " + userRecord.getSafeId() + ", "
+                            + userRecord.toString());
+                    e.printStackTrace();
+                }
+            });
+        } catch (Exception e) {
+            Log.e(Constants.TAG, "IllegalArgumentException has been crashing the app in past.");
+            e.printStackTrace();
+        }
     }
 
     /**

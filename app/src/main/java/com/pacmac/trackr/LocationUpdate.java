@@ -83,7 +83,12 @@ public class LocationUpdate implements LocationListener, GoogleApiClient.Connect
         task.addOnCompleteListener(new OnCompleteListener<Location>() {
             @Override
             public void onComplete(@NonNull Task<Location> task) {
-                newLocation(task.getResult());
+                try {
+                    newLocation(task.getResult());
+                } catch (Exception e) {
+                    Log.e(Constants.TAG, "This RuntimeException has been crashing the app in past.");
+                    e.printStackTrace();
+                }
             }
         });
     }
