@@ -12,6 +12,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.location.Location;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.IBinder;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -36,7 +37,7 @@ public class LocationService extends Service implements LocationListener, Google
 
     private int updateFreq = Constants.TIME_BATTERY_OK * 60 * 1000;
     private int updateFreqLowBat = updateFreq + 25 * 60 * 1000;
-    private long lastLocationTime = 0L;
+    private Location lastLocation = null;
 
     @Override
     public void onCreate() {
@@ -124,7 +125,12 @@ public class LocationService extends Service implements LocationListener, Google
             Log.d(TAG, "Battery LOW: " + level);
             lastBatLevel = false;
         }
-        processNewLocation(getLastKnownLocation());
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                processNewLocation(getLastKnownLocation());
+            }
+        }, 5000);
         startLocationUpdates();
     }
 
@@ -147,22 +153,29 @@ public class LocationService extends Service implements LocationListener, Google
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
     }
 
-    private void processNewLocation(Location lastLocation) {
-        if (lastLocation == null) {
+    private void processNewLocation(Location newLocation) {
+        if (newLocation == null) {
             return;
         }
-        long time = lastLocation.getTime();
-        if (time == lastLocationTime) {
+        long time = newLocation.getTime();
+        if (lastLocation != null && time == lastLocation.getTime()) {
             Log.d(TAG, "Location same as previous. SKIP");
             return;
         }
-        lastLocationTime = time;
+        if(lastLocation != null
+                && newLocation.getLatitude() == lastLocation.getLatitude()
+                && newLocation.getLongitude() == lastLocation.getLongitude()
+                && newLocation.getTime() - updateFreq < lastLocation.getTime()) {
+            return;
+        }
+
+        lastLocation = newLocation;
         int batteryLevel = Utility.getBatteryLevel(getApplicationContext());
         int cellQuality = Utility.getCellSignalQuality(getApplicationContext(), isPermissionEnabled);
-        LocationTxObject newLocation = new LocationTxObject(lastLocation.getLatitude(),
-                lastLocation.getLongitude(), time, batteryLevel, cellQuality);
+        LocationTxObject newLocationFBObject = new LocationTxObject(newLocation.getLatitude(),
+                newLocation.getLongitude(), time, batteryLevel, cellQuality);
 
-        FirebaseHandler.fireUpload(getApplicationContext(), newLocation, trackingID, null);
+        FirebaseHandler.fireUpload(getApplicationContext(), newLocationFBObject, trackingID, null);
 
         if (batteryLevel >= 25 && !lastBatLevel) {
             updateLocFreqTime();

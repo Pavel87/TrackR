@@ -27,6 +27,7 @@ public class Constants {
     public static final String PADLOCK_PASS = "padlock_pass";
     public static final String OBSOLETE_INFO = "obsolete_info";
     public static final String POLICY_UPDATE1_FIRST_RUN = "policy_update1_first_run";
+    public static final String TIMESTAMP_NOTIFICATION = "TIMESTAMP_NOTIFICATION";
 
     public static final String WORK_LOC = "work_location";
     public static final String HOME_LOC = "home_location";

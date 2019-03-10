@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pacmac.trackr">
+          package="com.pacmac.trackr">
 
-    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
-    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
 
     <application
         android:name=".TrackRApplication"
@@ -25,35 +25,32 @@
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
+                <action android:name="android.intent.action.MAIN"/>
 
-                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
             android:name=".MainActivityV2"
             android:label="Android TrackeR"
-            android:screenOrientation="portrait"></activity>
+            android:screenOrientation="portrait"/>
 
         <receiver
             android:name=".RebootReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.BOOT_COMPLETED"/>
             </intent-filter>
         </receiver>
 
         <service
             android:name=".LocationService"
             android:enabled="true"
-            android:exported="false" />
-        <service
-            android:name=".LocationJobService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:exported="false"/>
         <service
             android:name="com.tutelatechnologies.sdk.framework.TutelaSDKService"
-            android:permission="android.permission.BIND_JOB_SERVICE" />
+            android:permission="android.permission.BIND_JOB_SERVICE"/>
 
         <activity
             android:name=".HelpActivity"
@@ -63,7 +60,7 @@
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pacmac.trackr.MainActivityV2" />
+                android:value="com.pacmac.trackr.MainActivityV2"/>
         </activity>
         <activity
             android:name=".AddDeviceActivity"
@@ -73,7 +70,7 @@
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pacmac.trackr.MainActivityV2" />
+                android:value="com.pacmac.trackr.MainActivityV2"/>
         </activity>
         <activity
             android:name=".ImageGallery"
@@ -83,7 +80,7 @@
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pacmac.trackr.AddDeviceActivity" />
+                android:value="com.pacmac.trackr.AddDeviceActivity"/>
         </activity>
         <activity
             android:name=".SettingsActivityV2"
@@ -93,23 +90,32 @@
             android:theme="@style/AppTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pacmac.trackr.MainActivityV2" />
+                android:value="com.pacmac.trackr.MainActivityV2"/>
         </activity>
 
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
+            android:value="@string/google_maps_key"/>
+        <meta-data
+            android:name="preloaded_fonts"
+            android:resource="@array/preloaded_fonts"/>
 
-        <service android:name=".FetchFirebaseData" />
+        <service android:name=".FetchFirebaseData"/>
 
         <receiver
             android:name=".CheckInReceiver"
             android:enabled="true"
             android:exported="false">
             <intent-filter>
-                <action android:name="android_device_tracker_checkin" />
+                <action android:name="android_device_tracker_checkin"/>
             </intent-filter>
         </receiver>
+
+        <service
+            android:name=".ForegroundTrackingService"
+            android:enabled="true"
+            android:exported="true">
+        </service>
     </application>
 
 </manifest>

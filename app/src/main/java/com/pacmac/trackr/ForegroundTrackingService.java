@@ -4,24 +4,48 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
+import android.os.IBinder;
 import android.support.v4.app.NotificationCompat;
-import android.support.v4.app.NotificationManagerCompat;
 
-public final class TrackingNotification {
+public class ForegroundTrackingService extends Service {
+    public ForegroundTrackingService() {
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        // TODO: Return the communication channel to the service.
+        throw new UnsupportedOperationException("Not yet implemented");
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        long timestamp;
+        if(intent != null) {
+            timestamp = intent.getLongExtra(Constants.TIMESTAMP_NOTIFICATION, System.currentTimeMillis());
+        } else {
+            timestamp =  System.currentTimeMillis();
+        }
+
+        startForeground(NOTIFICATION_ID, createNotification(getApplicationContext(), timestamp));
+        return START_STICKY_COMPATIBILITY;
+    }
+
 
     private static final String CHANNEL_ID = "AndroidDeviceTracker";
     private static final int NOTIFICATION_ID = 8888;
     public static final String ADT_CHECKIN_ACTION = "android_device_tracker_checkin";
 
-    public static final void unsubscribeForTrackingNotification(Context context) {
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-        notificationManager.cancel(NOTIFICATION_ID);
-    }
 
-    public static void startNotification(Context context, long timestamp) {
+    public static Notification createNotification(Context context, long timestamp) {
         try {
             createNotificationChannel(context);
 
@@ -41,24 +65,22 @@ public final class TrackingNotification {
                     .setVisibility(NotificationCompat.VISIBILITY_SECRET)
                     .setColorized(true)
                     .setShowWhen(false)
-                    .setColor(context.getResources().getColor(R.color.colorAccent))
+//                    .setColor(context.getResources().getColor(R.color.colorAccent))
                     .addAction(R.drawable.notification_small, "CHECK IN", checkInIntent)
                     .addAction(R.drawable.notification_small, "SETTINGS", settingsIntent)
                     .setOngoing(true);
 
-            if(timestamp > 0) {
+            if (timestamp > 0) {
                 mBuilder.setContentText("Last check-in at " + Utility.parseDate(timestamp));
-            } else if(timestamp == -1) {
+            } else if (timestamp == -1) {
                 mBuilder.setContentText("Processing last checked location");
             }
 
-            NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
-
-            // notificationId is a unique int for each notification that you must define
-            notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+            return mBuilder.build();
         } catch (Exception e) {
             e.printStackTrace();
         }
+        return null;
     }
 
     private static void createNotificationChannel(Context context) {

@@ -17,6 +17,7 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.pacmac.trackr.mapmarker.IconGenerator;
+import com.tutelatechnologies.sdk.framework.TutelaSDKFactory;
 
 import android.Manifest;
 import android.app.Activity;
@@ -31,6 +32,7 @@ import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
@@ -50,6 +52,8 @@ import android.view.Display;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.view.animation.ScaleAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -78,6 +82,10 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private FloatingActionButton fab;
     private TypedArray stockImages;
 
+    private LinearLayout refreshPanel;
+    private Button refreshButton;
+    private TextView refreshTimeView;
+
     /**
      * show title must be true during initialization so it can be handled properly during collapse
      */
@@ -96,7 +104,9 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     private int refreshCounter = 0;
     private int FIRST_RUN_FETCH_DELAY = 5 * 1000;
     private int REFRESH_DELAY = 60 * 1000;
-    private int REFRESH_DELAY_SHORT = 20 * 1000;
+    private int REFRESH_DELAY_SHORT = 10 * 1000;
+
+    private long lastFbCheckTimestamp = 0;
 
     private static final String LOCATION_PERMISSION = Manifest.permission.ACCESS_FINE_LOCATION;
 
@@ -127,6 +137,14 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main_v2);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+            try {
+                TutelaSDKFactory.getTheSDK().initializeWithApiKey(Constants.REG_KEY, this, false);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
         bottomNavigation = findViewById(R.id.navigation);
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -140,7 +158,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         isPermissionEnabled = Utility.checkSelfPermission(getApplicationContext(), LOCATION_PERMISSION);
 
         shouldShowObsoleteNotification = preferences.getBoolean(Constants.OBSOLETE_INFO, true);
-        if(!shouldShowObsoleteNotification && Utility.getDayOfMonth() < 23) {
+        if (!shouldShowObsoleteNotification && Utility.getDayOfMonth() < 23) {
             shouldShowObsoleteNotification = true;
             preferences.edit().putBoolean(Constants.OBSOLETE_INFO, shouldShowObsoleteNotification).apply();
         }
@@ -249,7 +267,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                     collapsingToolbarLayout.setTitle(getString(R.string.app_name));
                 } else {
                     //hide title
-                    if(showTitle) {
+                    if (showTitle) {
                         collapsingToolbarLayout.setTitle("");
                         showTitle = false;
                     }
@@ -273,8 +291,27 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             Display display = getWindowManager().getDefaultDisplay();
             Point size = new Point();
             display.getSize(size);
-            layoutParams.height = 3*size.y/5;
+            layoutParams.height = 3 * size.y / 5;
         }
+
+
+        // REFRESH PANEL
+        refreshPanel = findViewById(R.id.refreshPanel);
+        refreshTimeView = findViewById(R.id.refreshTimeView);
+        refreshButton = findViewById(R.id.refreshBtn);
+        refreshButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                refreshCounter = 0;
+                lastFbCheckTimestamp = 0;
+                refreshPanel.setVisibility(View.GONE);
+                if (userRecords.size() > 0 && checkIfshouldTryRetrieveDevicePosition()) {
+                    startRefreshListTimer(REFRESH_DELAY);
+                } else {
+                    startRefreshListTimer(REFRESH_DELAY_SHORT);
+                }
+            }
+        });
     }
 
 
@@ -298,8 +335,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             Utility.startTrackingService(getApplicationContext(), preferences);
         }
         showUsersLocationOnMap(shouldAnimateMap);
+
+        refreshCounter = 0;
+        refreshPanel.setVisibility(View.GONE);
         if (userRecords.size() > 0 && checkIfshouldTryRetrieveDevicePosition()) {
-            if(isFirstAppRun) {
+            if (isFirstAppRun) {
                 isFirstAppRun = false;
                 startRefreshListTimer(FIRST_RUN_FETCH_DELAY);
             } else {
@@ -331,7 +371,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
 
     @Override
     public void onSaveInstanceState(Bundle outState, PersistableBundle outPersistentState) {
-
         super.onSaveInstanceState(outState, outPersistentState);
     }
 
@@ -369,7 +408,11 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
         Log.d(Constants.TAG, "Conn changed: " + isConnected);
         this.isConnected = isConnected;
         if (isConnected && !skipConnReceiverTrigger) {
-            checkIfshouldTryRetrieveDevicePosition();
+            refreshCounter = 0;
+            refreshPanel.setVisibility(View.GONE);
+            if(checkIfshouldTryRetrieveDevicePosition() && refreshPanel.getVisibility() == View.VISIBLE) {
+                lastFbCheckTimestamp = 0;
+            }
         }
         skipConnReceiverTrigger = false;
     }
@@ -384,7 +427,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                         userRecords.get(currentTracker).getLongitude()), 16f));
             } else {
                 Utility.showToast(getApplicationContext(), "Ups nothing to show for " +
-                        userRecords.get(currentTracker).getAlias(),((View) bottomNavigation).getHeight(), false);
+                        userRecords.get(currentTracker).getAlias(), ((View) bottomNavigation).getHeight(), false);
             }
         }
     }
@@ -514,6 +557,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                     Utility.createJsonArrayStringFromUserRecords(userRecords));
         }
     }
+
     private void loadUserRecordsFromFile() {
         userRecords = Utility.convertJsonStringToUserRecords(getFilesDir() + Constants.JSON_LOC_FILE_NAME);
         Log.d(TAG, "userRecords.size: " + userRecords.size());
@@ -647,6 +691,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             skipfbCallOnReconfiguration = false;
             return;
         }
+        lastFbCheckTimestamp = System.currentTimeMillis();
         FirebaseHandler.fetchFirebaseData(getApplicationContext(), userRecords, this);
     }
 
@@ -674,20 +719,6 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             preferences.edit().putInt(Constants.RATING_POPUP_COUNTER, counter).commit();
         }
     }
-
-
-//    private void getAddress(int rowId) {
-//        registerAddressResolverReceiver();
-//        if (Geocoder.isPresent()) {
-//            Thread t = new Thread(new AddressResolverRunnable(getApplicationContext(), rowId, userRecords.get(rowId).getLatitude(),
-//                    userRecords.get(rowId).getLongitude()));
-//            t.setName("AddressResolverTrackR");
-//            t.setDaemon(true);
-//            t.start();
-//        } else {
-//            userRecords.get(rowId).setAddress(getResources().getString(R.string.not_available));
-//        }
-//    }
 
     private void registerAddressResolverReceiver() {
         if (!isAddressResolverRegistred) {
@@ -719,7 +750,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
                 iconGenerator.setStyle(i + 3);
 //                iconGenerator.setBackground();
 
-                if(userRecords.get(i).getProfileImageId() >= stockImages.length()
+                if (userRecords.get(i).getProfileImageId() >= stockImages.length()
                         || userRecords.get(i).getProfileImageId() < 0) {
                     userRecords.get(i).setProfileImageId(0);
                 }
@@ -755,6 +786,7 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
     /**
      * This call back only sets boolean flag that user interacted with Map
      * fragment and will turn off animation of marker position on each refresh.
+     *
      * @param latLng
      */
     @Override
@@ -817,15 +849,28 @@ public class MainActivityV2 extends AppCompatActivity implements OnMapReadyCallb
             int delay = REFRESH_DELAY;
 
             // Only reach firebase 2 times after resume
-            if (refreshCounter%2 == 0) {
+            if (refreshCounter < 1) {
                 if (checkIfshouldTryRetrieveDevicePosition()) {
+                    refreshCounter++;
                     delay = REFRESH_DELAY_SHORT;
                 }
+            } else if (refreshPanel.getVisibility() == View.GONE && lastFbCheckTimestamp != 0) {
+                if (refreshCounter >= 1) {
+                    refreshPanel.setVisibility(View.VISIBLE);
+//                    ScaleAnimation anim = new ScaleAnimation(1,1,0,1);
+//                    anim.setDuration(1000);
+//                    anim.setFillAfter(true);
+//                    refreshPanel.startAnimation(anim);
+
+                    refreshTimeView.setText(Utility.getLastFBPullTime(lastFbCheckTimestamp));
+                }
+                refreshCounter++;
             }
-            refreshCounter++;
             startRefreshListTimer(delay);
         }
     };
+
+
 
     private void startRefreshListTimer(int delay) {
         isRefreshListHandlerRegistred = true;

@@ -53,7 +53,6 @@ import android.view.View;
 import android.view.Window;
 import android.widget.Button;
 import android.widget.CompoundButton;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -118,9 +117,7 @@ public class Utility {
         String month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
         int hour = calendar.get(Calendar.HOUR_OF_DAY);
         int minute = calendar.get(Calendar.MINUTE);
-
-        return String.format("%02d", hour) + ":"
-                + String.format("%02d", minute) + ", " + day + " " + month;
+        return String.format("%s %02d, %02d:%02d", month, day, hour, minute);
     }
 
     public static int getDayOfMonth() {
@@ -285,9 +282,9 @@ public class Utility {
     public static void showToast(Context context, CharSequence text, int yOffset, boolean changeColor) {
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.trackr_notification_top, null);
-        TextView toastText =  view.findViewById(R.id.toastText);
+        TextView toastText = view.findViewById(R.id.toastText);
         toastText.setText(text);
-        if(changeColor) {
+        if (changeColor) {
             toastText.setTextColor(Color.WHITE);
             view.findViewById(R.id.toastLayout).setBackgroundColor(context.getResources().getColor(R.color.colorAccent));
         }
@@ -412,7 +409,7 @@ public class Utility {
 
     public static LocationRecord createLocationRecordFromJson(JSONObject object) {
         try {
-            int batteryLevel = (int)object.getDouble("batteryLevel");
+            int batteryLevel = (int) object.getDouble("batteryLevel");
             return new LocationRecord(object.getInt("id"), object.getDouble("latitude"), object.getDouble("longitude"),
                     object.getLong("timestamp"), batteryLevel, object.getString("address"),
                     object.getString("alias"), object.getString("recId"), object.getString("safeId"),
@@ -539,9 +536,9 @@ public class Utility {
         long updateFreq = preferences.getInt(Constants.TRACKING_FREQ, Constants.TIME_BATTERY_OK) * 60 * 1000;
 
 
-        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 && updateFreq < 15 * 60 * 1000L) {
-            updateFreq = 15 * 60 * 1000L;
-        }
+//        if (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 && updateFreq < 15 * 60 * 1000L) {
+//            updateFreq = 15 * 60 * 1000L;
+//        }
         if (isTrackingOn && (Build.VERSION.SDK_INT > Build.VERSION_CODES.N_MR1 || !isMyServiceRunning(context, LocationService.class))) {
 
             Intent intentService = new Intent(context, LocationService.class);
@@ -549,9 +546,10 @@ public class Utility {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 context.startService(intentService);
             } else {
-                JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
+                context.startService(intentService);
+//                JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
             }
-            TrackingNotification.startNotification(context, 0);
+            TrackingForegroundServiceController.startForegroundServiceWithNotification(context, 0);
         }
     }
 
@@ -562,6 +560,7 @@ public class Utility {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 context.startService(intentService);
             } else {
+                context.startService(intentService);
                 // TODO add job for this.
                 // JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
             }
@@ -576,6 +575,7 @@ public class Utility {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     context.stopService(intentService);
                 } else {
+                    context.stopService(intentService);
                     // TODO add job for this.
                     // JobSchedulerHelper.scheduleLocationUpdateJOB(context, updateFreq);
                 }
@@ -704,7 +704,6 @@ public class Utility {
     }
 
 
-
     @SuppressLint("MissingPermission")
     public static int getCellSignalQuality(Context context, boolean isPermissionEnabled) {
         int cellQuality = -1;
@@ -769,6 +768,17 @@ public class Utility {
         }
         float rawLevel = ((float) level / (float) scale) * 100.0f;
         return (int) (Math.round(rawLevel * 100.0) / 100.0);
+    }
+
+    public static String getLastFBPullTime(long timestamp) {
+
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTimeInMillis(timestamp);
+//        int day = calendar.get(Calendar.DAY_OF_MONTH);
+//        String month = calendar.getDisplayName(Calendar.MONTH, Calendar.SHORT, Locale.getDefault());
+        int hour = calendar.get(Calendar.HOUR_OF_DAY);
+        int minute = calendar.get(Calendar.MINUTE);
+        return String.format("%02d:%02d", hour, minute);
     }
 
 }

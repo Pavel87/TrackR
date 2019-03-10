@@ -74,7 +74,8 @@ public class SettingsActivityV2 extends AppCompatActivity {
         locUpdateFreqSeekbar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
-                int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+//                int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+                int offset = SEEKBAR_OFFSET;
 
                 locReqFrequency.setText(String.valueOf(progress + offset) + " min");
             }
@@ -86,7 +87,8 @@ public class SettingsActivityV2 extends AppCompatActivity {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 SharedPreferences.Editor editor = preferences.edit();
-                int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+//                int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+                int offset = SEEKBAR_OFFSET;
                 freq = seekBar.getProgress() + offset;
                 editor.putInt(Constants.TRACKING_FREQ, freq);
                 editor.commit();
@@ -138,7 +140,8 @@ public class SettingsActivityV2 extends AppCompatActivity {
 
         trackingID.setText(trackId);
         txSwitch.setChecked(isTrackingEnabled);
-        int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+//        int offset = Build.VERSION.SDK_INT < Build.VERSION_CODES.O ? SEEKBAR_OFFSET : SEEKBAR_OFFSET_JOB;
+        int offset = SEEKBAR_OFFSET;
         locUpdateFreqSeekbar.setProgress(freq - offset);
         locReqFrequency.setText(freq + " min");
 
@@ -316,21 +319,23 @@ public class SettingsActivityV2 extends AppCompatActivity {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     stopService(intentService);
                 } else {
-                    JobSchedulerHelper.cancelLocationUpdateJOB(getApplicationContext());
+                    stopService(intentService);
+//                    JobSchedulerHelper.cancelLocationUpdateJOB(getApplicationContext());
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error during service shutdown:" + e.getMessage());
-                TrackingNotification.unsubscribeForTrackingNotification(getApplicationContext());
+                TrackingForegroundServiceController.stopForegroundServiceWithNotification(getApplicationContext());
             }
             try {
                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                     startService(intentService);
                 } else {
-                    JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
+                    startService(intentService);
+//                    JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
                 }
             } catch (Exception e) {
                 Log.e(TAG, "Error during service restart:" + e.getMessage());
-                TrackingNotification.unsubscribeForTrackingNotification(getApplicationContext());
+                TrackingForegroundServiceController.stopForegroundServiceWithNotification(getApplicationContext());
             }
             return true;
         }
@@ -428,18 +433,20 @@ public class SettingsActivityV2 extends AppCompatActivity {
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 startService(intentService);
             } else {
-                JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
+                startService(intentService);
+//                JobSchedulerHelper.scheduleLocationUpdateJOB(getApplicationContext(), freq*60*1000L);
             }
-            TrackingNotification.startNotification(getApplicationContext(), 0);
+            TrackingForegroundServiceController.startForegroundServiceWithNotification(getApplicationContext(), 0);
         } else {
             removeMyPhoneFromUserList();
             Intent intentService = new Intent(getApplicationContext(), LocationService.class);
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 stopService(intentService);
             } else {
-                JobSchedulerHelper.cancelLocationUpdateJOB(getApplicationContext());
+                stopService(intentService);
+//                JobSchedulerHelper.cancelLocationUpdateJOB(getApplicationContext());
             }
-            TrackingNotification.unsubscribeForTrackingNotification(getApplicationContext());
+            TrackingForegroundServiceController.stopForegroundServiceWithNotification(getApplicationContext());
         }
     }
 

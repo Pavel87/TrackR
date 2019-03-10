@@ -12,6 +12,12 @@
     <!--<color name="fab">#6A1B9A</color>-->
     <color name="fab">#6A1B9A</color>
 
+
+    <color name="refreshPanelBG">#E5E6E6</color>
+    <color name="refreshPanelText">#F30039</color>
+
+
+
     <color name="transparent1">#32121212</color>
     <color name="textLight">#C3C3C3</color>
     <color name="textLight2">#707070</color>

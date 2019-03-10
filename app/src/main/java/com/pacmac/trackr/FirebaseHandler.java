@@ -82,7 +82,7 @@ public final class FirebaseHandler {
                     if (recoveredUser == null) {
                         return;
                     }
-                    Log.e("FIRESTORM", recoveredUser.toString());
+                    Log.e("FIRESTORM", userRecord.getRecId() + " | " + recoveredUser.toString());
 
                     // check if timestamps are same and if yes then don't
                     // update loc record to save duplicate porcessing
@@ -373,7 +373,7 @@ public final class FirebaseHandler {
                                 listener.newLocationUploadFinished();
                             }
                             try {
-                                TrackingNotification.startNotification(context, timestamp);
+                                TrackingForegroundServiceController.startForegroundServiceWithNotification(context, timestamp);
                             }catch (Exception e) {
                                 e.printStackTrace();
                             }
